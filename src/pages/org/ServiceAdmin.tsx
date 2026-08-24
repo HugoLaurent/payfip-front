@@ -3,23 +3,17 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Image as ImageIcon } from 'lucide-react'
 import { apiCall, apiUpload, GATEWAY_URL } from '@/lib/api'
 import { TariffsManager } from '@/components/org/TariffsManager'
-import { Card, DangerButton, LoadError, Modal, PageHeader, SecondaryButton, TextInput } from '@/components/ui'
+import { OpeningScheduleManager } from '@/components/org/OpeningScheduleManager'
+import { Card, DangerButton, LoadError, Modal, SecondaryButton, StatusBadge, Textarea } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
-import type { AuthState, ServiceRow } from '@/lib/types'
+import { useAuth } from '@/lib/useAuth'
+import { useToast } from '@/lib/useToast'
+import { SERVICE_STATUS_LABELS, SERVICE_STATUS_TINTS, SERVICE_TYPE_LABELS } from '@/lib/serviceLabels'
+import type { ServiceRow } from '@/lib/types'
 
-const STATUS_LABELS: Record<string, string> = {
-  draft: 'Brouillon',
-  active: 'Actif',
-  archived: 'Archivé',
-}
-
-const STATUS_TINTS: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-600',
-  active: 'bg-emerald-100 text-emerald-700',
-  archived: 'bg-gray-100 text-gray-500',
-}
-
-export function ServiceAdmin({ auth }: { auth: AuthState }) {
+export function ServiceAdmin() {
+  const { auth } = useAuth()
+  const { showToast } = useToast()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
@@ -58,26 +52,63 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
   const [deletingCover, setDeletingCover] = useState(false)
   const [showCloseConfirm, setShowCloseConfirm] = useState(false)
   const [togglingStatus, setTogglingStatus] = useState(false)
-  const [slugInput, setSlugInput] = useState('')
-  const [savingSlug, setSavingSlug] = useState(false)
-  const [slugError, setSlugError] = useState<string | null>(null)
+  const [closeMessageInput, setCloseMessageInput] = useState('')
+  const [closedMessageInput, setClosedMessageInput] = useState('')
+  const [savingClosedMessage, setSavingClosedMessage] = useState(false)
+  const [closedMessageError, setClosedMessageError] = useState<string | null>(null)
+  const [tab, setTab] = useState<'tariffs' | 'settings'>('tariffs')
 
   useEffect(() => {
-    setSlugInput(service?.slug ?? '')
-    setSlugError(null)
-  }, [service?.slug])
+    setClosedMessageInput(service?.closedMessage ?? '')
+    setClosedMessageError(null)
+  }, [service?.closedMessage])
 
-  async function setServiceStatus(status: 'active' | 'archived') {
+  async function setServiceStatus(status: 'active' | 'archived', closedMessage?: string) {
     if (!service) return
     setTogglingStatus(true)
-    const result = await apiCall<{ data: { id: number; name: string; status: string } }>(
+    const body: { status: 'active' | 'archived'; closedMessage?: string | null } = { status }
+    if (status === 'archived') body.closedMessage = closedMessage?.trim() || null
+    const result = await apiCall<{ data: { id: number; name: string; status: string; closedMessage: string | null } }>(
       'PATCH',
       `/auth/services/${service.id}`,
-      { token: auth.token, body: { status } }
+      { token: auth.token, body }
     )
     setTogglingStatus(false)
     setShowCloseConfirm(false)
-    if (result.ok) setService((prev) => (prev ? { ...prev, status } : prev))
+    if (result.ok) {
+      setService((prev) =>
+        prev ? { ...prev, status, closedMessage: result.data.data.closedMessage } : prev
+      )
+      showToast('success', status === 'archived' ? 'Service fermé' : 'Service réactivé', service.name)
+    } else {
+      showToast('error', 'Échec', "Impossible de modifier le statut du service.")
+    }
+  }
+
+  async function handleSaveClosedMessage() {
+    if (!service) return
+    const trimmed = closedMessageInput.trim()
+    if (trimmed === (service.closedMessage ?? '')) return
+
+    setSavingClosedMessage(true)
+    setClosedMessageError(null)
+
+    const result = await apiCall<{ data: { closedMessage: string | null } }>(
+      'PATCH',
+      `/auth/services/${service.id}`,
+      { token: auth.token, body: { closedMessage: trimmed || null } }
+    )
+
+    setSavingClosedMessage(false)
+
+    if (!result.ok) {
+      setClosedMessageError('Échec de la mise à jour du message.')
+      showToast('error', 'Échec', 'Impossible de mettre à jour le message.')
+      return
+    }
+
+    setService((prev) => (prev ? { ...prev, closedMessage: result.data.data.closedMessage } : prev))
+    showToast('success', 'Message mis à jour', service.name)
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -94,11 +125,13 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
 
     if (!result.ok) {
       setError("Échec de l'envoi du logo.")
+      showToast('error', 'Échec', "Impossible d'envoyer le logo.")
       return
     }
 
     setService((prev) => (prev ? { ...prev, hasLogo: true } : prev))
     setCacheBust(Date.now())
+    showToast('success', 'Logo mis à jour', service.name)
   }
 
   async function handleCoverFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -115,41 +148,13 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
 
     if (!result.ok) {
       setCoverError("Échec de l'envoi de l'image de couverture.")
+      showToast('error', 'Échec', "Impossible d'envoyer l'image de couverture.")
       return
     }
 
     setService((prev) => (prev ? { ...prev, hasCoverImage: true } : prev))
     setCoverCacheBust(Date.now())
-  }
-
-  async function handleSaveSlug() {
-    if (!service) return
-    const trimmed = slugInput.trim()
-    if (trimmed === (service.slug ?? '')) return
-
-    setSavingSlug(true)
-    setSlugError(null)
-
-    const result = await apiCall<{ data: { slug: string | null } }>(
-      'PATCH',
-      `/auth/services/${service.id}`,
-      { token: auth.token, body: { slug: trimmed || null } }
-    )
-
-    setSavingSlug(false)
-
-    if (!result.ok) {
-      if (result.status === 409) {
-        setSlugError('Ce lien est déjà utilisé par un autre service.')
-      } else if (result.status === 400) {
-        setSlugError('Lien invalide — lettres minuscules, chiffres et tirets uniquement.')
-      } else {
-        setSlugError('Échec de la mise à jour du lien.')
-      }
-      return
-    }
-
-    setService((prev) => (prev ? { ...prev, slug: result.data.data.slug } : prev))
+    showToast('success', 'Couverture mise à jour', service.name)
   }
 
   async function handleDeleteCover() {
@@ -164,11 +169,13 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
 
     if (!result.ok) {
       setCoverError("Échec de la suppression de l'image de couverture.")
+      showToast('error', 'Échec', "Impossible de supprimer l'image de couverture.")
       return
     }
 
     setService((prev) => (prev ? { ...prev, hasCoverImage: false } : prev))
     setCoverCacheBust(0)
+    showToast('success', 'Couverture supprimée', service.name)
   }
 
   if (loadFailed) {
@@ -185,6 +192,9 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
   const coverUrl = service.hasCoverImage
     ? `${GATEWAY_URL}/services/${service.id}/cover${coverCacheBust ? `?v=${coverCacheBust}` : ''}`
     : null
+  const hasTariffsTab = service.serviceType === 'billetterie'
+  const showTariffs = hasTariffsTab && tab === 'tariffs'
+  const showSettings = !hasTariffsTab || tab === 'settings'
 
   return (
     <div>
@@ -197,76 +207,129 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
         Services
       </button>
 
-      <PageHeader
-        title={service.name}
-        subtitle={service.serviceType}
-        action={
-          <div className="flex items-center gap-2">
-            <span
-              className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_TINTS[service.status] ?? 'bg-gray-100 text-gray-600'}`}
-            >
-              {STATUS_LABELS[service.status] ?? service.status}
-            </span>
-            {canToggle && service.status === 'active' && (
-              <DangerButton
-                type="button"
-                onClick={() => setShowCloseConfirm(true)}
-                className="px-3 py-1.5"
-              >
-                Fermer le service
-              </DangerButton>
-            )}
-            {canToggle && service.status === 'archived' && (
-              <SecondaryButton
-                type="button"
-                onClick={() => setServiceStatus('active')}
-                disabled={togglingStatus}
-                className="px-3 py-1.5"
-              >
-                {togglingStatus ? 'Réactivation…' : 'Réactiver le service'}
-              </SecondaryButton>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <div
+            className={`flex h-[52px] w-[52px] shrink-0 items-center justify-center overflow-hidden squircle rounded-2xl ${
+              logoUrl ? 'bg-gray-100' : 'bg-gradient-to-br from-aregie-deep to-aregie-light'
+            }`}
+          >
+            {logoUrl && (
+              <img src={logoUrl} alt={service.name} className="h-full w-full object-contain" />
             )}
           </div>
-        }
-      />
+          <div className="min-w-0">
+            <h1
+              className="truncate text-xl font-bold text-gray-900"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              {service.name}
+            </h1>
+            <p className="truncate text-sm text-gray-500">
+              {SERVICE_TYPE_LABELS[service.serviceType] ?? service.serviceType} · en ligne
+            </p>
+          </div>
+        </div>
 
-      <Card className="mb-6">
-        <p className="text-sm font-medium text-gray-700">Lien public</p>
-        <p className="mt-0.5 mb-3 text-xs text-gray-400">
-          L'adresse que les usagers utilisent pour accéder à ce service en ligne, sans compte.
-        </p>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="shrink-0 text-sm text-gray-400">
-            {window.location.origin}/{service.serviceType}/
-          </span>
-          <TextInput
-            value={slugInput}
-            onChange={(e) => setSlugInput(e.target.value.toLowerCase())}
-            placeholder="mon-service"
-            disabled={!isAdmin}
-            className="max-w-[240px]"
+          <StatusBadge
+            label={SERVICE_STATUS_LABELS[service.status] ?? service.status}
+            className={SERVICE_STATUS_TINTS[service.status] ?? 'bg-gray-100 text-gray-600'}
           />
-          {isAdmin && (
+          {canToggle && service.status === 'active' && (
+            <DangerButton
+              type="button"
+              onClick={() => {
+                setCloseMessageInput(service.closedMessage ?? '')
+                setShowCloseConfirm(true)
+              }}
+              className="px-3 py-1.5"
+            >
+              Fermer le service
+            </DangerButton>
+          )}
+          {canToggle && service.status === 'archived' && (
             <SecondaryButton
               type="button"
-              onClick={handleSaveSlug}
-              disabled={savingSlug || slugInput.trim() === (service.slug ?? '')}
-              className="px-3 py-2"
+              onClick={() => setServiceStatus('active')}
+              disabled={togglingStatus}
+              className="px-3 py-1.5"
             >
-              {savingSlug ? 'Enregistrement…' : 'Enregistrer'}
+              {togglingStatus ? 'Réactivation…' : 'Réactiver le service'}
             </SecondaryButton>
           )}
         </div>
-        {slugError && <p className="mt-2 text-xs text-red-600">{slugError}</p>}
-        {!service.slug && (
-          <p className="mt-2 text-xs text-amber-600">
-            Sans lien public, ce service n'est pas accessible en ligne par les usagers.
+      </div>
+
+      {hasTariffsTab && (
+        <div className="mb-4 flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => setTab('tariffs')}
+            className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
+              tab === 'tariffs' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
+            }`}
+          >
+            Tarifs
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('settings')}
+            className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
+              tab === 'settings' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
+            }`}
+          >
+            Paramètres
+          </button>
+        </div>
+      )}
+
+      {showTariffs && <TariffsManager auth={auth} service={service} />}
+
+      {showSettings && (
+        <>
+      {service.serviceType === 'billetterie' && (
+        <div className="mb-6">
+          <OpeningScheduleManager
+            auth={auth}
+            service={service}
+            canManage={canToggle}
+            onServiceUpdate={(patch) => setService((prev) => (prev ? { ...prev, ...patch } : prev))}
+          />
+        </div>
+      )}
+
+      {service.status === 'archived' && canToggle && (
+        <Card className="mb-6">
+          <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
+            Message affiché aux usagers
           </p>
-        )}
-      </Card>
+          <p className="mt-0.5 mb-3 text-xs text-gray-400">
+            Remplace le texte générique "Ce service n'est pas ouvert actuellement." tant que le
+            service reste fermé.
+          </p>
+          <Textarea
+            value={closedMessageInput}
+            onChange={(e) => setClosedMessageInput(e.target.value)}
+            placeholder="Ex. Fermé pour travaux jusqu'à nouvel ordre."
+            rows={2}
+            maxLength={300}
+            className="mb-2"
+          />
+          <SecondaryButton
+            type="button"
+            onClick={handleSaveClosedMessage}
+            disabled={savingClosedMessage || closedMessageInput.trim() === (service.closedMessage ?? '')}
+            className="px-3 py-2"
+          >
+            {savingClosedMessage ? 'Enregistrement…' : 'Enregistrer'}
+          </SecondaryButton>
+          {closedMessageError && <p className="mt-2 text-xs text-red-600">{closedMessageError}</p>}
+        </Card>
+      )}
 
       <Card className="mb-6 flex flex-wrap items-center gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden squircle rounded-xl bg-gray-100">
           {logoUrl ? (
             <img src={logoUrl} alt={service.name} className="h-full w-full object-contain" />
           ) : (
@@ -280,7 +343,7 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
         </div>
 
         {isAdmin && (
-          <label className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
+          <label className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 squircle rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
             {uploading ? 'Envoi…' : 'Changer le logo'}
             <input
               type="file"
@@ -294,7 +357,7 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
       </Card>
 
       <Card className="mb-6 flex flex-wrap items-center gap-4">
-        <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100">
+        <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden squircle rounded-xl bg-gray-100">
           {coverUrl ? (
             <img src={coverUrl} alt={service.name} className="h-full w-full object-cover" />
           ) : (
@@ -312,7 +375,7 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
 
         {isAdmin && (
           <div className="flex shrink-0 items-center gap-2">
-            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
+            <label className="inline-flex cursor-pointer items-center justify-center gap-2 squircle rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
               {uploadingCover ? 'Envoi…' : "Changer l'image"}
               <input
                 type="file"
@@ -330,8 +393,8 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
           </div>
         )}
       </Card>
-
-      {service.serviceType === 'billetterie' && <TariffsManager auth={auth} service={service} />}
+        </>
+      )}
 
       {showCloseConfirm && (
         <Modal title="Fermer le service" onClose={() => setShowCloseConfirm(false)}>
@@ -339,10 +402,21 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
             Les citoyens ne pourront plus acheter sur <strong>{service.name}</strong> tant qu'il
             reste fermé. Vous pourrez le réactiver à tout moment.
           </p>
+          <label className="mb-1 block text-xs font-medium text-gray-500">
+            Message affiché aux usagers (facultatif)
+          </label>
+          <Textarea
+            value={closeMessageInput}
+            onChange={(e) => setCloseMessageInput(e.target.value)}
+            placeholder="Ex. Fermé pour travaux jusqu'à nouvel ordre."
+            rows={2}
+            maxLength={300}
+            className="mb-4"
+          />
           <div className="flex gap-2">
             <DangerButton
               type="button"
-              onClick={() => setServiceStatus('archived')}
+              onClick={() => setServiceStatus('archived', closeMessageInput)}
               disabled={togglingStatus}
               className="flex-1 justify-center py-2"
             >
@@ -361,3 +435,5 @@ export function ServiceAdmin({ auth }: { auth: AuthState }) {
     </div>
   )
 }
+
+export default ServiceAdmin

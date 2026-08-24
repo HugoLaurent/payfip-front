@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { AuthGate } from '@/layouts/AuthGate'
+import { StaffGate } from '@/layouts/StaffGate'
 
 // Parcours citoyen public — chargé à la demande : jamais utile pour un
 // agent connecté, et inversement (voir AuthGate pour le lazy de
@@ -18,6 +19,7 @@ function App() {
         <Route path="/billetterie/:slug/retour" element={<PurchaseReturnPage />} />
         <Route path="/factures/:slug" element={<PublicInvoicePage />} />
         <Route path="/factures/:slug/retour" element={<InvoiceReturnPage />} />
+        <Route path="/staff/*" element={<StaffGate />} />
         <Route path="/*" element={<AuthGate />} />
       </Routes>
     </Suspense>

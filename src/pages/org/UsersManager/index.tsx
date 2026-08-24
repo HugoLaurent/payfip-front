@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { ChevronRight, KeyRound, Plus, Search, Users as UsersIcon } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import {
@@ -12,10 +11,15 @@ import {
   Pagination,
   PrimaryButton,
   SecondaryButton,
+  StatusBadge,
   TextInput,
 } from '@/components/ui'
-import { useDelayedLoading } from '@/lib/useDelayedLoading'
-import type { AgentPermissions, AuthState, PageMeta } from '@/lib/types'
+import { usePaginatedResource } from '@/lib/usePaginatedResource'
+import { useAuth } from '@/lib/useAuth'
+import { useToast } from '@/lib/useToast'
+import { UserFormModal } from './UserFormModal'
+import { PERMISSION_LABELS } from './permissions'
+import type { AgentPermissions, PageMeta } from '@/lib/types'
 
 const PER_PAGE = 10
 
@@ -41,6 +45,18 @@ function agentName(agent: Agent): string | null {
   return [agent.firstName, agent.lastName].filter(Boolean).join(' ')
 }
 
+function agentInitials(agent: Agent): string {
+  const name = agentName(agent)
+  if (!name) return agent.email.slice(0, 2).toUpperCase()
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
+}
+
 function formatLastLogin(iso: string | null): string {
   if (!iso) return 'Jamais connecté'
   const diffMs = Date.now() - new Date(iso).getTime()
@@ -54,29 +70,27 @@ function formatLastLogin(iso: string | null): string {
   return `Dernière connexion le ${new Date(iso).toLocaleDateString('fr-FR')}`
 }
 
-const PERMISSION_LABELS: { key: keyof AgentPermissions; label: string }[] = [
-  { key: 'canSell', label: 'Vendre des billets' },
-  { key: 'canScan', label: 'Scanner les billets' },
-  { key: 'canManageTariffs', label: 'Gérer les tarifs' },
-  { key: 'canViewHistory', label: "Voir l'historique" },
-  { key: 'canToggleService', label: 'Fermer les ventes' },
-]
-
-const DEFAULT_PERMISSIONS: AgentPermissions = {
-  canSell: true,
-  canScan: true,
-  canManageTariffs: false,
-  canViewHistory: true,
-  canToggleService: false,
-}
-
-export function UsersManager({ auth }: { auth: AuthState }) {
+export function UsersManager() {
+  const { auth } = useAuth()
+  const { showToast } = useToast()
   const [tab, setTab] = useState<'agents' | 'admins'>('agents')
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
-  const [agents, setAgents] = useState<Agent[] | null>(null)
-  const showLoading = useDelayedLoading(agents === null)
-  const [meta, setMeta] = useState<PageMeta | null>(null)
+  const {
+    data: agents,
+    meta,
+    loadFailed,
+    showLoading,
+    reload: loadAgents,
+  } = usePaginatedResource<Agent, PageMeta>({
+    fetcher: () =>
+      apiCall(
+        'GET',
+        `/auth/users?role=${tab === 'admins' ? 'admin' : 'agent'}&q=${encodeURIComponent(q)}&page=${page}&perPage=${PER_PAGE}`,
+        { token: auth.token }
+      ),
+    deps: [auth.token, tab, q, page],
+  })
   const [manageAgentId, setManageAgentId] = useState<number | null>(null)
   const [editPermissions, setEditPermissions] = useState<Record<number, AgentPermissions> | null>(
     null
@@ -96,99 +110,6 @@ export function UsersManager({ auth }: { auth: AuthState }) {
   const [resetPasswordError, setResetPasswordError] = useState<string | null>(null)
   const [resetPasswordSuccess, setResetPasswordSuccess] = useState(false)
 
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [serviceIds, setServiceIds] = useState<number[]>([])
-  const [permissions, setPermissions] = useState<AgentPermissions>(DEFAULT_PERMISSIONS)
-  const [creating, setCreating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [loadFailed, setLoadFailed] = useState(false)
-
-  async function loadAgents() {
-    setLoadFailed(false)
-    const roleParam = tab === 'admins' ? 'admin' : 'agent'
-    const result = await apiCall<{ data: Agent[]; meta: PageMeta }>(
-      'GET',
-      `/auth/users?role=${roleParam}&q=${encodeURIComponent(q)}&page=${page}&perPage=${PER_PAGE}`,
-      { token: auth.token }
-    )
-    if (result.ok) {
-      setAgents(result.data.data)
-      setMeta(result.data.meta)
-    } else {
-      setLoadFailed(true)
-    }
-  }
-
-  useEffect(() => {
-    const timeout = setTimeout(loadAgents, 250)
-    return () => clearTimeout(timeout)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.token, tab, q, page])
-
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
-    if (serviceIds.length === 0) {
-      setError('Choisissez au moins un service.')
-      return
-    }
-
-    setCreating(true)
-    setError(null)
-
-    const result = await apiCall('POST', '/auth/users', {
-      token: auth.token,
-      body: { firstName, lastName, email, password, serviceIds, ...permissions },
-    })
-
-    setCreating(false)
-
-    if (result.ok) {
-      setFirstName('')
-      setLastName('')
-      setEmail('')
-      setPassword('')
-      setServiceIds([])
-      setPermissions(DEFAULT_PERMISSIONS)
-      setShowCreateModal(false)
-      await loadAgents()
-    } else if (result.status === 409) {
-      setError('Cet email est déjà utilisé.')
-    } else if (result.status === 422) {
-      setError("Un des services choisis n'appartient pas à votre organisme.")
-    } else {
-      setError('Échec de la création.')
-    }
-  }
-
-  async function handleCreateAdmin(e: React.FormEvent) {
-    e.preventDefault()
-    setCreating(true)
-    setError(null)
-
-    const result = await apiCall('POST', '/auth/users', {
-      token: auth.token,
-      body: { firstName, lastName, email, password, role: 'admin' },
-    })
-
-    setCreating(false)
-
-    if (result.ok) {
-      setFirstName('')
-      setLastName('')
-      setEmail('')
-      setPassword('')
-      setShowCreateModal(false)
-      await loadAgents()
-    } else if (result.status === 409) {
-      setError('Cet email est déjà utilisé.')
-    } else {
-      setError('Échec de la création.')
-    }
-  }
-
   function selectManageAgent(agent: Agent) {
     setManageAgentId(agent.id)
     setEditPermissions(Object.fromEntries(agent.services.map((s) => [s.id, s.permissions])))
@@ -199,7 +120,7 @@ export function UsersManager({ auth }: { auth: AuthState }) {
   async function saveAgentPermissions() {
     if (manageAgentId === null || !editPermissions) return
     setSavingPermissions(true)
-    await apiCall('PATCH', `/auth/users/${manageAgentId}`, {
+    const result = await apiCall('PATCH', `/auth/users/${manageAgentId}`, {
       token: auth.token,
       body: {
         // Le validateur rejette une chaîne vide — on n'envoie le champ
@@ -217,6 +138,11 @@ export function UsersManager({ auth }: { auth: AuthState }) {
     setSavingPermissions(false)
     setManageAgentId(null)
     setEditPermissions(null)
+    if (result.ok) {
+      showToast('success', 'Utilisateur mis à jour', agentName(manageAgent!) ?? manageAgent!.email)
+    } else {
+      showToast('error', 'Échec', "Impossible d'enregistrer les modifications.")
+    }
     await loadAgents()
   }
 
@@ -236,11 +162,18 @@ export function UsersManager({ auth }: { auth: AuthState }) {
     })
     setStatusUpdating(false)
     if (result.ok) {
+      showToast(
+        'success',
+        status === 'active' ? 'Utilisateur réactivé' : 'Utilisateur désactivé',
+        agentName(manageAgent!) ?? manageAgent!.email
+      )
       await loadAgents()
     } else if (result.status === 409) {
       setStatusError("Impossible : c'est le dernier administrateur actif de l'organisme.")
+      showToast('error', 'Échec', "C'est le dernier administrateur actif de l'organisme.")
     } else {
       setStatusError('Échec de la mise à jour.')
+      showToast('error', 'Échec', 'Impossible de mettre à jour le statut.')
     }
   }
 
@@ -261,15 +194,19 @@ export function UsersManager({ auth }: { auth: AuthState }) {
     if (result.ok) {
       setResetPasswordValue('')
       setResetPasswordSuccess(true)
+      showToast('success', 'Mot de passe réinitialisé', agentName(manageAgent!) ?? manageAgent!.email)
     } else if (result.status === 422) {
       setResetPasswordError('Ce mot de passe a déjà été utilisé récemment par cet utilisateur.')
+      showToast('error', 'Échec', 'Ce mot de passe a déjà été utilisé récemment.')
     } else {
       setResetPasswordError('Échec de la réinitialisation.')
+      showToast('error', 'Échec', 'Impossible de réinitialiser le mot de passe.')
     }
   }
 
   async function handleDeleteAgent() {
     if (manageAgentId === null) return
+    const deletedName = manageAgent ? (agentName(manageAgent) ?? manageAgent.email) : ''
     setDeleting(true)
     setDeleteError(null)
     const result = await apiCall('DELETE', `/auth/users/${manageAgentId}`, { token: auth.token })
@@ -278,11 +215,14 @@ export function UsersManager({ auth }: { auth: AuthState }) {
       setShowDeleteConfirm(false)
       setManageAgentId(null)
       setEditPermissions(null)
+      showToast('success', 'Utilisateur supprimé', deletedName)
       await loadAgents()
     } else if (result.status === 409) {
       setDeleteError("L'agent doit d'abord être désactivé.")
+      showToast('error', 'Échec', "L'agent doit d'abord être désactivé.")
     } else {
       setDeleteError('Échec de la suppression.')
+      showToast('error', 'Échec', "Impossible de supprimer l'utilisateur.")
     }
   }
 
@@ -512,19 +452,7 @@ export function UsersManager({ auth }: { auth: AuthState }) {
         title="Utilisateurs"
         subtitle={tab === 'admins' ? "Administrateurs de l'organisme" : "Agents de l'organisme"}
         action={
-          <PrimaryButton
-            type="button"
-            onClick={() => {
-              setFirstName('')
-              setLastName('')
-              setEmail('')
-              setPassword('')
-              setServiceIds([])
-              setPermissions(DEFAULT_PERMISSIONS)
-              setError(null)
-              setShowCreateModal(true)
-            }}
-          >
+          <PrimaryButton type="button" onClick={() => setShowCreateModal(true)}>
             <Plus size={16} />
             {tab === 'admins' ? 'Ajouter un administrateur' : 'Ajouter un agent'}
           </PrimaryButton>
@@ -538,7 +466,7 @@ export function UsersManager({ auth }: { auth: AuthState }) {
             setTab('agents')
             setPage(1)
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+          className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
             tab === 'agents' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
           }`}
         >
@@ -550,7 +478,7 @@ export function UsersManager({ auth }: { auth: AuthState }) {
             setTab('admins')
             setPage(1)
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+          className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
             tab === 'admins' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
           }`}
         >
@@ -581,36 +509,40 @@ export function UsersManager({ auth }: { auth: AuthState }) {
           />
         )}
         {agents?.map((agent) => (
-          <motion.button
+          <button
             key={agent.id}
             type="button"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={() => selectManageAgent(agent)}
-            className="flex w-full items-center justify-between rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-black/5 transition-shadow hover:ring-aregie-blue/40"
+            className="flex w-full items-center gap-3 squircle rounded-2xl bg-white p-4 text-left shadow-[0_1px_3px_rgba(20,25,60,0.06)] transition-shadow hover:shadow-md"
           >
-            <div>
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] font-bold ${
+                agent.status === 'inactive'
+                  ? 'bg-gray-100 text-gray-400'
+                  : 'bg-aregie-deep/10 text-aregie-deep'
+              }`}
+            >
+              {agentInitials(agent)}
+            </div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <p className="font-medium text-gray-900">
+                <p className="truncate font-medium text-gray-900">
                   {agentName(agent) ?? agent.email}
                   {agent.id === auth.userId && ' (vous)'}
                 </p>
                 {agent.status === 'inactive' && (
-                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
-                    Désactivé
-                  </span>
+                  <StatusBadge label="Désactivé" className="bg-gray-100 text-gray-500" />
                 )}
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="truncate text-sm text-gray-500">
                 {agentName(agent) ? `${agent.email} · ` : ''}
                 {tab === 'agents' &&
                   `${agent.services.map((s) => s.name).join(', ') || 'Aucun service'} · `}
                 {formatLastLogin(agent.lastLoginAt)}
               </p>
             </div>
-            <ChevronRight size={18} className="text-gray-400" />
-          </motion.button>
+            <ChevronRight size={18} className="shrink-0 text-gray-400" />
+          </button>
         ))}
       </div>
 
@@ -625,134 +557,18 @@ export function UsersManager({ auth }: { auth: AuthState }) {
         </Card>
       )}
 
-      {showCreateModal && tab === 'agents' && (
-        <Modal title="Nouvel agent" onClose={() => setShowCreateModal(false)}>
-          <form onSubmit={handleCreate} className="space-y-3">
-            <div className="flex gap-3">
-              <TextInput
-                placeholder="Prénom"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-              />
-              <TextInput
-                placeholder="Nom"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-              />
-            </div>
-            <TextInput
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <TextInput
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-            <p className="text-xs text-gray-400">
-              Devra choisir son propre mot de passe à sa première connexion.
-            </p>
-
-            <div>
-              <p className="mb-1.5 text-sm font-medium text-gray-700">Services</p>
-              <div className="flex flex-wrap gap-3">
-                {auth.services.map((s) => (
-                  <label key={s.id} className="flex items-center gap-2 text-sm text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={serviceIds.includes(s.id)}
-                      onChange={(e) =>
-                        setServiceIds((prev) =>
-                          e.target.checked ? [...prev, s.id] : prev.filter((id) => id !== s.id)
-                        )
-                      }
-                    />
-                    {s.name}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-1.5 text-sm font-medium text-gray-700">Permissions</p>
-              <div className="grid grid-cols-2 gap-2">
-                {PERMISSION_LABELS.map(({ key, label }) => (
-                  <label key={key} className="flex items-center gap-2 text-sm text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={permissions[key]}
-                      onChange={(e) =>
-                        setPermissions((prev) => ({ ...prev, [key]: e.target.checked }))
-                      }
-                    />
-                    {label}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {error && <p className="text-sm text-red-600">{error}</p>}
-
-            <PrimaryButton type="submit" disabled={creating} className="w-full">
-              {creating ? 'Création…' : 'Créer'}
-            </PrimaryButton>
-          </form>
-        </Modal>
-      )}
-
-      {showCreateModal && tab === 'admins' && (
-        <Modal title="Nouvel administrateur" onClose={() => setShowCreateModal(false)}>
-          <form onSubmit={handleCreateAdmin} className="space-y-3">
-            <div className="flex gap-3">
-              <TextInput
-                placeholder="Prénom"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-              />
-              <TextInput
-                placeholder="Nom"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-              />
-            </div>
-            <TextInput
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <TextInput
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-            <p className="text-xs text-gray-400">
-              Un administrateur a un accès complet à l'organisme et devra choisir son propre mot
-              de passe à sa première connexion.
-            </p>
-
-            {error && <p className="text-sm text-red-600">{error}</p>}
-
-            <PrimaryButton type="submit" disabled={creating} className="w-full">
-              {creating ? 'Création…' : 'Créer'}
-            </PrimaryButton>
-          </form>
-        </Modal>
+      {showCreateModal && (
+        <UserFormModal
+          mode={tab === 'admins' ? 'admin' : 'agent'}
+          onClose={() => setShowCreateModal(false)}
+          onCreated={() => {
+            setShowCreateModal(false)
+            loadAgents()
+          }}
+        />
       )}
     </div>
   )
 }
+
+export default UsersManager

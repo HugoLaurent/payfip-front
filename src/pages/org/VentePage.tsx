@@ -16,7 +16,9 @@ import {
 import { apiCall, GATEWAY_URL } from '@/lib/api'
 import { Card, LoadError, PageHeader, PrimaryButton, SecondaryButton, SelectInput, TextInput } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
-import type { AuthState } from '@/lib/types'
+import { useAuth } from '@/lib/useAuth'
+import { useToast } from '@/lib/useToast'
+import { euros } from '@/lib/format'
 
 interface Tariff {
   id: number
@@ -55,12 +57,11 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   free: 'Gratuit',
 }
 
+// Composantes LOCALES, jamais `.toISOString()` (UTC) — décale d'un jour en
+// arrière tôt le matin dans un fuseau positif comme Europe/Paris.
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10)
-}
-
-function euros(cents: number): string {
-  return `${(cents / 100).toFixed(2)} €`
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 function Stepper({
@@ -80,7 +81,11 @@ function Stepper({
       >
         <Minus size={12} />
       </button>
-      <span className="w-5 text-center text-sm font-semibold text-gray-900">{value}</span>
+      <span
+        className={`w-5 text-center text-sm font-bold ${value > 0 ? 'text-aregie-deep' : 'text-gray-400'}`}
+      >
+        {value}
+      </span>
       <button
         type="button"
         onClick={() => onChange(value + 1)}
@@ -92,7 +97,9 @@ function Stepper({
   )
 }
 
-export function VentePage({ auth }: { auth: AuthState }) {
+export function VentePage() {
+  const { auth } = useAuth()
+  const { showToast } = useToast()
   const sellableServices = auth.services.filter(
     (s) => s.serviceType === 'billetterie' && (auth.role === 'admin' || s.permissions?.canSell)
   )
@@ -223,14 +230,27 @@ export function VentePage({ auth }: { auth: AuthState }) {
         paymentMethod,
         tickets: result.data.data.tickets,
       })
-    } else if (result.status === 422) {
-      setError('Type de tarif inconnu.')
-    } else if (result.status === 403) {
-      setError("Vous n'avez pas le droit de vendre sur ce service.")
-    } else if (result.status === 409) {
-      setError('Ce service est fermé — impossible de vendre des billets pour le moment.')
+      showToast(
+        'success',
+        'Vente enregistrée',
+        isFree
+          ? `${qtyTotal} billet${qtyTotal > 1 ? 's' : ''} gratuit${qtyTotal > 1 ? 's' : ''}`
+          : `${qtyTotal} billet${qtyTotal > 1 ? 's' : ''} · ${euros(totalCents)} encaissés en ${(PAYMENT_METHOD_LABELS[paymentMethod] ?? paymentMethod).toLowerCase()}`
+      )
     } else {
-      setError('Échec de la vente.')
+      const errorCode = (result.data as { error?: string } | null)?.error
+      const message =
+        result.status === 422 && errorCode === 'visit_date_closed'
+          ? "Ce jour n'est pas ouvert à la visite — choisissez une autre date."
+          : result.status === 422
+            ? 'Type de tarif inconnu.'
+            : result.status === 403
+              ? "Vous n'avez pas le droit de vendre sur ce service."
+              : result.status === 409
+                ? 'Ce service est fermé — impossible de vendre des billets pour le moment.'
+                : 'Échec de la vente.'
+      setError(message)
+      showToast('error', 'Échec de la vente', message)
     }
   }
 
@@ -299,7 +319,9 @@ export function VentePage({ auth }: { auth: AuthState }) {
             </div>
             <div className="flex justify-between border-t border-gray-100 pt-2 text-base">
               <span className="text-gray-500">Total</span>
-              <span className="font-bold text-gray-900">{euros(saleTotalCents)}</span>
+              <span className="font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
+                {euros(saleTotalCents)}
+              </span>
             </div>
           </div>
         </Card>
@@ -330,7 +352,7 @@ export function VentePage({ auth }: { auth: AuthState }) {
       <PageHeader icon={<ShoppingCart size={20} />} title="Vente" subtitle={auth.orgName} />
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Card delay={0}>
+        <Card>
           <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">Service</p>
           {sellableServices.length > 1 ? (
             <SelectInput value={serviceId ?? ''} onChange={(e) => setServiceId(Number(e.target.value))}>
@@ -341,11 +363,11 @@ export function VentePage({ auth }: { auth: AuthState }) {
               ))}
             </SelectInput>
           ) : (
-            <p className="font-medium text-gray-900">{sellableServices[0].name}</p>
+            <p className="font-bold text-gray-900">{sellableServices[0].name}</p>
           )}
         </Card>
 
-        <Card className="space-y-3" delay={0.06}>
+        <Card className="space-y-3">
           <p className="text-xs font-semibold tracking-wide text-gray-400 uppercase">Client</p>
           <div className="relative">
             <Mail size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
@@ -362,11 +384,12 @@ export function VentePage({ auth }: { auth: AuthState }) {
             type="date"
             value={visitDate}
             onChange={(e) => setVisitDate(e.target.value)}
+            min={todayIso()}
             required
           />
         </Card>
 
-        <Card delay={0.12}>
+        <Card>
           <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">Billets</p>
 
           {tariffsFailed && <LoadError onRetry={() => setReloadKey((k) => k + 1)} />}
@@ -381,14 +404,14 @@ export function VentePage({ auth }: { auth: AuthState }) {
             {tariffs?.map((t) => (
               <div
                 key={t.id}
-                className={`flex items-center justify-between gap-2 rounded-lg border px-2.5 py-2 transition ${
+                className={`flex items-center justify-between gap-2 squircle rounded-lg border px-2.5 py-2 transition ${
                   (quantities[t.tariffType] ?? 0) > 0
-                    ? 'border-aregie-blue/20 bg-aregie-deep/[0.03]'
+                    ? 'border-aregie-deep bg-aregie-deep/[0.04]'
                     : 'border-gray-100'
                 }`}
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-gray-900 capitalize">{t.tariffType}</p>
+                  <p className="truncate text-sm font-semibold text-gray-900 capitalize">{t.tariffType}</p>
                   <p className="text-xs text-gray-400">{euros(t.priceCents)}</p>
                 </div>
                 <Stepper
@@ -401,14 +424,14 @@ export function VentePage({ auth }: { auth: AuthState }) {
         </Card>
 
         {isFree ? (
-          <Card className="flex items-center gap-3 border border-emerald-100 bg-emerald-50" delay={0.18}>
+          <Card className="flex items-center gap-3 border border-emerald-100 bg-emerald-50">
             <Gift size={20} className="shrink-0 text-emerald-600" />
             <p className="text-sm font-medium text-emerald-800">
               Gratuit — aucun encaissement nécessaire
             </p>
           </Card>
         ) : (
-          <Card delay={0.18}>
+          <Card>
             <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">Paiement</p>
             <div className="grid grid-cols-4 gap-2">
               {PAYMENT_METHODS.map((m) => {
@@ -419,7 +442,7 @@ export function VentePage({ auth }: { auth: AuthState }) {
                     key={m.value}
                     type="button"
                     onClick={() => setPaymentMethod(m.value)}
-                    className={`flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-xs font-medium transition ${
+                    className={`flex flex-col items-center gap-1.5 squircle rounded-xl border px-2 py-3 text-xs font-medium transition ${
                       active
                         ? 'border-aregie-deep bg-aregie-deep text-white'
                         : 'border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -436,12 +459,12 @@ export function VentePage({ auth }: { auth: AuthState }) {
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <Card className="sticky bottom-4 shadow-md" delay={0.24}>
+        <Card className="sticky bottom-4 shadow-md">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm text-gray-500">
               {qtyTotal} billet{qtyTotal > 1 ? 's' : ''}
             </p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
               {isFree ? 'Gratuit' : euros(totalCents)}
             </p>
           </div>
@@ -453,3 +476,5 @@ export function VentePage({ auth }: { auth: AuthState }) {
     </div>
   )
 }
+
+export default VentePage

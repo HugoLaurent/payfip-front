@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { GATEWAY_URL } from '@/lib/api'
-import { useSquircle } from '@/lib/useSquircle'
 import type { ServiceLookup } from '@/lib/types'
 
 // En-tête avec logo/nom du service — n'apparaît que sur l'écran
@@ -23,7 +22,6 @@ export function PublicServiceHeader({
   onBack?: () => void
 }) {
   const [logoLoaded, setLogoLoaded] = useState(false)
-  const squircle = useSquircle<HTMLDivElement>(16)
 
   return (
     <motion.div
@@ -36,16 +34,14 @@ export function PublicServiceHeader({
         <button
           type="button"
           onClick={onBack}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[oklch(0.95_0.01_260)] text-[oklch(0.3_0.02_260)] md:h-11 md:w-11"
+          className="squircle flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[oklch(0.95_0.01_260)] text-[oklch(0.3_0.02_260)] md:h-11 md:w-11"
         >
           <ArrowLeft size={16} strokeWidth={2.5} className="md:h-5 md:w-5" />
         </button>
       )}
       {!logoFailed && (
         <div
-          ref={squircle.ref}
-          style={squircle.style}
-          className={`flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-xl md:h-24 md:w-24 md:rounded-2xl ${!logoLoaded ? 'bg-gray-100' : ''}`}
+          className={`squircle flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-xl md:h-24 md:w-24 md:rounded-2xl ${!logoLoaded ? 'bg-gray-100' : ''}`}
         >
           <motion.img
             src={`${GATEWAY_URL}/services/${service.serviceId}/logo`}

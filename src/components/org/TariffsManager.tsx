@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Archive, Pencil, Plus, RotateCcw, Ticket, Trash2 } from 'lucide-react'
+import { ChevronRight, Plus, Ticket, Trash2 } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import {
   Card,
@@ -10,9 +10,12 @@ import {
   PrimaryButton,
   SecondaryButton,
   SelectInput,
+  Switch,
   TextInput,
 } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
+import { useToast } from '@/lib/useToast'
+import { euros } from '@/lib/format'
 import type { AuthState, ServiceRow } from '@/lib/types'
 
 interface Tariff {
@@ -30,6 +33,7 @@ interface BudgetCode {
 export function TariffsManager({ auth, service }: { auth: AuthState; service: ServiceRow }) {
   const servicePermissions = auth.services.find((s) => s.id === service.id)?.permissions
   const canManage = auth.role === 'admin' || servicePermissions?.canManageTariffs === true
+  const { showToast } = useToast()
 
   const [tariffs, setTariffs] = useState<Tariff[] | null>(null)
   const [budgetCodes, setBudgetCodes] = useState<BudgetCode[]>([])
@@ -96,6 +100,7 @@ export function TariffsManager({ auth, service }: { auth: AuthState; service: Se
     setCreating(false)
 
     if (result.ok) {
+      showToast('success', 'Tarif créé', newType)
       setNewType('')
       setNewPrice('')
       setNewBudgetCode('')
@@ -103,34 +108,45 @@ export function TariffsManager({ auth, service }: { auth: AuthState; service: Se
       await loadTariffs()
     } else if (result.status === 409) {
       setError('Ce type de tarif existe déjà pour ce service.')
+      showToast('error', 'Échec', 'Ce type de tarif existe déjà pour ce service.')
     } else if (result.status === 422) {
       setError('Code budgétaire inconnu pour cette régie.')
+      showToast('error', 'Échec', 'Code budgétaire inconnu pour cette régie.')
     } else {
       setError('Échec de la création.')
+      showToast('error', 'Échec', 'Impossible de créer le tarif.')
     }
   }
 
   async function handleArchive(tariffId: number) {
-    await apiCall('PATCH', `/billetterie/tariffs/${tariffId}`, {
+    const tariffType = tariffs?.find((t) => t.id === tariffId)?.tariffType ?? ''
+    const result = await apiCall('PATCH', `/billetterie/tariffs/${tariffId}`, {
       token: auth.token,
       body: { status: 'archived' },
     })
+    if (result.ok) showToast('success', 'Tarif désactivé', tariffType)
+    else showToast('error', 'Échec', 'Impossible de désactiver le tarif.')
     await loadTariffs()
   }
 
   async function handleReactivate(tariffId: number) {
-    await apiCall('PATCH', `/billetterie/tariffs/${tariffId}`, {
+    const tariffType = tariffs?.find((t) => t.id === tariffId)?.tariffType ?? ''
+    const result = await apiCall('PATCH', `/billetterie/tariffs/${tariffId}`, {
       token: auth.token,
       body: { status: 'active' },
     })
+    if (result.ok) showToast('success', 'Tarif réactivé', tariffType)
+    else showToast('error', 'Échec', 'Impossible de réactiver le tarif.')
     await loadTariffs()
   }
 
   async function handleDelete() {
     if (!deletingTariff) return
     setDeleting(true)
-    await apiCall('DELETE', `/billetterie/tariffs/${deletingTariff.id}`, { token: auth.token })
+    const result = await apiCall('DELETE', `/billetterie/tariffs/${deletingTariff.id}`, { token: auth.token })
     setDeleting(false)
+    if (result.ok) showToast('success', 'Tarif supprimé', deletingTariff.tariffType)
+    else showToast('error', 'Échec', 'Impossible de supprimer le tarif.')
     setDeletingTariff(null)
     await loadTariffs()
   }
@@ -156,85 +172,108 @@ export function TariffsManager({ auth, service }: { auth: AuthState; service: Se
     setSaving(false)
 
     if (result.ok) {
+      showToast('success', 'Tarif modifié', editingTariff.tariffType)
       setEditingTariff(null)
       await loadTariffs()
     } else {
       setEditError('Échec de la modification.')
+      showToast('error', 'Échec', 'Impossible de modifier le tarif.')
     }
   }
 
+  const activeTariffs = tariffs?.filter((t) => t.status === 'active') ?? []
+  const archivedTariffs = tariffs?.filter((t) => t.status !== 'active') ?? []
+
   return (
     <div>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h3 className="flex items-center gap-2 text-sm font-medium text-gray-500">
-          <Ticket size={15} />
-          Tarifs
-        </h3>
-        {canManage && (
-          <PrimaryButton type="button" onClick={() => setShowCreateModal(true)} className="py-1.5 text-xs">
-            <Plus size={14} />
-            Ajouter un tarif
-          </PrimaryButton>
-        )}
-      </div>
+      <Card>
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+          <h3
+            className="text-sm font-bold text-gray-900"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            Grille tarifaire
+          </h3>
+          {canManage && (
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              style={{ fontFamily: 'var(--font-display)' }}
+              className="squircle inline-flex items-center gap-1.5 rounded-full bg-aregie-deep/10 px-4 py-2 text-xs font-bold text-aregie-deep transition hover:bg-aregie-deep/15"
+            >
+              <Plus size={14} />
+              Ajouter un tarif
+            </button>
+          )}
+        </div>
 
-      <div className="space-y-2">
         {loadFailed && <LoadError onRetry={loadTariffs} />}
-        {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
-        {!loadFailed && tariffs?.filter((t) => t.status === 'active').length === 0 && (
-          <EmptyState icon={<Ticket size={24} />} label="Aucun tarif actif." />
+        {!loadFailed && showLoading && <p className="py-3 text-sm text-gray-500">Chargement…</p>}
+        {!loadFailed && activeTariffs.length === 0 && (
+          <div className="py-2">
+            <EmptyState icon={<Ticket size={24} />} label="Aucun tarif actif." />
+          </div>
         )}
-        {tariffs
-          ?.filter((t) => t.status === 'active')
-          .map((t) => (
-            <Card key={t.id} className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="font-medium text-gray-900">{t.tariffType}</p>
-                <p className="text-sm text-gray-500">{(t.priceCents / 100).toFixed(2)} €</p>
-              </div>
-              {canManage && (
-                <div className="flex flex-wrap gap-2">
-                  <SecondaryButton type="button" onClick={() => openEdit(t)}>
-                    <Pencil size={14} />
-                    Modifier
-                  </SecondaryButton>
-                  <DangerButton type="button" onClick={() => handleArchive(t.id)}>
-                    <Archive size={14} />
-                    Désactiver
-                  </DangerButton>
-                </div>
-              )}
-            </Card>
-          ))}
-      </div>
 
-      {canManage && tariffs && tariffs.some((t) => t.status !== 'active') && (
-        <div className="mt-6">
+        <div className="divide-y divide-gray-100">
+          {activeTariffs.map((t) => (
+            <div key={t.id} className="flex items-center gap-3 py-3">
+              <p className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">
+                {t.tariffType}
+              </p>
+              <p
+                className={`w-20 shrink-0 text-right text-sm font-bold ${t.priceCents === 0 ? 'text-emerald-600' : 'text-gray-900'}`}
+              >
+                {t.priceCents === 0 ? 'Gratuit' : euros(t.priceCents)}
+              </p>
+              {canManage ? (
+                <>
+                  <Switch checked onChange={() => handleArchive(t.id)} />
+                  <button
+                    type="button"
+                    onClick={() => openEdit(t)}
+                    className="shrink-0 text-gray-400 transition hover:text-aregie-deep"
+                    aria-label={`Modifier « ${t.tariffType} »`}
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </>
+              ) : (
+                <ChevronRight size={18} className="shrink-0 text-gray-300" />
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {canManage && archivedTariffs.length > 0 && (
+        <div className="mt-4">
           <p className="mb-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">
             Tarifs désactivés
           </p>
-          <div className="space-y-2">
-            {tariffs
-              .filter((t) => t.status !== 'active')
-              .map((t) => (
-                <Card key={t.id} className="flex flex-wrap items-center justify-between gap-3 opacity-60">
-                  <div>
-                    <p className="font-medium text-gray-900">{t.tariffType}</p>
-                    <p className="text-sm text-gray-500">{(t.priceCents / 100).toFixed(2)} €</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <SecondaryButton type="button" onClick={() => handleReactivate(t.id)}>
-                      <RotateCcw size={14} />
-                      Réactiver
-                    </SecondaryButton>
-                    <DangerButton type="button" onClick={() => setDeletingTariff(t)}>
-                      <Trash2 size={14} />
-                      Supprimer
-                    </DangerButton>
-                  </div>
-                </Card>
+          <Card>
+            <div className="divide-y divide-gray-100">
+              {archivedTariffs.map((t) => (
+                <div key={t.id} className="flex items-center gap-3 py-3 opacity-60">
+                  <p className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">
+                    {t.tariffType}
+                  </p>
+                  <p className="w-20 shrink-0 text-right text-sm font-bold text-gray-900">
+                    {t.priceCents === 0 ? 'Gratuit' : euros(t.priceCents)}
+                  </p>
+                  <Switch checked={false} onChange={() => handleReactivate(t.id)} />
+                  <button
+                    type="button"
+                    onClick={() => setDeletingTariff(t)}
+                    className="shrink-0 text-gray-400 transition hover:text-red-600"
+                    aria-label={`Supprimer « ${t.tariffType} »`}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               ))}
-          </div>
+            </div>
+          </Card>
         </div>
       )}
 

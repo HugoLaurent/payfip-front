@@ -54,9 +54,9 @@ export function ForcedPasswordChange({
     <div className="flex min-h-svh items-center justify-center bg-gray-50 px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm ring-1 ring-black/5"
+        className="squircle w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm ring-1 ring-black/5"
       >
-        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-aregie-deep/10 text-aregie-deep">
+        <div className="squircle mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-aregie-deep/10 text-aregie-deep">
           <KeyRound size={18} />
         </div>
         <h1 className="text-lg font-semibold text-gray-900">Changement de mot de passe requis</h1>

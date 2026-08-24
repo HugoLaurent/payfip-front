@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { useSquircle } from '@/lib/useSquircle'
 import aregieLogo from '@/assets/aregie-logo.png'
 
 // Badge "AREGIE" — vrai logo institutionnel (voir FORGEJO_REPO/AREGIE),
@@ -10,15 +9,10 @@ import aregieLogo from '@/assets/aregie-logo.png'
 // ancré en bas à droite de l'écran entier — "toute la page", pas juste le
 // contenu.
 function AregieBadge() {
-  const squircle = useSquircle<HTMLDivElement>(8)
   return (
     <div className="mt-4 flex items-center justify-end gap-1.5 md:fixed md:right-6 md:bottom-5 md:mt-0">
       <p className="text-[10px] font-medium text-ink-faint">Propulsé par</p>
-      <div
-        ref={squircle.ref}
-        style={squircle.style}
-        className="flex shrink-0 items-center rounded-lg bg-aregie-deep px-2.5 py-[5px]"
-      >
+      <div className="squircle flex shrink-0 items-center rounded-lg bg-aregie-deep px-2.5 py-[5px]">
         <img src={aregieLogo} alt="AREGIE" className="h-[10px] w-auto" />
       </div>
     </div>

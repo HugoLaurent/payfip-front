@@ -24,22 +24,25 @@ export function Modal({
       transition={{ duration: 0.15, ease: 'easeOut' }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
+      style={{ fontFamily: 'var(--font-public)' }}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.96, y: 8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.18, ease: 'easeOut' }}
-        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-xl"
+        className="squircle max-h-[85vh] w-full max-w-md overflow-y-auto rounded-[20px] bg-white p-6 shadow-[0_30px_60px_-20px_rgba(20,25,60,0.4)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-semibold text-aregie-deep">{title}</h3>
+          <h3 className="text-[17px] font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
+            {title}
+          </h3>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+            className="squircle rounded-lg bg-gray-100 p-1.5 text-gray-500 transition hover:bg-gray-200 hover:text-gray-700"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
         {children}

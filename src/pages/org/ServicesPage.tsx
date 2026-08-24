@@ -1,49 +1,33 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Search, Store } from 'lucide-react'
+import { ChevronRight, Search, Store } from 'lucide-react'
 import { apiCall, GATEWAY_URL } from '@/lib/api'
-import { Card, EmptyState, LoadError, PageHeader, Pagination, TextInput } from '@/components/ui'
-import { useDelayedLoading } from '@/lib/useDelayedLoading'
-import type { AuthState, PageMeta, ServiceRow } from '@/lib/types'
-
-const STATUS_LABELS: Record<string, string> = {
-  draft: 'Brouillon',
-  active: 'Actif',
-  archived: 'Archivé',
-}
+import { Card, EmptyState, LoadError, PageHeader, Pagination, StatusBadge, TextInput } from '@/components/ui'
+import { usePaginatedResource } from '@/lib/usePaginatedResource'
+import { useAuth } from '@/lib/useAuth'
+import { SERVICE_STATUS_LABELS, SERVICE_STATUS_TINTS, SERVICE_TYPE_LABELS } from '@/lib/serviceLabels'
+import type { PageMeta, ServiceRow } from '@/lib/types'
 
 const PER_PAGE = 10
 
-export function ServicesPage({ auth }: { auth: AuthState }) {
+export function ServicesPage() {
+  const { auth } = useAuth()
   const navigate = useNavigate()
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
-  const [services, setServices] = useState<ServiceRow[] | null>(null)
-  const [meta, setMeta] = useState<PageMeta | null>(null)
-  const [loadFailed, setLoadFailed] = useState(false)
-  const [reloadKey, setReloadKey] = useState(0)
-  const showLoading = useDelayedLoading(services === null)
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setLoadFailed(false)
-      apiCall<{ data: ServiceRow[]; meta: PageMeta }>(
-        'GET',
-        `/auth/services?q=${encodeURIComponent(q)}&page=${page}&perPage=${PER_PAGE}`,
-        { token: auth.token }
-      ).then((result) => {
-        if (result.ok) {
-          setServices(result.data.data)
-          setMeta(result.data.meta)
-        } else {
-          setLoadFailed(true)
-        }
-      })
-    }, 250)
-
-    return () => clearTimeout(timeout)
-  }, [auth.token, q, page, reloadKey])
+  const {
+    data: services,
+    meta,
+    loadFailed,
+    showLoading,
+    reload,
+  } = usePaginatedResource<ServiceRow, PageMeta>({
+    fetcher: () =>
+      apiCall('GET', `/auth/services?q=${encodeURIComponent(q)}&page=${page}&perPage=${PER_PAGE}`, {
+        token: auth.token,
+      }),
+    deps: [auth.token, q, page],
+  })
 
   return (
     <div>
@@ -63,40 +47,54 @@ export function ServicesPage({ auth }: { auth: AuthState }) {
       </div>
 
       <div className="space-y-2">
-        {loadFailed && <LoadError onRetry={() => setReloadKey((k) => k + 1)} />}
+        {loadFailed && <LoadError onRetry={reload} />}
         {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
         {!loadFailed && services?.length === 0 && (
           <EmptyState icon={<Store size={28} />} label="Aucun service." />
         )}
         {services?.map((service) => (
-          <motion.button
+          <button
             key={service.id}
             type="button"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={() => navigate(`/services/${service.id}`, { state: { service } })}
-            className="flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-black/5 transition-shadow hover:ring-aregie-blue/40"
+            className="flex w-full items-center gap-3.5 squircle rounded-2xl bg-white p-4 text-left shadow-[0_1px_3px_rgba(20,25,60,0.06)] transition-shadow hover:shadow-md"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100">
+            <div
+              className={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden squircle rounded-xl ${
+                service.hasLogo || service.status !== 'active'
+                  ? 'bg-gray-100'
+                  : 'bg-gradient-to-br from-aregie-deep to-aregie-light'
+              }`}
+            >
               {service.hasLogo ? (
                 <img
                   src={`${GATEWAY_URL}/services/${service.id}/logo`}
                   alt={service.name}
                   className="h-full w-full object-contain"
                 />
-              ) : (
+              ) : service.status !== 'active' ? (
                 <Store size={18} className="text-gray-300" />
-              )}
+              ) : null}
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate font-medium text-gray-900">{service.name}</p>
-              <p className="text-sm text-gray-500 capitalize">
-                {service.serviceType} · {STATUS_LABELS[service.status] ?? service.status}
+              <p
+                className="truncate text-[14.5px] font-bold text-gray-900"
+                style={{ fontFamily: 'var(--font-public)' }}
+              >
+                {service.name}
+              </p>
+              <p className="text-[12.5px] font-medium text-gray-500">
+                {SERVICE_TYPE_LABELS[service.serviceType] ?? service.serviceType}
               </p>
             </div>
-          </motion.button>
+
+            <StatusBadge
+              label={SERVICE_STATUS_LABELS[service.status] ?? service.status}
+              className={SERVICE_STATUS_TINTS[service.status] ?? 'bg-gray-100 text-gray-600'}
+            />
+            <ChevronRight size={18} className="shrink-0 text-gray-400" />
+          </button>
         ))}
       </div>
 
@@ -113,3 +111,5 @@ export function ServicesPage({ auth }: { auth: AuthState }) {
     </div>
   )
 }
+
+export default ServicesPage

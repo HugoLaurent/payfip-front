@@ -2,18 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import QRCode from 'qrcode'
-import { AlertTriangle, CheckCircle2, Loader2, Printer, XCircle } from 'lucide-react'
+import { CheckCircle2, Loader2, Printer } from 'lucide-react'
 import { apiCall, GATEWAY_URL } from '@/lib/api'
 import { LoadError } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
-import { getSvgPath } from 'figma-squircle'
+import { usePaymentStatusPolling, isPendingPaymentStatus } from '@/lib/usePaymentStatusPolling'
+import { euros } from '@/lib/format'
 import type { ServiceLookup } from '@/lib/types'
 import { PublicShell } from '@/layouts/PublicShell'
-import { FadeIn, PublicButton, PublicGhostButton } from '@/components/public'
-import { useSquircle } from '@/lib/useSquircle'
-
-// Taille fixe (88x88), pas besoin de mesurer dynamiquement.
-const QR_BOX_CLIP_PATH = `path('${getSvgPath({ width: 88, height: 88, cornerRadius: 16, cornerSmoothing: 0.75 })}')`
+import { FadeIn, PaymentFailedState, PaymentPendingState, PublicButton } from '@/components/public'
 
 type PaymentStatus = 'draft' | 'awaiting_payment' | 'paid' | 'confirmed' | 'failed' | 'cancelled' | 'expired'
 
@@ -36,20 +33,6 @@ const STATUS_LABELS: Record<PaymentStatus, string> = {
   expired: 'Le délai de paiement a expiré',
 }
 
-// Le callback du gateway résout normalement le paiement avant de
-// rediriger ici — ce polling n'est qu'un filet de sécurité si le statut
-// arrive encore en transition (draft/awaiting_payment).
-const POLL_INTERVAL_MS = 2500
-const POLL_MAX_ATTEMPTS = 6
-
-function isPending(status: PaymentStatus): boolean {
-  return status === 'draft' || status === 'awaiting_payment'
-}
-
-function euros(cents: number): string {
-  return `${(cents / 100).toFixed(2)} €`
-}
-
 function formatDateLabel(iso: string): string {
   const date = new Date(`${iso}T00:00:00`)
   return date.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -66,9 +49,6 @@ export function PurchaseReturnPage() {
   const confirmedMessage = searchParams.get('message')
   const confirmedEmail = searchParams.get('email')
 
-  const [status, setStatus] = useState<PaymentStatus | null>(initialStatus)
-  const [pollAttempts, setPollAttempts] = useState(0)
-
   const [tickets, setTickets] = useState<Ticket[] | null>(null)
   const [orderCode, setOrderCode] = useState<string | null>(null)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
@@ -81,9 +61,12 @@ export function PurchaseReturnPage() {
 
   const [service, setService] = useState<ServiceLookup | null>(null)
 
-  const ticketCardSquircle = useSquircle<HTMLDivElement>(20)
-
   const missingParams = !idop || !orgId || !sourceReference || !initialStatus
+  const { status, maxAttemptsReached } = usePaymentStatusPolling<PaymentStatus>({
+    idop,
+    missingParams,
+    initialStatus,
+  })
 
   useEffect(() => {
     if (!slug) return
@@ -91,21 +74,6 @@ export function PurchaseReturnPage() {
       if (result.ok) setService(result.data.data)
     })
   }, [slug])
-
-  useEffect(() => {
-    if (missingParams || !status || !isPending(status) || pollAttempts >= POLL_MAX_ATTEMPTS) return
-
-    const timeout = setTimeout(async () => {
-      const result = await apiCall<{ data: { status: PaymentStatus } }>(
-        'GET',
-        `/paiement/status/${idop}`
-      )
-      if (result.ok) setStatus(result.data.data.status)
-      setPollAttempts((n) => n + 1)
-    }, POLL_INTERVAL_MS)
-
-    return () => clearTimeout(timeout)
-  }, [status, pollAttempts, missingParams, idop])
 
   useEffect(() => {
     if (missingParams || (status !== 'paid' && status !== 'confirmed')) return
@@ -181,16 +149,8 @@ export function PurchaseReturnPage() {
       <div className="mx-auto max-w-md space-y-4 pt-4">
         {missingParams || !status ? (
           <p className="pt-10 text-center text-sm text-ink-soft">Lien de retour de paiement invalide ou incomplet.</p>
-        ) : isPending(status) ? (
-          <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <Loader2 size={28} className="animate-spin text-aregie-deep" />
-            <p className="text-sm font-medium text-ink-soft">{STATUS_LABELS[status]}</p>
-            {pollAttempts >= POLL_MAX_ATTEMPTS && (
-              <p className="text-xs text-ink-faint">
-                Ça prend plus de temps que prévu — rechargez cette page dans quelques instants.
-              </p>
-            )}
-          </div>
+        ) : isPendingPaymentStatus(status) ? (
+          <PaymentPendingState label={STATUS_LABELS[status]} maxAttemptsReached={maxAttemptsReached} />
         ) : status === 'paid' || status === 'confirmed' ? (
           <>
             <FadeIn className="flex flex-col items-center gap-3 pt-2 text-center">
@@ -225,12 +185,10 @@ export function PurchaseReturnPage() {
             </FadeIn>
 
             <motion.div
-              ref={ticketCardSquircle.ref}
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, ease: 'easeOut', delay: 0.08 }}
-              style={ticketCardSquircle.style}
-              className="overflow-visible rounded-[20px] bg-white p-0 shadow-[0_12px_30px_-14px_rgba(20,25,60,0.18)]"
+              className="squircle overflow-visible rounded-[20px] bg-white p-0 shadow-[0_12px_30px_-14px_rgba(20,25,60,0.18)]"
             >
               <div className="flex flex-col gap-0.5 px-5 pt-5 pb-4">
                 <p className="font-bold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
@@ -271,10 +229,7 @@ export function PurchaseReturnPage() {
               </div>
 
               <div className="flex items-center gap-4 px-5 py-5">
-                <div
-                  style={{ clipPath: QR_BOX_CLIP_PATH }}
-                  className="flex h-[88px] w-[88px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-otp-bg"
-                >
+                <div className="squircle flex h-[88px] w-[88px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-otp-bg">
                   {qrDataUrl ? (
                     <img src={qrDataUrl} alt="QR code de la commande" className="h-full w-full object-contain" />
                   ) : (
@@ -306,19 +261,13 @@ export function PurchaseReturnPage() {
             )}
           </>
         ) : (
-          <div className="flex flex-col items-center gap-3 pt-10 text-center">
-            {status === 'expired' ? (
-              <AlertTriangle size={32} className="text-amber-500" />
-            ) : (
-              <XCircle size={32} className="text-red-600" />
-            )}
-            <p className="font-semibold text-ink">{STATUS_LABELS[status]}</p>
-            <p className="text-sm text-ink-soft">Aucune somme n'a été prélevée. Vous pouvez réessayer le paiement.</p>
-            {retryError && <p className="text-sm text-red-600">{retryError}</p>}
-            <PublicGhostButton type="button" onClick={handleRetry} disabled={retrying} className="w-full">
-              {retrying ? 'Redirection…' : 'Réessayer le paiement'}
-            </PublicGhostButton>
-          </div>
+          <PaymentFailedState
+            expired={status === 'expired'}
+            label={STATUS_LABELS[status]}
+            retryError={retryError}
+            retrying={retrying}
+            onRetry={handleRetry}
+          />
         )}
       </div>
     </PublicShell>

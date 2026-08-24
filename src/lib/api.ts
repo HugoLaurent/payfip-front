@@ -20,10 +20,11 @@ export interface ApiResult<T = unknown> {
 export async function apiCall<T = unknown>(
   method: string,
   path: string,
-  options: { body?: unknown; token?: string } = {}
+  options: { body?: unknown; token?: string; staffKey?: string } = {}
 ): Promise<ApiResult<T>> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (options.token) headers.Authorization = `Bearer ${options.token}`
+  if (options.staffKey) headers['x-staff-key'] = options.staffKey
 
   const res = await fetch(`${GATEWAY_URL}${path}`, {
     method,

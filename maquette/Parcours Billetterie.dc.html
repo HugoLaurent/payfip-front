@@ -15,26 +15,25 @@
   body{margin:0;background:oklch(0.97 0.012 75);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
   *{box-sizing:border-box}
   input{font-family:'Inter',system-ui,sans-serif}
-  ::placeholder{color:oklch(0.62 0.01 260)}
 </style>
 </helmet>
 
 <div style="min-height:100vh;padding:56px 32px 80px;display:flex;flex-direction:column;align-items:center;gap:40px">
 
-  <div style="max-width:720px;text-align:center;display:flex;flex-direction:column;gap:10px">
+  <div style="max-width:760px;text-align:center;display:flex;flex-direction:column;gap:10px">
     <div style="font:600 12px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.5 0.11 265)">AREGIE — Parcours d'achat public</div>
-    <h1 style="margin:0;font:700 28px/1.25 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">Réservation Piscine municipale de Chartres</h1>
-    <p style="margin:0;font:400 14px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260)">Direction premium mais accessible : ticketing chaleureux, mobile-first, sans compte. Palette AREGIE conservée (bleu profond, bleu, azur) + un accent corail pour les actions et le succès, dans l'esprit billetterie grand public. Trois écrans clés ci-dessous : sélection des billets, vérification email, confirmation avec billets.</p>
+    <h1 style="margin:0;font:700 28px/1.25 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">Piscine municipale de Chartres — Réservation en ligne</h1>
+    <p style="margin:0;font:400 14px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260)">Réaligné sur le parcours réel du code (payfip-front) : l'ordre exact est Email → Billets → Paiement — la vérification email vient en premier, la date se choisit en ligne sur l'écran Billets, pas d'étape "Date" séparée.</p>
   </div>
 
   <div style="display:flex;flex-wrap:wrap;gap:44px;justify-content:center;align-items:flex-start">
 
-    <!-- SCREEN 1 : SELECTION BILLETS -->
+    <!-- SCREEN 1 : EMAIL -->
     <div style="display:flex;flex-direction:column;gap:14px;align-items:center">
-      <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">1 · Sélection des billets</div>
+      <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">1 · Vérification email</div>
       <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
         <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;position:relative;display:flex;flex-direction:column">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 6px;flex:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
             <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
             <div style="display:flex;gap:4px;align-items:center">
               <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
@@ -43,128 +42,34 @@
             </div>
           </div>
 
-          <div style="display:flex;align-items:center;gap:12px;padding:14px 24px 12px;flex:none">
-            <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#223499,#6f80e4);display:flex;align-items:center;justify-content:center;font:700 15px 'Outfit',sans-serif;color:#fff;flex:none">PC</div>
-            <div style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0">
-              <div style="font:700 15px/1.2 'Outfit',sans-serif;color:oklch(0.22 0.03 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Piscine municipale de Chartres</div>
-              <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Réservation en ligne</div>
-            </div>
-            <div style="font:700 10px/1 ui-monospace,monospace;letter-spacing:.05em;color:oklch(0.45 0.1 265);flex:none">AREGIE</div>
-          </div>
-
-          <div style="display:flex;gap:6px;padding:2px 24px 16px;flex:none">
-            <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
-              <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">✓</div>
-              <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.4 0.02 260)">Date</div>
-            </div>
-            <div style="flex:1;height:2px;background:#223499;margin-top:11px;border-radius:2px"></div>
-            <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
-              <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">2</div>
-              <div style="font:700 9.5px/1 'Inter',sans-serif;color:#223499">Billets</div>
-            </div>
-            <div style="flex:1;height:2px;background:oklch(0.9 0.01 260);margin-top:11px;border-radius:2px"></div>
-            <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
-              <div style="width:22px;height:22px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.55 0.01 260);display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">3</div>
-              <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Email</div>
-            </div>
-            <div style="flex:1;height:2px;background:oklch(0.9 0.01 260);margin-top:11px;border-radius:2px"></div>
-            <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
-              <div style="width:22px;height:22px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.55 0.01 260);display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">4</div>
-              <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Paiement</div>
-            </div>
-          </div>
-
-          <div style="flex:1;overflow-y:auto;padding:4px 24px 24px;display:flex;flex-direction:column;gap:18px">
-
-            <div style="display:flex;align-items:center;gap:12px;background:oklch(0.96 0.02 250);border-radius:16px;padding:14px 16px">
-              <div style="width:38px;height:38px;border-radius:10px;background:#0080c0;display:flex;align-items:center;justify-content:center;flex:none">
-                <div style="width:16px;height:16px;border:2px solid #fff;border-radius:3px;position:relative"><div style="position:absolute;top:-5px;left:2px;width:2px;height:5px;background:#fff"></div><div style="position:absolute;top:-5px;right:2px;width:2px;height:5px;background:#fff"></div></div>
-              </div>
-              <div style="flex:1">
-                <div style="font:600 10.5px/1 'Inter',sans-serif;color:oklch(0.5 0.02 250);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Date de visite</div>
-                <div style="font:700 15px/1.2 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Mercredi 20 août 2026</div>
-              </div>
-              <div style="font:600 12.5px/1 'Inter',sans-serif;color:#0080c0">Modifier</div>
-            </div>
-
-            <div>
-              <div style="font:700 17px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260);margin-bottom:2px">Choisissez vos billets</div>
-              <div style="font:400 12.5px/1.5 'Inter',sans-serif;color:oklch(0.5 0.015 260);margin-bottom:14px">Pour la journée du 20 août 2026</div>
-
-              <div style="display:flex;flex-direction:column;gap:10px">
-                <sc-for list="{{ ticketRows }}" as="t" hint-placeholder-count="4">
-                  <div style="display:flex;align-items:center;gap:12px;border:1.5px solid oklch(0.92 0.01 260);border-radius:16px;padding:14px 16px">
-                    <div style="flex:1;min-width:0">
-                      <div style="font:700 14.5px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">{{ t.label }}</div>
-                      <div style="font:400 11.5px/1.4 'Inter',sans-serif;color:oklch(0.55 0.015 260);margin:1px 0 4px">{{ t.desc }}</div>
-                      <div style="font:700 13.5px/1 'Inter',sans-serif;color:oklch(0.4 0.13 40)">{{ t.priceLabel }}</div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:10px;flex:none">
-                      <button onClick="{{ t.dec }}" style="width:32px;height:32px;border-radius:50%;border:1.5px solid oklch(0.85 0.01 260);background:#fff;font:700 17px/1 'Inter',sans-serif;color:oklch(0.4 0.02 260);cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>
-                      <div style="width:22px;text-align:center;font:700 15px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)">{{ t.count }}</div>
-                      <button onClick="{{ t.inc }}" style="width:32px;height:32px;border-radius:50%;border:none;background:#223499;font:700 17px/1 'Inter',sans-serif;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>
-                    </div>
-                  </div>
-                </sc-for>
+          <div style="flex:none;padding:0 24px">
+            <div style="display:flex;align-items:center;gap:12px;padding-top:14px;padding-bottom:12px">
+              <div style="width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#223499,#6f80e4);display:flex;align-items:center;justify-content:center;font:700 20px 'Outfit',sans-serif;color:#fff;flex:none">PC</div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 15px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Piscine municipale de Chartres</div>
+                <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Réservation en ligne</div>
               </div>
             </div>
-            <div style="height:8px"></div>
-          </div>
-
-          <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15);display:flex;align-items:center;gap:14px">
-            <div style="flex:1">
-              <div style="font:500 11.5px/1.3 'Inter',sans-serif;color:oklch(0.55 0.015 260)">{{ totalCount }} billet(s)</div>
-              <div style="font:800 20px/1.2 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">{{ totalLabel }}</div>
-            </div>
-            <button style="border:none;border-radius:100px;padding:15px 28px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Commander →</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SCREEN 2 : VERIFICATION EMAIL -->
-    <div style="display:flex;flex-direction:column;gap:14px;align-items:center">
-      <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">2 · Vérification email</div>
-      <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
-        <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;position:relative;display:flex;flex-direction:column">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 6px;flex:none">
-            <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
-            <div style="display:flex;gap:4px;align-items:center">
-              <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
-              <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
-              <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
-            </div>
-          </div>
-
-          <div style="display:flex;align-items:center;gap:12px;padding:14px 24px 12px;flex:none">
-            <div style="width:36px;height:36px;border-radius:10px;background:oklch(0.95 0.01 260);display:flex;align-items:center;justify-content:center;font:700 16px/1 'Inter',sans-serif;color:oklch(0.3 0.02 260);cursor:pointer">←</div>
-            <div style="font:700 16px/1.2 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Vérifier votre email</div>
-          </div>
-
-          <div style="display:flex;gap:6px;padding:2px 24px 20px;flex:none">
-            <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
-              <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">✓</div>
-              <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.4 0.02 260)">Date</div>
-            </div>
-            <div style="flex:1;height:2px;background:#223499;margin-top:11px;border-radius:2px"></div>
-            <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
-              <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">✓</div>
-              <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.4 0.02 260)">Billets</div>
-            </div>
-            <div style="flex:1;height:2px;background:#223499;margin-top:11px;border-radius:2px"></div>
-            <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
-              <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">3</div>
-              <div style="font:700 9.5px/1 'Inter',sans-serif;color:#223499">Email</div>
-            </div>
-            <div style="flex:1;height:2px;background:oklch(0.9 0.01 260);margin-top:11px;border-radius:2px"></div>
-            <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
-              <div style="width:22px;height:22px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.55 0.01 260);display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">4</div>
-              <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Paiement</div>
+            <div style="display:flex;gap:6px;padding-bottom:20px">
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">1</div>
+                <div style="font:700 9.5px/1 'Inter',sans-serif;color:#223499">Email</div>
+              </div>
+              <div style="flex:1;height:2px;background:oklch(0.92 0.01 260);margin-top:11px;border-radius:2px"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.6 0.01 260);display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">2</div>
+                <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Billets</div>
+              </div>
+              <div style="flex:1;height:2px;background:oklch(0.92 0.01 260);margin-top:11px;border-radius:2px"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.6 0.01 260);display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">3</div>
+                <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Paiement</div>
+              </div>
             </div>
           </div>
 
           <div style="flex:1;overflow-y:auto;padding:4px 24px 24px;display:flex;flex-direction:column;gap:22px">
-            <p style="margin:0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260)">Pour confirmer votre commande, nous vérifions votre adresse email. Vos billets vous y seront envoyés.</p>
+            <p style="margin:0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260)">Avant de choisir vos billets, nous vérifions votre adresse email. Vos billets vous y seront envoyés.</p>
 
             <div style="display:flex;align-items:center;gap:12px;background:oklch(0.96 0.03 150);border:1.5px solid oklch(0.85 0.06 150);border-radius:16px;padding:13px 16px">
               <div style="width:32px;height:32px;border-radius:50%;background:oklch(0.65 0.15 150);color:#fff;display:flex;align-items:center;justify-content:center;font:700 15px/1 'Inter',sans-serif;flex:none">✓</div>
@@ -188,12 +93,95 @@
             <div style="height:8px"></div>
           </div>
 
+          <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15)">
+            <button style="width:100%;border:none;border-radius:100px;padding:15px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Continuer →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2 : TICKETS -->
+    <div style="display:flex;flex-direction:column;gap:14px;align-items:center">
+      <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">2 · Sélection des billets</div>
+      <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+        <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;position:relative;display:flex;flex-direction:column">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+            <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+            <div style="display:flex;gap:4px;align-items:center">
+              <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+              <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+              <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+            </div>
+          </div>
+
+          <div style="flex:none;padding:0 24px">
+            <div style="display:flex;align-items:center;gap:12px;padding-top:14px;padding-bottom:12px">
+              <div style="width:36px;height:36px;border-radius:10px;background:oklch(0.95 0.01 260);display:flex;align-items:center;justify-content:center;font:700 16px/1 'Inter',sans-serif;color:oklch(0.3 0.02 260);cursor:pointer;flex:none">←</div>
+              <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#223499,#6f80e4);display:flex;align-items:center;justify-content:center;font:700 14px 'Outfit',sans-serif;color:#fff;flex:none">PC</div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 15px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Piscine municipale de Chartres</div>
+                <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Réservation en ligne</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;padding-bottom:16px">
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">✓</div>
+                <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.4 0.02 260)">Email</div>
+              </div>
+              <div style="flex:1;height:2px;background:#223499;margin-top:11px;border-radius:2px"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">2</div>
+                <div style="font:700 9.5px/1 'Inter',sans-serif;color:#223499">Billets</div>
+              </div>
+              <div style="flex:1;height:2px;background:oklch(0.92 0.01 260);margin-top:11px;border-radius:2px"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                <div style="width:22px;height:22px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.6 0.01 260);display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">3</div>
+                <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Paiement</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex:1;overflow-y:auto;padding:4px 24px 24px;display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;align-items:center;gap:12px;background:oklch(0.96 0.02 250);border-radius:16px;padding:14px 16px">
+              <div style="width:38px;height:38px;border-radius:10px;background:#0080c0;display:flex;align-items:center;justify-content:center;flex:none">
+                <div style="width:16px;height:16px;border:2px solid #fff;border-radius:3px"></div>
+              </div>
+              <div style="flex:1">
+                <div style="font:600 10.5px/1 'Inter',sans-serif;color:oklch(0.5 0.02 250);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Date de visite</div>
+                <div style="font:700 15px/1.2 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Mercredi 20 août 2026</div>
+              </div>
+              <div style="font:600 12.5px/1 'Inter',sans-serif;color:#0080c0">Modifier</div>
+            </div>
+
+            <div>
+              <div style="font:700 17px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260);margin-bottom:2px">Choisissez vos billets</div>
+              <div style="font:400 12.5px/1.5 'Inter',sans-serif;color:oklch(0.5 0.015 260);margin-bottom:14px">Pour la journée du 20 août 2026</div>
+
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ ticketRows }}" as="t" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:12px;border:1.5px solid oklch(0.92 0.01 260);border-radius:16px;padding:14px 16px">
+                    <div style="flex:1;min-width:0">
+                      <div style="font:700 14.5px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">{{ t.label }}</div>
+                      <div style="font:700 13.5px/1 'Inter',sans-serif;color:oklch(0.4 0.13 40)">{{ t.priceLabel }}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;flex:none">
+                      <button onClick="{{ t.dec }}" style="width:32px;height:32px;border-radius:50%;border:1.5px solid oklch(0.85 0.01 260);background:#fff;font:700 17px/1 'Inter',sans-serif;color:oklch(0.4 0.02 260);cursor:pointer">−</button>
+                      <div style="width:22px;text-align:center;font:700 15px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)">{{ t.count }}</div>
+                      <button onClick="{{ t.inc }}" style="width:32px;height:32px;border-radius:50%;border:none;background:#223499;font:700 17px/1 'Inter',sans-serif;color:#fff;cursor:pointer">+</button>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="height:8px"></div>
+          </div>
+
           <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15);display:flex;align-items:center;gap:14px">
             <div style="flex:1">
               <div style="font:500 11.5px/1.3 'Inter',sans-serif;color:oklch(0.55 0.015 260)">{{ totalCount }} billet(s)</div>
               <div style="font:800 20px/1.2 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">{{ totalLabel }}</div>
             </div>
-            <button style="border:none;border-radius:100px;padding:15px 28px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Valider →</button>
+            <button style="border:none;border-radius:100px;padding:15px 28px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Commander →</button>
           </div>
         </div>
       </div>
@@ -215,7 +203,7 @@
 
           <div style="flex:1;overflow-y:auto;padding:28px 24px 24px;display:flex;flex-direction:column;gap:22px;align-items:center">
 
-            <div style="width:76px;height:76px;border-radius:50%;background:oklch(0.65 0.15 150);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 28px -8px oklch(0.65 0.15 150 / .5);margin-top:8px">
+            <div style="width:76px;height:76px;border-radius:50%;background:oklch(0.65 0.15 150);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 28px -10px oklch(0.65 0.15 150 / .55)">
               <div style="font:800 32px/1 'Inter',sans-serif;color:#fff">✓</div>
             </div>
             <div style="text-align:center">
@@ -224,7 +212,7 @@
             </div>
             <div style="font:700 12px/1 ui-monospace,monospace;letter-spacing:.03em;color:#0080c0;background:oklch(0.94 0.03 220);padding:9px 16px;border-radius:100px">N° AR-2026-084213</div>
 
-            <div style="width:100%;background:#fff;border-radius:20px;box-shadow:0 12px 30px -14px rgba(20,25,60,.18);position:relative;overflow:visible;margin-top:6px">
+            <div style="width:100%;background:#fff;border-radius:20px;box-shadow:0 12px 30px -14px rgba(20,25,60,.18)">
               <div style="padding:20px 20px 16px;display:flex;flex-direction:column;gap:2px">
                 <div style="font:700 15px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Piscine municipale de Chartres</div>
                 <div style="font:500 12.5px/1.4 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Mercredi 20 août 2026</div>
@@ -240,11 +228,13 @@
               <div style="position:relative;height:0">
                 <div style="position:absolute;left:-12px;top:-1px;width:24px;height:24px;border-radius:50%;background:oklch(0.97 0.012 75)"></div>
                 <div style="position:absolute;right:-12px;top:-1px;width:24px;height:24px;border-radius:50%;background:oklch(0.97 0.012 75)"></div>
-                <div style="margin:0 24px;border-top:2px dashed oklch(0.88 0.01 260)"></div>
+                <div style="margin:0 24px;border-top:2px dashed oklch(0.92 0.01 260)"></div>
               </div>
               <div style="padding:20px;display:flex;align-items:center;gap:16px">
-                <div style="width:88px;height:88px;border-radius:12px;flex:none;background:repeating-linear-gradient(45deg,oklch(0.3 0.02 260) 0 3px,oklch(0.94 0.01 260) 3px 6px);display:flex;align-items:center;justify-content:center">
-                  <div style="background:#fff;padding:3px 5px;border-radius:3px;font:600 8px/1.2 ui-monospace,monospace;color:oklch(0.4 0.02 260);text-align:center">QR<br/>CODE</div>
+                <div style="width:88px;height:88px;border-radius:16px;flex:none;background:oklch(0.97 0.008 260);display:flex;align-items:center;justify-content:center">
+                  <div style="width:66px;height:66px;background:repeating-linear-gradient(45deg,oklch(0.3 0.02 260) 0 3px,oklch(0.94 0.01 260) 3px 6px);border-radius:6px;display:flex;align-items:center;justify-content:center">
+                    <div style="background:#fff;padding:2px 4px;border-radius:3px;font:600 7px/1.2 ui-monospace,monospace;color:oklch(0.4 0.02 260)">QR</div>
+                  </div>
                 </div>
                 <div style="flex:1">
                   <div style="font:600 10px/1 'Inter',sans-serif;color:oklch(0.55 0.015 260);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px">Total réglé</div>
@@ -265,55 +255,48 @@
   </div>
 
   <div style="max-width:1280px;text-align:center;display:flex;flex-direction:column;gap:10px;margin-top:24px">
-    <h2 style="margin:0;font:700 22px/1.3 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">Et sur ordinateur ?</h2>
-    <p style="margin:0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Le contenu ne s'étire pas : la sélection passe en deux colonnes avec un panier récapitulatif fixe en aside (remplace la barre basse mobile) ; les écrans plus courts (email, confirmation) restent une colonne centrée, comme un reçu.</p>
+    <h2 style="margin:0;font:700 22px/1.3 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">Sur ordinateur — écran Billets (2 colonnes + récapitulatif sticky)</h2>
   </div>
 
   <div style="display:flex;flex-wrap:wrap;gap:44px;justify-content:center;align-items:flex-start">
-    <x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1180 }}" height="{{ 760 }}" url="reservation.aregie.fr/piscine-chartres" hint-size="1180px,760px">
+    <x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1180 }}" height="{{ 760 }}" url="reservation.aregie.fr/billetterie/piscine-chartres" hint-size="1180px,760px">
       <div style="width:100%;height:100%;background:#fff;overflow-y:auto;padding:32px 48px 40px">
         <div style="max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:24px">
 
           <div style="display:flex;align-items:center;gap:14px">
-            <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#223499,#6f80e4);display:flex;align-items:center;justify-content:center;font:700 16px 'Outfit',sans-serif;color:#fff;flex:none">PC</div>
+            <div style="width:36px;height:36px;border-radius:10px;background:oklch(0.95 0.01 260);display:flex;align-items:center;justify-content:center;font:700 16px/1 'Inter',sans-serif;color:oklch(0.3 0.02 260);flex:none">←</div>
+            <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#223499,#6f80e4);display:flex;align-items:center;justify-content:center;font:700 16px 'Outfit',sans-serif;color:#fff;flex:none">PC</div>
             <div style="flex:1">
-              <div style="font:700 17px/1.2 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Piscine municipale de Chartres</div>
-              <div style="font:500 12px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Réservation en ligne</div>
+              <div style="font:700 20px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Piscine municipale de Chartres</div>
+              <div style="font:500 13px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Réservation en ligne</div>
             </div>
-            <div style="font:700 11px/1 ui-monospace,monospace;letter-spacing:.05em;color:oklch(0.45 0.1 265)">AREGIE</div>
           </div>
 
           <div style="display:flex;gap:8px;max-width:560px">
             <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:center">
               <div style="width:24px;height:24px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 12px 'Inter',sans-serif">✓</div>
-              <div style="font:600 10.5px/1 'Inter',sans-serif;color:oklch(0.4 0.02 260)">Date</div>
+              <div style="font:600 10.5px/1 'Inter',sans-serif;color:oklch(0.4 0.02 260)">Email</div>
             </div>
             <div style="flex:1;height:2px;background:#223499;margin-top:12px;border-radius:2px"></div>
             <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:center">
               <div style="width:24px;height:24px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 12px 'Inter',sans-serif">2</div>
               <div style="font:700 10.5px/1 'Inter',sans-serif;color:#223499">Billets</div>
             </div>
-            <div style="flex:1;height:2px;background:oklch(0.9 0.01 260);margin-top:12px;border-radius:2px"></div>
+            <div style="flex:1;height:2px;background:oklch(0.92 0.01 260);margin-top:12px;border-radius:2px"></div>
             <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:center">
-              <div style="width:24px;height:24px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.55 0.01 260);display:flex;align-items:center;justify-content:center;font:700 12px 'Inter',sans-serif">3</div>
-              <div style="font:600 10.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Email</div>
-            </div>
-            <div style="flex:1;height:2px;background:oklch(0.9 0.01 260);margin-top:12px;border-radius:2px"></div>
-            <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:center">
-              <div style="width:24px;height:24px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.55 0.01 260);display:flex;align-items:center;justify-content:center;font:700 12px 'Inter',sans-serif">4</div>
+              <div style="width:24px;height:24px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.6 0.01 260);display:flex;align-items:center;justify-content:center;font:700 12px 'Inter',sans-serif">3</div>
               <div style="font:600 10.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Paiement</div>
             </div>
           </div>
 
           <div style="display:flex;gap:36px;align-items:flex-start">
             <div style="flex:1;display:flex;flex-direction:column;gap:20px;min-width:0">
-
               <div style="border-radius:16px;overflow:hidden;position:relative;height:180px;background:repeating-linear-gradient(115deg,oklch(0.88 0.03 220) 0 14px,oklch(0.93 0.02 220) 14px 28px);display:flex;align-items:center;justify-content:center">
                 <span style="font:600 11px/1 ui-monospace,monospace;color:oklch(0.4 0.05 230);background:#fff;padding:5px 10px;border-radius:6px">photo — piscine municipale</span>
               </div>
 
               <div style="display:flex;align-items:center;gap:12px;background:oklch(0.96 0.02 250);border-radius:14px;padding:14px 18px">
-                <div style="width:36px;height:36px;border-radius:10px;background:#0080c0;flex:none"></div>
+                <div style="width:38px;height:38px;border-radius:10px;background:#0080c0;flex:none"></div>
                 <div style="flex:1">
                   <div style="font:600 10.5px/1 'Inter',sans-serif;color:oklch(0.5 0.02 250);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Date de visite</div>
                   <div style="font:700 15px/1.2 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Mercredi 20 août 2026</div>
@@ -325,10 +308,9 @@
                 <div style="font:700 18px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260);margin-bottom:14px">Choisissez vos billets</div>
                 <div style="display:flex;flex-direction:column;gap:10px">
                   <sc-for list="{{ ticketRows }}" as="t" hint-placeholder-count="4">
-                    <div style="display:flex;align-items:center;gap:16px;border:1.5px solid oklch(0.92 0.01 260);border-radius:14px;padding:14px 18px">
+                    <div style="display:flex;align-items:center;gap:16px;border:1.5px solid oklch(0.92 0.01 260);border-radius:16px;padding:14px 18px">
                       <div style="flex:1;min-width:0">
                         <div style="font:700 14.5px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">{{ t.label }}</div>
-                        <div style="font:400 11.5px/1.4 'Inter',sans-serif;color:oklch(0.55 0.015 260);margin:1px 0 4px">{{ t.desc }}</div>
                         <div style="font:700 13.5px/1 'Inter',sans-serif;color:oklch(0.4 0.13 40)">{{ t.priceLabel }}</div>
                       </div>
                       <div style="display:flex;align-items:center;gap:10px;flex:none">
@@ -363,46 +345,6 @@
         </div>
       </div>
     </x-import>
-
-    <x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 640 }}" height="{{ 760 }}" url="reservation.aregie.fr/confirmation" hint-size="640px,760px">
-      <div style="width:100%;height:100%;background:oklch(0.97 0.012 75);overflow-y:auto;padding:44px 24px;display:flex;flex-direction:column;align-items:center;gap:22px">
-        <div style="width:76px;height:76px;border-radius:50%;background:oklch(0.65 0.15 150);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 28px -8px oklch(0.65 0.15 150 / .5)">
-          <div style="font:800 32px/1 'Inter',sans-serif;color:#fff">✓</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font:800 22px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260);margin-bottom:6px">Réservation confirmée</div>
-          <div style="font:400 13.5px/1.5 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Vos billets ont été envoyés à<br/>jean.dupont@email.fr</div>
-        </div>
-        <div style="font:700 12px/1 ui-monospace,monospace;letter-spacing:.03em;color:#0080c0;background:oklch(0.94 0.03 220);padding:9px 16px;border-radius:100px">N° AR-2026-084213</div>
-
-        <div style="width:100%;max-width:420px;background:#fff;border-radius:20px;box-shadow:0 12px 30px -14px rgba(20,25,60,.18)">
-          <div style="padding:20px 20px 16px;display:flex;flex-direction:column;gap:2px">
-            <div style="font:700 15px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Piscine municipale de Chartres</div>
-            <div style="font:500 12.5px/1.4 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Mercredi 20 août 2026</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:10px;padding:0 20px 16px">
-            <sc-for list="{{ purchasedRows }}" as="p" hint-placeholder-count="2">
-              <div style="display:flex;justify-content:space-between;align-items:center;font:500 13px/1.3 'Inter',sans-serif;color:oklch(0.35 0.02 260)">
-                <span>{{ p.count }} × {{ p.label }}</span>
-                <span style="font-weight:700;color:oklch(0.22 0.03 260)">{{ p.lineLabel }}</span>
-              </div>
-            </sc-for>
-          </div>
-          <div style="margin:0 24px;border-top:2px dashed oklch(0.88 0.01 260)"></div>
-          <div style="padding:20px;display:flex;align-items:center;gap:16px">
-            <div style="width:88px;height:88px;border-radius:12px;flex:none;background:repeating-linear-gradient(45deg,oklch(0.3 0.02 260) 0 3px,oklch(0.94 0.01 260) 3px 6px);display:flex;align-items:center;justify-content:center">
-              <div style="background:#fff;padding:3px 5px;border-radius:3px;font:600 8px/1.2 ui-monospace,monospace;color:oklch(0.4 0.02 260);text-align:center">QR<br/>CODE</div>
-            </div>
-            <div style="flex:1">
-              <div style="font:600 10px/1 'Inter',sans-serif;color:oklch(0.55 0.015 260);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px">Total réglé</div>
-              <div style="font:800 21px/1 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">{{ totalLabel }}</div>
-            </div>
-          </div>
-        </div>
-
-        <button style="border:none;border-radius:100px;padding:16px 32px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">⬇ Télécharger mes billets (PDF)</button>
-      </div>
-    </x-import>
   </div>
 </div>
 
@@ -415,10 +357,10 @@ class Component extends DCLogic {
   };
 
   tickets = [
-    { id: 'plein', label: 'Plein tarif', desc: 'Adulte', price: 3, priceLabel: '3,00 €' },
-    { id: 'reduit', label: 'Tarif réduit', desc: "Étudiant, senior, demandeur d'emploi", price: 1.5, priceLabel: '1,50 €' },
-    { id: 'enfant', label: 'Enfant -12 ans', desc: "Sur présentation d'un justificatif", price: 0, priceLabel: 'Gratuit' },
-    { id: 'abonne', label: 'Abonné annuel', desc: 'Carte piscine en cours de validité', price: 2, priceLabel: '2,00 €' }
+    { id: 'plein', label: 'Plein tarif', price: 3, priceLabel: '3,00 €' },
+    { id: 'reduit', label: 'Tarif réduit', price: 1.5, priceLabel: '1,50 €' },
+    { id: 'enfant', label: 'Enfant -12 ans', price: 0, priceLabel: 'Gratuit' },
+    { id: 'abonne', label: 'Abonné annuel', price: 2, priceLabel: '2,00 €' }
   ];
 
   inc(id) {

@@ -5,7 +5,7 @@ import { History, LayoutDashboard, LogOut, Pencil, ScanLine, ShoppingCart, Store
 import { apiCall } from '@/lib/api'
 import { hasBilletteriePermission } from '@/lib/permissions'
 import { Modal, PrimaryButton, TextInput } from '@/components/ui'
-import type { AuthState } from '@/lib/types'
+import { useAuth } from '@/lib/useAuth'
 
 function SidebarLink({
   to,
@@ -23,7 +23,7 @@ function SidebarLink({
       to={to}
       onClick={onNavigate}
       className={({ isActive }) =>
-        `relative flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+        `squircle relative flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
           isActive ? '' : 'text-gray-600 hover:bg-gray-100'
         }`
       }
@@ -33,7 +33,7 @@ function SidebarLink({
           {isActive && (
             <motion.div
               layoutId="sidebar-active-pill"
-              className="absolute inset-0 rounded-lg bg-aregie-deep shadow-sm"
+              className="squircle absolute inset-0 rounded-lg bg-aregie-deep shadow-sm"
               transition={{ type: 'spring', stiffness: 500, damping: 40 }}
             />
           )}
@@ -48,18 +48,13 @@ function SidebarLink({
 }
 
 export function Sidebar({
-  auth,
-  onLogout,
-  onAuthUpdate,
   mobileOpen,
   onCloseMobile,
 }: {
-  auth: AuthState
-  onLogout: () => void
-  onAuthUpdate: (patch: Partial<AuthState>) => void
   mobileOpen: boolean
   onCloseMobile: () => void
 }) {
+  const { auth, onLogout, onAuthUpdate } = useAuth()
   const isAdmin = auth.role === 'admin'
   const fullName = [auth.firstName, auth.lastName].filter(Boolean).join(' ')
   const location = useLocation()
@@ -166,11 +161,16 @@ export function Sidebar({
         onClick={openProfileModal}
         className="group flex items-center gap-2.5 border-b border-black/5 px-5 py-4 text-left transition hover:bg-gray-50"
       >
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-aregie-deep text-sm font-bold text-white">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center squircle rounded-lg bg-aregie-deep text-sm font-bold text-white">
           P
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-gray-900">{auth.orgName}</p>
+          <p
+            className="truncate text-sm font-bold text-gray-900"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            {auth.orgName}
+          </p>
           <p className="truncate text-xs text-gray-500">
             {fullName || (isAdmin ? 'Administrateur' : 'Agent')}
           </p>
@@ -216,7 +216,7 @@ export function Sidebar({
         <button
           type="button"
           onClick={onLogout}
-          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-600 transition hover:bg-gray-100"
+          className="flex w-full items-center gap-2.5 squircle rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-600 transition hover:bg-gray-100"
         >
           <LogOut size={17} />
           Déconnexion

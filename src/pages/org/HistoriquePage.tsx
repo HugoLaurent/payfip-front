@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, Globe, History, Printer, Search, User } from 'lucide-react'
 import { apiCall, GATEWAY_URL } from '@/lib/api'
-import { Card, EmptyState, LoadError, PageHeader, Pagination, SelectInput, TextInput } from '@/components/ui'
+import { Card, EmptyState, LoadError, PageHeader, Pagination, SelectInput, StatusBadge, TextInput } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
-import type { AuthState, PageMeta } from '@/lib/types'
+import { usePaginatedResource } from '@/lib/usePaginatedResource'
+import { useAuth } from '@/lib/useAuth'
+import { euros } from '@/lib/format'
+import type { PageMeta } from '@/lib/types'
 
 interface OrderTicket {
   id: number
@@ -85,10 +88,6 @@ const TICKET_STATUS_LABELS: Record<string, string> = {
   expired: 'Expiré',
 }
 
-function euros(cents: number): string {
-  return `${(cents / 100).toFixed(2)} €`
-}
-
 const PER_PAGE = 10
 
 function todayISO(): string {
@@ -96,7 +95,8 @@ function todayISO(): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 }
 
-export function HistoriquePage({ auth }: { auth: AuthState }) {
+export function HistoriquePage() {
+  const { auth } = useAuth()
   const visibleServices = auth.services.filter(
     (s) => s.serviceType === 'billetterie' && (auth.role === 'admin' || s.permissions?.canViewHistory)
   )
@@ -110,11 +110,29 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
   const [dateFrom, setDateFrom] = useState(todayISO())
   const [dateTo, setDateTo] = useState(todayISO())
   const [page, setPage] = useState(1)
-  const [orders, setOrders] = useState<Order[] | null>(null)
-  const [meta, setMeta] = useState<PageMeta | null>(null)
-  const [loadFailed, setLoadFailed] = useState(false)
-  const [reloadKey, setReloadKey] = useState(0)
-  const showOrdersLoading = useDelayedLoading(orders === null)
+
+  const {
+    data: orders,
+    meta,
+    loadFailed,
+    showLoading: showOrdersLoading,
+    reload: reloadOrders,
+  } = usePaginatedResource<Order, PageMeta>({
+    fetcher: () => {
+      const qs = new URLSearchParams({
+        serviceId: String(serviceId),
+        page: String(page),
+        perPage: String(PER_PAGE),
+        ...(q ? { q } : {}),
+        ...(status ? { status } : {}),
+        ...(dateFrom ? { dateFrom } : {}),
+        ...(dateTo ? { dateTo } : {}),
+      })
+      return apiCall('GET', `/billetterie/orders?${qs}`, { token: auth.token })
+    },
+    deps: [tab, auth.token, serviceId, q, status, dateFrom, dateTo, page],
+    enabled: tab === 'orders' && serviceId !== null,
+  })
 
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [attempts, setAttempts] = useState<PaymentAttempt[] | null>(null)
@@ -123,12 +141,27 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
   const [pdfLoadingId, setPdfLoadingId] = useState<number | null>(null)
   const [pdfErrorId, setPdfErrorId] = useState<number | null>(null)
 
-  const [scans, setScans] = useState<ScanEntry[] | null>(null)
-  const [scansMeta, setScansMeta] = useState<PageMeta | null>(null)
   const [scansPage, setScansPage] = useState(1)
-  const [scansFailed, setScansFailed] = useState(false)
-  const [scansReloadKey, setScansReloadKey] = useState(0)
-  const showScansLoading = useDelayedLoading(scans === null)
+  const {
+    data: scans,
+    meta: scansMeta,
+    loadFailed: scansFailed,
+    showLoading: showScansLoading,
+    reload: reloadScans,
+  } = usePaginatedResource<ScanEntry, PageMeta>({
+    fetcher: () => {
+      const qs = new URLSearchParams({
+        serviceId: String(serviceId),
+        page: String(scansPage),
+        perPage: String(PER_PAGE),
+        ...(dateFrom ? { dateFrom } : {}),
+        ...(dateTo ? { dateTo } : {}),
+      })
+      return apiCall('GET', `/billetterie/scans?${qs}`, { token: auth.token })
+    },
+    deps: [tab, auth.token, serviceId, dateFrom, dateTo, scansPage],
+    enabled: tab === 'scans' && serviceId !== null,
+  })
 
   const currentService = auth.services.find((s) => s.id === serviceId)
   const canSell = auth.role === 'admin' || currentService?.permissions?.canSell === true
@@ -145,62 +178,6 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q])
-
-  useEffect(() => {
-    if (tab !== 'orders' || serviceId === null) return
-
-    const timeout = setTimeout(() => {
-      setLoadFailed(false)
-      const qs = new URLSearchParams({
-        serviceId: String(serviceId),
-        page: String(page),
-        perPage: String(PER_PAGE),
-        ...(q ? { q } : {}),
-        ...(status ? { status } : {}),
-        ...(dateFrom ? { dateFrom } : {}),
-        ...(dateTo ? { dateTo } : {}),
-      })
-      apiCall<{ data: Order[]; meta: PageMeta }>('GET', `/billetterie/orders?${qs}`, {
-        token: auth.token,
-      }).then((result) => {
-        if (result.ok) {
-          setOrders(result.data.data)
-          setMeta(result.data.meta)
-        } else {
-          setLoadFailed(true)
-        }
-      })
-    }, 250)
-
-    return () => clearTimeout(timeout)
-  }, [tab, auth.token, serviceId, q, status, dateFrom, dateTo, page, reloadKey])
-
-  useEffect(() => {
-    if (tab !== 'scans' || serviceId === null) return
-
-    const timeout = setTimeout(() => {
-      setScansFailed(false)
-      const qs = new URLSearchParams({
-        serviceId: String(serviceId),
-        page: String(scansPage),
-        perPage: String(PER_PAGE),
-        ...(dateFrom ? { dateFrom } : {}),
-        ...(dateTo ? { dateTo } : {}),
-      })
-      apiCall<{ data: ScanEntry[]; meta: PageMeta }>('GET', `/billetterie/scans?${qs}`, {
-        token: auth.token,
-      }).then((result) => {
-        if (result.ok) {
-          setScans(result.data.data)
-          setScansMeta(result.data.meta)
-        } else {
-          setScansFailed(true)
-        }
-      })
-    }, 250)
-
-    return () => clearTimeout(timeout)
-  }, [tab, auth.token, serviceId, dateFrom, dateTo, scansPage, scansReloadKey])
 
   async function loadAttempts(order: Order) {
     setAttemptsFailed(false)
@@ -270,7 +247,7 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
         <button
           type="button"
           onClick={() => setTab('orders')}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+          className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
             tab === 'orders' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
           }`}
         >
@@ -279,7 +256,7 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
         <button
           type="button"
           onClick={() => setTab('scans')}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+          className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
             tab === 'scans' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
           }`}
         >
@@ -355,7 +332,7 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
                 setDateTo(todayISO())
                 setPage(1)
               }}
-              className="shrink-0 whitespace-nowrap rounded-lg px-2 py-2 text-xs font-medium text-aregie-deep hover:bg-aregie-tint/10"
+              className="shrink-0 whitespace-nowrap squircle rounded-lg px-2 py-2 text-xs font-medium text-aregie-deep hover:bg-aregie-tint/10"
             >
               Aujourd'hui
             </button>
@@ -380,7 +357,7 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
 
       {tab === 'scans' ? (
         <div className="space-y-2">
-          {scansFailed && <LoadError onRetry={() => setScansReloadKey((k) => k + 1)} />}
+          {scansFailed && <LoadError onRetry={reloadScans} />}
           {!scansFailed && showScansLoading && <p className="text-sm text-gray-500">Chargement…</p>}
           {!scansFailed && scans?.length === 0 && (
             <EmptyState icon={<History size={28} />} label="Aucun scan." />
@@ -390,13 +367,10 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                        SCAN_RESULT_TINTS[s.result] ?? 'bg-red-100 text-red-600'
-                      }`}
-                    >
-                      {SCAN_RESULT_LABELS[s.result] ?? s.result}
-                    </span>
+                    <StatusBadge
+                      label={SCAN_RESULT_LABELS[s.result] ?? s.result}
+                      className={SCAN_RESULT_TINTS[s.result] ?? 'bg-red-100 text-red-600'}
+                    />
                     {s.tariffType && <span className="truncate text-sm text-gray-700">{s.tariffType}</span>}
                   </div>
                   <p className="mt-0.5 truncate text-[13px] text-gray-400">
@@ -419,7 +393,7 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
         </div>
       ) : (
       <div className="space-y-2">
-        {loadFailed && <LoadError onRetry={() => setReloadKey((k) => k + 1)} />}
+        {loadFailed && <LoadError onRetry={reloadOrders} />}
         {!loadFailed && showOrdersLoading && <p className="text-sm text-gray-500">Chargement…</p>}
         {!loadFailed && orders?.length === 0 && (
           <EmptyState icon={<History size={28} />} label="Aucune commande." />
@@ -433,7 +407,7 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
                 className="min-w-0 flex-1 text-left"
               >
                 <div className="flex items-baseline gap-2">
-                  <p className="truncate text-sm font-medium text-gray-900">{order.email}</p>
+                  <p className="truncate text-sm font-bold text-gray-900">{order.email}</p>
                   {order.paymentReference && (
                     <span className="shrink-0 font-mono text-[11px] text-gray-400">
                       {order.paymentReference}
@@ -453,7 +427,7 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
                     title="Voir / réimprimer les billets"
                     onClick={() => openTicketsPdf(order.id)}
                     disabled={pdfLoadingId === order.id}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-aregie-deep disabled:opacity-40"
+                    className="flex h-7 w-7 items-center justify-center squircle rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-aregie-deep disabled:opacity-40"
                   >
                     <Printer size={15} />
                   </button>
@@ -463,11 +437,10 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
                   onClick={() => toggleAttempts(order)}
                   className="flex items-center gap-3"
                 >
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${STATUS_TINTS[order.status] ?? 'bg-gray-100 text-gray-600'}`}
-                  >
-                    {STATUS_LABELS[order.status] ?? order.status}
-                  </span>
+                  <StatusBadge
+                    label={STATUS_LABELS[order.status] ?? order.status}
+                    className={STATUS_TINTS[order.status] ?? 'bg-gray-100 text-gray-600'}
+                  />
                   {expandedId === order.id ? (
                     <ChevronUp size={16} className="text-gray-400" />
                   ) : (
@@ -572,3 +545,5 @@ export function HistoriquePage({ auth }: { auth: AuthState }) {
     </div>
   )
 }
+
+export default HistoriquePage

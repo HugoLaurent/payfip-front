@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{margin:0;background:linear-gradient(180deg,#f5f8fc 0%,#ffffff 220px);color:#1f2432;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+</style>
+</helmet>
+
+<div style="min-height:100vh;padding:56px 32px 80px;display:flex;flex-direction:column;align-items:center;gap:40px">
+
+  <div style="max-width:820px;text-align:center;display:flex;flex-direction:column;gap:10px">
+    <div style="font:600 12px/1 sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#223499">AREGIE — Panel staff (back-office interne)</div>
+    <h1 style="margin:0;font:600 26px/1.3 sans-serif;color:#111827">Détail organisme</h1>
+    <p style="margin:0;font:400 14px/1.6 sans-serif;color:#6b7280">Basé sur le vrai design system du code (Card/Modal/Buttons/PageHeader, Segoe UI, tons aregie-deep/aregie-blue, badges pilule) — pas de style "premium public". Modal de suspension calquée sur la modal "Fermer le service" existante (ServiceAdmin.tsx). Utilisateurs de l'organisme et transfert de service hors périmètre.</p>
+  </div>
+
+  <!-- SCREEN 1: LISTE ORGANISMES (avec statut suspendu) -->
+  <div style="display:flex;flex-direction:column;gap:14px;align-items:center">
+    <div style="font:600 12px/1 monospace;color:#fff;background:#223499;padding:6px 12px;border-radius:20px">1 · Liste Organismes — ligne suspendue</div>
+    <div style="width:960px;background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04);box-shadow:0 1px 3px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.05);padding:22px 26px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+        <div style="width:40px;height:40px;border-radius:12px;background:rgba(34,52,153,.1);display:flex;align-items:center;justify-content:center;color:#223499;font:600 16px/1 sans-serif;flex:none">▤</div>
+        <div>
+          <div style="font:600 20px/1.3 sans-serif;color:#111827">Organismes</div>
+          <div style="font:400 13px/1.3 sans-serif;color:#6b7280">Clients AREGIE — lecture seule sauf statut</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;margin-top:14px">
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 6px;border-bottom:1px solid #f1f2f4">
+          <div style="flex:1;min-width:0">
+            <div style="font:600 14px/1.3 sans-serif;color:#111827">Ville de Chartres</div>
+            <div style="font:400 12.5px/1.3 sans-serif;color:#9ca3af">chartres.aregie.fr</div>
+          </div>
+          <span style="font:500 12px/1 sans-serif;color:#047857;background:#d1fae5;padding:5px 10px;border-radius:100px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#047857"></span>Actif</span>
+          <span style="color:#c1c5cc;flex:none">›</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 6px;border-bottom:1px solid #f1f2f4">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font:600 14px/1.3 sans-serif;color:#111827">Communauté d'agglomération Sud Loire</span>
+            </div>
+            <div style="font:400 12.5px/1.3 sans-serif;color:#9ca3af">sud-loire.aregie.fr · suspendu le 18/08/2026</div>
+          </div>
+          <span style="font:500 12px/1 sans-serif;color:#b91c1c;background:#fee2e2;padding:5px 10px;border-radius:100px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#b91c1c"></span>Suspendu</span>
+          <span style="color:#c1c5cc;flex:none">›</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 6px">
+          <div style="flex:1;min-width:0">
+            <div style="font:600 14px/1.3 sans-serif;color:#111827">CCAS de Rennes</div>
+            <div style="font:400 12.5px/1.3 sans-serif;color:#9ca3af">ccas-rennes.aregie.fr</div>
+          </div>
+          <span style="font:500 12px/1 sans-serif;color:#047857;background:#d1fae5;padding:5px 10px;border-radius:100px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#047857"></span>Actif</span>
+          <span style="color:#c1c5cc;flex:none">›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: DETAIL ORGANISME NORMAL -->
+  <div style="display:flex;flex-direction:column;gap:14px;align-items:center">
+    <div style="font:600 12px/1 monospace;color:#fff;background:#223499;padding:6px 12px;border-radius:20px">2 · Détail organisme — actif</div>
+    <div style="width:960px;background:transparent">
+      <button style="border:none;background:transparent;padding:0;margin-bottom:16px;display:inline-flex;align-items:center;gap:6px;font:500 13.5px/1 sans-serif;color:#6b7280;cursor:pointer">← Organismes</button>
+
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:24px">
+        <div style="display:flex;min-width:0;align-items:center;gap:12px">
+          <div style="width:44px;height:44px;border-radius:14px;background:rgba(34,52,153,.1);display:flex;align-items:center;justify-content:center;color:#223499;font:600 16px/1 sans-serif;flex:none">▤</div>
+          <div style="min-width:0">
+            <div style="display:flex;align-items:center;gap:8px">
+              <h2 style="margin:0;font:600 20px/1.3 sans-serif;color:#111827">Ville de Chartres</h2>
+              <button style="border:none;background:transparent;color:#0080c0;font:500 12.5px/1 sans-serif;cursor:pointer;padding:2px 4px">Renommer</button>
+            </div>
+            <div style="font:400 13px/1.3 sans-serif;color:#9ca3af">chartres.aregie.fr</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font:500 12.5px/1 sans-serif;color:#047857;background:#d1fae5;padding:6px 12px;border-radius:100px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#047857"></span>Actif</span>
+          <button style="border:1px solid #fecaca;border-radius:8px;padding:6px 12px;background:#fff;color:#dc2626;font:500 13px/1 sans-serif;cursor:pointer">Suspendre l'organisme</button>
+        </div>
+      </div>
+
+      <div style="background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.05);padding:22px 26px">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">
+          <div>
+            <div style="font:600 15px/1.3 sans-serif;color:#111827">Services</div>
+            <div style="font:400 12.5px/1.4 sans-serif;color:#9ca3af">Billetterie et facturation de cet organisme</div>
+          </div>
+          <button style="border:none;border-radius:8px;padding:9px 16px;background:#223499;color:#fff;font:500 13.5px/1 sans-serif;cursor:pointer">+ Nouveau service</button>
+        </div>
+
+        <div style="display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 6px;border-bottom:1px solid #f1f2f4">
+            <div style="flex:1;min-width:0">
+              <div style="font:600 13.5px/1.3 sans-serif;color:#111827">Piscine municipale</div>
+              <div style="font:400 12px/1.3 sans-serif;color:#9ca3af">Billetterie · Client PayFiP n° 78341</div>
+            </div>
+            <span style="font:500 11.5px/1 sans-serif;color:#047857;background:#d1fae5;padding:4px 10px;border-radius:100px;flex:none">Actif</span>
+            <button style="border:1px solid #fecaca;border-radius:8px;padding:6px 12px;background:#fff;color:#dc2626;font:500 12.5px/1 sans-serif;cursor:pointer;flex:none">Fermer</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 6px;border-bottom:1px solid #f1f2f4">
+            <div style="flex:1;min-width:0">
+              <div style="font:600 13.5px/1.3 sans-serif;color:#111827">Musée des Beaux-Arts</div>
+              <div style="font:400 12px/1.3 sans-serif;color:#9ca3af">Billetterie · Client PayFiP n° 78355</div>
+            </div>
+            <span style="font:500 11.5px/1 sans-serif;color:#047857;background:#d1fae5;padding:4px 10px;border-radius:100px;flex:none">Actif</span>
+            <button style="border:1px solid #fecaca;border-radius:8px;padding:6px 12px;background:#fff;color:#dc2626;font:500 12.5px/1 sans-serif;cursor:pointer;flex:none">Fermer</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 6px;border-bottom:1px solid #f1f2f4">
+            <div style="flex:1;min-width:0">
+              <div style="font:600 13.5px/1.3 sans-serif;color:#111827">Régie eau & assainissement</div>
+              <div style="font:400 12px/1.3 sans-serif;color:#9ca3af">Facture · Client PayFiP n° 78302</div>
+            </div>
+            <span style="font:500 11.5px/1 sans-serif;color:#047857;background:#d1fae5;padding:4px 10px;border-radius:100px;flex:none">Actif</span>
+            <button style="border:1px solid #fecaca;border-radius:8px;padding:6px 12px;background:#fff;color:#dc2626;font:500 12.5px/1 sans-serif;cursor:pointer;flex:none">Fermer</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 6px;opacity:.6">
+            <div style="flex:1;min-width:0">
+              <div style="font:600 13.5px/1.3 sans-serif;color:#111827">Conservatoire de musique</div>
+              <div style="font:400 12px/1.3 sans-serif;color:#9ca3af">Billetterie · Client PayFiP n° 78390</div>
+            </div>
+            <span style="font:500 11.5px/1 sans-serif;color:#6b7280;background:#f1f2f4;padding:4px 10px;border-radius:100px;flex:none">Fermé</span>
+            <button style="border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;background:#fff;color:#4b5563;font:500 12.5px/1 sans-serif;cursor:pointer;flex:none">Réactiver</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: MODAL SUSPENSION -->
+  <div style="display:flex;flex-direction:column;gap:14px;align-items:center">
+    <div style="font:600 12px/1 monospace;color:#fff;background:#223499;padding:6px 12px;border-radius:20px">3 · Modal de suspension</div>
+    <div style="width:960px;height:600px;position:relative;border-radius:16px;overflow:hidden;background:#eef1f6">
+      <div style="position:absolute;inset:0;filter:blur(1.5px);opacity:.55;padding:26px 30px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+          <div style="width:44px;height:44px;border-radius:14px;background:rgba(34,52,153,.1)"></div>
+          <div><div style="font:600 20px/1 sans-serif;color:#111827">Ville de Chartres</div></div>
+        </div>
+        <div style="background:#fff;border-radius:16px;height:220px"></div>
+      </div>
+      <div style="position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center">
+        <div style="width:460px;background:#fff;border-radius:16px;box-shadow:0 20px 25px -5px rgba(0,0,0,.15);padding:24px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div style="font:600 16px/1.3 sans-serif;color:#223499">Suspendre l'organisme</div>
+            <div style="width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font:600 13px/1 sans-serif;cursor:pointer">✕</div>
+          </div>
+          <p style="margin:0 0 14px;font:400 13.5px/1.6 sans-serif;color:#4b5563">Tous les administrateurs et agents de <strong>Ville de Chartres</strong> seront déconnectés et ne pourront plus se reconnecter. Leurs services publics afficheront "fermé" aux citoyens. Vous pourrez réactiver l'organisme à tout moment.</p>
+          <div style="margin-bottom:16px">
+            <label style="display:block;font:500 12.5px/1 sans-serif;color:#374151;margin-bottom:6px">Message affiché en interne (optionnel)</label>
+            <textarea placeholder="ex: impayé, contactez la facturation" style="width:100%;min-height:64px;border:1px solid #e5e7eb;border-radius:8px;padding:9px 11px;font:400 13px/1.5 sans-serif;color:#111827;resize:none;outline:none"></textarea>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button style="flex:1;border:1px solid #fecaca;border-radius:8px;padding:9px;background:#fff;color:#dc2626;font:500 13.5px/1 sans-serif;cursor:pointer">Suspendre</button>
+            <button style="flex:1;border:1px solid #e5e7eb;border-radius:8px;padding:9px;background:#fff;color:#4b5563;font:500 13.5px/1 sans-serif;cursor:pointer">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: ORGANISME SUSPENDU -->
+  <div style="display:flex;flex-direction:column;gap:14px;align-items:center">
+    <div style="font:600 12px/1 monospace;color:#fff;background:#223499;padding:6px 12px;border-radius:20px">4 · Détail organisme — suspendu</div>
+    <div style="width:960px">
+      <button style="border:none;background:transparent;padding:0;margin-bottom:16px;display:inline-flex;align-items:center;gap:6px;font:500 13.5px/1 sans-serif;color:#6b7280;cursor:pointer">← Organismes</button>
+
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px">
+        <div style="display:flex;min-width:0;align-items:center;gap:12px">
+          <div style="width:44px;height:44px;border-radius:14px;background:rgba(34,52,153,.1);display:flex;align-items:center;justify-content:center;color:#223499;font:600 16px/1 sans-serif;flex:none">▤</div>
+          <div style="min-width:0">
+            <div style="display:flex;align-items:center;gap:8px">
+              <h2 style="margin:0;font:600 20px/1.3 sans-serif;color:#111827">Communauté d'agglomération Sud Loire</h2>
+              <button style="border:none;background:transparent;color:#0080c0;font:500 12.5px/1 sans-serif;cursor:pointer;padding:2px 4px">Renommer</button>
+            </div>
+            <div style="font:400 13px/1.3 sans-serif;color:#9ca3af">sud-loire.aregie.fr</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font:500 12.5px/1 sans-serif;color:#b91c1c;background:#fee2e2;padding:6px 12px;border-radius:100px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#b91c1c"></span>Suspendu</span>
+          <button style="border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;background:#fff;color:#374151;font:500 13px/1 sans-serif;cursor:pointer">Réactiver l'organisme</button>
+        </div>
+      </div>
+
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 18px;display:flex;gap:12px;align-items:flex-start;margin-bottom:20px">
+        <div style="width:22px;height:22px;border-radius:50%;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;font:700 12px/1 sans-serif;flex:none">!</div>
+        <div>
+          <div style="font:600 13.5px/1.3 sans-serif;color:#991b1b">Organisme suspendu depuis le 18/08/2026</div>
+          <div style="font:400 12.5px/1.5 sans-serif;color:#b91c1c;margin-top:2px">Impayé — contacter la facturation avant réactivation. Tous les agents sont déconnectés ; les 3 services actifs affichent "fermé" au public.</div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.05);padding:22px 26px;opacity:.75">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">
+          <div>
+            <div style="font:600 15px/1.3 sans-serif;color:#111827">Services</div>
+            <div style="font:400 12.5px/1.4 sans-serif;color:#9ca3af">Fermés au public tant que l'organisme reste suspendu</div>
+          </div>
+          <button disabled style="border:none;border-radius:8px;padding:9px 16px;background:#c7cbd3;color:#fff;font:500 13.5px/1 sans-serif;cursor:not-allowed">+ Nouveau service</button>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 6px;border-bottom:1px solid #f1f2f4">
+            <div style="flex:1;min-width:0">
+              <div style="font:600 13.5px/1.3 sans-serif;color:#111827">Médiathèque intercommunale</div>
+              <div style="font:400 12px/1.3 sans-serif;color:#9ca3af">Billetterie · Client PayFiP n° 78412</div>
+            </div>
+            <span style="font:500 11.5px/1 sans-serif;color:#b91c1c;background:#fee2e2;padding:4px 10px;border-radius:100px;flex:none">Fermé (organisme)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 6px">
+            <div style="flex:1;min-width:0">
+              <div style="font:600 13.5px/1.3 sans-serif;color:#111827">Régie transport</div>
+              <div style="font:400 12px/1.3 sans-serif;color:#9ca3af">Facture · Client PayFiP n° 78420</div>
+            </div>
+            <span style="font:500 11.5px/1 sans-serif;color:#b91c1c;background:#fee2e2;padding:4px 10px;border-radius:100px;flex:none">Fermé (organisme)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+</body>
+</html>

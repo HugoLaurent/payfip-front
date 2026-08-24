@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { AlertTriangle, CheckCircle2, Loader2, Mail, XCircle } from 'lucide-react'
+import { CheckCircle2, Mail } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
-import { useSquircle } from '@/lib/useSquircle'
+import { usePaymentStatusPolling, isPendingPaymentStatus } from '@/lib/usePaymentStatusPolling'
+import { euros } from '@/lib/format'
 import type { ServiceLookup } from '@/lib/types'
 import { PublicShell } from '@/layouts/PublicShell'
-import { FadeIn, PublicGhostButton } from '@/components/public'
+import { FadeIn, PaymentFailedState, PaymentPendingState } from '@/components/public'
 
 type PaymentStatus = 'draft' | 'awaiting_payment' | 'paid' | 'failed' | 'cancelled' | 'expired'
 
@@ -31,20 +32,6 @@ const STATUS_LABELS: Record<PaymentStatus, string> = {
   expired: 'Le délai de paiement a expiré',
 }
 
-// Le callback du gateway résout normalement le paiement avant de
-// rediriger ici — ce polling n'est qu'un filet de sécurité si le statut
-// arrive encore en transition (draft/awaiting_payment).
-const POLL_INTERVAL_MS = 2500
-const POLL_MAX_ATTEMPTS = 6
-
-function isPending(status: PaymentStatus): boolean {
-  return status === 'draft' || status === 'awaiting_payment'
-}
-
-function euros(cents: number): string {
-  return `${(cents / 100).toFixed(2)} €`
-}
-
 export function InvoiceReturnPage() {
   const { slug } = useParams<{ slug: string }>()
   const [searchParams] = useSearchParams()
@@ -53,9 +40,6 @@ export function InvoiceReturnPage() {
   const orgId = searchParams.get('orgId')
   const sourceReference = searchParams.get('sourceReference')
   const initialStatus = (searchParams.get('status') as PaymentStatus | null) ?? null
-
-  const [status, setStatus] = useState<PaymentStatus | null>(initialStatus)
-  const [pollAttempts, setPollAttempts] = useState(0)
 
   const [invoice, setInvoice] = useState<InvoiceSummary | null>(null)
   const [invoiceFailed, setInvoiceFailed] = useState(false)
@@ -66,9 +50,12 @@ export function InvoiceReturnPage() {
 
   const [service, setService] = useState<ServiceLookup | null>(null)
 
-  const invoiceCardSquircle = useSquircle<HTMLDivElement>(20)
-
   const missingParams = !idop || !orgId || !sourceReference || !initialStatus
+  const { status, maxAttemptsReached } = usePaymentStatusPolling<PaymentStatus>({
+    idop,
+    missingParams,
+    initialStatus,
+  })
 
   useEffect(() => {
     if (!slug) return
@@ -76,18 +63,6 @@ export function InvoiceReturnPage() {
       if (result.ok) setService(result.data.data)
     })
   }, [slug])
-
-  useEffect(() => {
-    if (missingParams || !status || !isPending(status) || pollAttempts >= POLL_MAX_ATTEMPTS) return
-
-    const timeout = setTimeout(async () => {
-      const result = await apiCall<{ data: { status: PaymentStatus } }>('GET', `/paiement/status/${idop}`)
-      if (result.ok) setStatus(result.data.data.status)
-      setPollAttempts((n) => n + 1)
-    }, POLL_INTERVAL_MS)
-
-    return () => clearTimeout(timeout)
-  }, [status, pollAttempts, missingParams, idop])
 
   useEffect(() => {
     if (missingParams || status !== 'paid') return
@@ -128,16 +103,8 @@ export function InvoiceReturnPage() {
       <div className="mx-auto max-w-md space-y-4 pt-4">
         {missingParams || !status ? (
           <p className="pt-10 text-center text-sm text-ink-soft">Lien de retour de paiement invalide ou incomplet.</p>
-        ) : isPending(status) ? (
-          <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <Loader2 size={28} className="animate-spin text-aregie-deep" />
-            <p className="text-sm font-medium text-ink-soft">{STATUS_LABELS[status]}</p>
-            {pollAttempts >= POLL_MAX_ATTEMPTS && (
-              <p className="text-xs text-ink-faint">
-                Ça prend plus de temps que prévu — rechargez cette page dans quelques instants.
-              </p>
-            )}
-          </div>
+        ) : isPendingPaymentStatus(status) ? (
+          <PaymentPendingState label={STATUS_LABELS[status]} maxAttemptsReached={maxAttemptsReached} />
         ) : status === 'paid' ? (
           <>
             <FadeIn className="flex flex-col items-center gap-3 pt-2 text-center">
@@ -171,12 +138,10 @@ export function InvoiceReturnPage() {
             </FadeIn>
 
             <motion.div
-              ref={invoiceCardSquircle.ref}
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, ease: 'easeOut', delay: 0.08 }}
-              style={invoiceCardSquircle.style}
-              className="overflow-visible rounded-[20px] bg-white p-0 shadow-[0_12px_30px_-14px_rgba(20,25,60,0.18)]"
+              className="squircle overflow-visible rounded-[20px] bg-white p-0 shadow-[0_12px_30px_-14px_rgba(20,25,60,0.18)]"
             >
               <div className="flex flex-col gap-0.5 px-5 pt-5 pb-4">
                 <p className="font-bold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
@@ -200,7 +165,7 @@ export function InvoiceReturnPage() {
               </div>
 
               <div className="flex items-center gap-4 px-5 py-5">
-                <div className="flex h-[88px] w-[88px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-success-tint">
+                <div className="squircle flex h-[88px] w-[88px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-success-tint">
                   <Mail size={28} className="text-success" />
                 </div>
                 <div className="flex-1">
@@ -221,19 +186,13 @@ export function InvoiceReturnPage() {
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center gap-3 pt-10 text-center">
-            {status === 'expired' ? (
-              <AlertTriangle size={32} className="text-amber-500" />
-            ) : (
-              <XCircle size={32} className="text-red-600" />
-            )}
-            <p className="font-semibold text-ink">{STATUS_LABELS[status]}</p>
-            <p className="text-sm text-ink-soft">Aucune somme n'a été prélevée. Vous pouvez réessayer le paiement.</p>
-            {retryError && <p className="text-sm text-red-600">{retryError}</p>}
-            <PublicGhostButton type="button" onClick={handleRetry} disabled={retrying} className="w-full">
-              {retrying ? 'Redirection…' : 'Réessayer le paiement'}
-            </PublicGhostButton>
-          </div>
+          <PaymentFailedState
+            expired={status === 'expired'}
+            label={STATUS_LABELS[status]}
+            retryError={retryError}
+            retrying={retrying}
+            onRetry={handleRetry}
+          />
         )}
       </div>
     </PublicShell>

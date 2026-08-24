@@ -37,9 +37,9 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (auth: AuthState) => voi
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-gray-50 px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm ring-1 ring-black/5">
+      <form onSubmit={handleSubmit} className="squircle w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm ring-1 ring-black/5">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aregie-deep text-base font-bold text-white">
+          <div className="squircle flex h-10 w-10 items-center justify-center rounded-xl bg-aregie-deep text-base font-bold text-white">
             P
           </div>
           <div>

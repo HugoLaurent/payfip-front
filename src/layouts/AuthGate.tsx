@@ -1,8 +1,11 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginForm } from '@/pages/auth/LoginForm'
 import { ForcedPasswordChange } from '@/pages/auth/ForcedPasswordChange'
 import { apiCall } from '@/lib/api'
 import { loadStoredAuth, saveStoredAuth, clearStoredAuth } from '@/lib/storage'
+import { AuthProvider } from '@/lib/AuthProvider'
+import { ToastProvider } from '@/lib/ToastProvider'
 import type { AuthState } from '@/lib/types'
 
 interface RefreshResponse {
@@ -14,10 +17,19 @@ interface RefreshResponse {
 // page reste ouverte) plutôt que de laisser la session mourir sèchement.
 const REFRESH_INTERVAL_MS = 20 * 60 * 1000
 
-// Chargé à la demande : l'espace organisme (Dashboard, ServicesPage,
+// Chargés à la demande : l'espace organisme (Dashboard, ServicesPage,
 // ScannerPage/jsQR…) ne doit peser sur le bundle que pour les usagers
-// effectivement connectés, jamais pour le parcours citoyen public.
+// effectivement connectés, jamais pour le parcours citoyen public. Un
+// chunk par page plutôt qu'un seul gros chunk "OrgSpace" : ScannerPage
+// (jsQR) ne se charge par ex. que quand l'agent clique "Scanner".
 const OrgSpace = lazy(() => import('@/layouts/OrgSpace'))
+const Dashboard = lazy(() => import('@/pages/org/Dashboard'))
+const ServicesPage = lazy(() => import('@/pages/org/ServicesPage'))
+const ServiceAdmin = lazy(() => import('@/pages/org/ServiceAdmin'))
+const UsersManager = lazy(() => import('@/pages/org/UsersManager'))
+const VentePage = lazy(() => import('@/pages/org/VentePage'))
+const HistoriquePage = lazy(() => import('@/pages/org/HistoriquePage'))
+const ScannerPage = lazy(() => import('@/pages/org/ScannerPage'))
 
 // Espace organisme (agents/admins) — extrait pour laisser App.tsx router
 // entre ce parcours authentifié et le parcours d'achat public (aucun
@@ -79,8 +91,26 @@ export function AuthGate() {
   }
 
   return (
-    <Suspense fallback={null}>
-      <OrgSpace auth={auth} onLogout={handleLogout} onAuthUpdate={updateAuth} />
-    </Suspense>
+    <AuthProvider value={{ auth, onLogout: handleLogout, onAuthUpdate: updateAuth }}>
+      <ToastProvider>
+        <Suspense fallback={null}>
+          <Routes>
+            <Route element={<OrgSpace />}>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/services/:id" element={<ServiceAdmin />} />
+              <Route path="/vente" element={<VentePage />} />
+              <Route path="/historique" element={<HistoriquePage />} />
+              <Route path="/scanner" element={<ScannerPage />} />
+              {auth.role === 'admin' && (
+                <Route path="/utilisateurs" element={<UsersManager />} />
+              )}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </ToastProvider>
+    </AuthProvider>
   )
 }

@@ -1,9 +1,4 @@
 import { useRef } from 'react'
-import { getSvgPath } from 'figma-squircle'
-
-// Taille fixe (46x56), donc pas besoin d'un ResizeObserver par case : un
-// seul tracé squircle calculé une fois, partagé par toutes les cases.
-const OTP_DIGIT_CLIP_PATH = `path('${getSvgPath({ width: 46, height: 56, cornerRadius: 12, cornerSmoothing: 0.75 })}')`
 
 export function OtpDigitInput({
   digits,
@@ -60,10 +55,10 @@ export function OtpDigitInput({
           onPaste={handlePaste}
           maxLength={1}
           inputMode="numeric"
-          className={`h-14 w-[46px] rounded-xl bg-otp-bg text-center text-[22px] leading-none font-extrabold text-ink outline-none transition ${
+          className={`squircle h-14 w-[46px] rounded-xl bg-otp-bg text-center text-[22px] leading-none font-extrabold text-ink outline-none transition ${
             i === firstEmptyIdx ? 'border-2 border-aregie-blue' : 'border-2 border-transparent'
           }`}
-          style={{ fontFamily: 'var(--font-display)', clipPath: OTP_DIGIT_CLIP_PATH }}
+          style={{ fontFamily: 'var(--font-display)' }}
         />
       ))}
     </div>
