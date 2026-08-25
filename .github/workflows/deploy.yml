@@ -28,6 +28,5 @@ jobs:
             set -e
             cd /opt/payfip/payfip-front-src
             git pull origin main
-            cd /opt/payfip/deploy
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml build payfip-front
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d payfip-front
+            sudo /opt/payfip/deploy/bin/compose-deploy.sh build payfip-front
+            sudo /opt/payfip/deploy/bin/compose-deploy.sh up -d payfip-front
