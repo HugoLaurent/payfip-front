@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { decodeJwtPayload } from '@/lib/decodeJwtPayload'
 
 interface StaffTokenPayload {
@@ -15,6 +16,7 @@ export function StaffAuthCallback({
   onLoggedIn: (token: string, email: string, name: string | null) => void
 }) {
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.hash.slice(1))
@@ -38,7 +40,12 @@ export function StaffAuthCallback({
     }
 
     onLoggedIn(token, payload.email, payload.name)
-  }, [onLoggedIn])
+    // Sans cette navigation explicite, la page reste sur /staff/auth/complete
+    // — cette route reste déclarée même une fois la session établie (il
+    // faut bien pouvoir y revenir sans être connecté), donc rien ne
+    // redirige seul vers le panel une fois le token reçu.
+    navigate('/staff', { replace: true })
+  }, [onLoggedIn, navigate])
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-gray-50 px-4">
