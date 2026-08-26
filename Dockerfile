@@ -11,6 +11,8 @@ COPY . .
 # bundle) — pas une variable d'environnement runtime comme côté backend.
 ARG VITE_GATEWAY_URL
 ENV VITE_GATEWAY_URL=$VITE_GATEWAY_URL
+ARG VITE_GLITCHTIP_DSN
+ENV VITE_GLITCHTIP_DSN=$VITE_GLITCHTIP_DSN
 RUN npm run build
 
 FROM nginx:1.27-alpine
