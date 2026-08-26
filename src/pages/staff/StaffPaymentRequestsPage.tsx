@@ -27,7 +27,7 @@ interface StaffPaymentRequest {
 const SOURCE_SERVICE_LABELS: Record<string, string> = { billetterie: 'Billetterie', factures: 'Facture' }
 
 export function StaffPaymentRequestsPage() {
-  const { staffKey } = useStaffAuth()
+  const { staffToken } = useStaffAuth()
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
 
@@ -42,9 +42,9 @@ export function StaffPaymentRequestsPage() {
       apiCall(
         'GET',
         `/staff/payment-requests?${q ? `q=${encodeURIComponent(q)}&` : ''}page=${page}&perPage=${PER_PAGE}`,
-        { staffKey }
+        { staffToken }
       ),
-    deps: [staffKey, q, page],
+    deps: [staffToken, q, page],
   })
 
   return (

@@ -1,7 +1,9 @@
 import { lazy, Suspense, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { StaffLoginForm } from '@/pages/staff/StaffLoginForm'
-import { loadStoredStaffKey, clearStoredStaffKey } from '@/lib/storage'
+import { StaffAuthCallback } from '@/pages/staff/StaffAuthCallback'
+import { loadStoredStaffToken, saveStoredStaffToken, clearStoredStaffToken } from '@/lib/storage'
+import { decodeJwtPayload } from '@/lib/decodeJwtPayload'
 import { StaffAuthProvider } from '@/lib/StaffAuthProvider'
 import { ToastProvider } from '@/lib/ToastProvider'
 
@@ -15,43 +17,81 @@ const StaffInvoicesPage = lazy(() => import('@/pages/staff/StaffInvoicesPage'))
 const StaffPaymentRequestsPage = lazy(() => import('@/pages/staff/StaffPaymentRequestsPage'))
 const StaffEmailsPage = lazy(() => import('@/pages/staff/StaffEmailsPage'))
 
-// Panel staff AREGIE — secret partagé (x-staff-key), pas de compte
-// individuel ni de JWT à renouveler, donc pas d'équivalent au refresh
-// périodique d'AuthGate. Complètement séparé de l'auth organisme (aucun
-// point commun : ni stockage, ni contexte, ni layout).
-export function StaffGate() {
-  const [staffKey, setStaffKey] = useState<string | null>(() => loadStoredStaffKey())
+interface StaffTokenPayload {
+  email: string
+  name: string | null
+}
 
-  function handleLogout() {
-    clearStoredStaffKey()
-    setStaffKey(null)
+interface StaffSession {
+  token: string
+  email: string
+  name: string | null
+}
+
+function sessionFromToken(token: string): StaffSession | null {
+  const payload = decodeJwtPayload<StaffTokenPayload>(token)
+  if (!payload) return null
+  return { token, email: payload.email, name: payload.name }
+}
+
+// Panel staff AREGIE — SSO Authentik (voir StaffLoginForm/StaffAuthCallback
+// pour le flux). Complètement séparé de l'auth organisme (aucun point
+// commun : ni stockage, ni contexte, ni layout). `auth/complete` doit
+// rester joignable même sans session : c'est la route qui l'établit.
+export function StaffGate() {
+  const [session, setSession] = useState<StaffSession | null>(() => {
+    const token = loadStoredStaffToken()
+    return token ? sessionFromToken(token) : null
+  })
+
+  function handleLoggedIn(token: string) {
+    saveStoredStaffToken(token)
+    setSession(sessionFromToken(token))
   }
 
-  if (!staffKey) {
-    return <StaffLoginForm onLoggedIn={setStaffKey} />
+  function handleLogout() {
+    clearStoredStaffToken()
+    setSession(null)
   }
 
   return (
-    <StaffAuthProvider value={{ staffKey, onLogout: handleLogout }}>
-      <ToastProvider>
-        <Suspense fallback={null}>
-          <Routes>
-            <Route element={<StaffSpace />}>
-              <Route path="/" element={<Navigate to="organismes" replace />} />
-              <Route path="organismes" element={<StaffOrganizationsPage />} />
-              <Route path="organismes/:id" element={<StaffOrganizationDetailPage />} />
-              <Route path="services" element={<StaffServicesPage />} />
-              <Route path="utilisateurs" element={<StaffUsersPage />} />
-              <Route path="commandes" element={<StaffOrdersPage />} />
-              <Route path="factures" element={<StaffInvoicesPage />} />
-              <Route path="paiements" element={<StaffPaymentRequestsPage />} />
-              <Route path="emails" element={<StaffEmailsPage />} />
-              <Route path="*" element={<Navigate to="organismes" replace />} />
-            </Route>
-          </Routes>
-        </Suspense>
-      </ToastProvider>
-    </StaffAuthProvider>
+    <Routes>
+      <Route path="auth/complete" element={<StaffAuthCallback onLoggedIn={handleLoggedIn} />} />
+
+      {!session ? (
+        <Route path="*" element={<StaffLoginForm />} />
+      ) : (
+        <Route
+          element={
+            <StaffAuthProvider
+              value={{
+                staffToken: session.token,
+                email: session.email,
+                name: session.name,
+                onLogout: handleLogout,
+              }}
+            >
+              <ToastProvider>
+                <Suspense fallback={null}>
+                  <StaffSpace />
+                </Suspense>
+              </ToastProvider>
+            </StaffAuthProvider>
+          }
+        >
+          <Route path="/" element={<Navigate to="organismes" replace />} />
+          <Route path="organismes" element={<StaffOrganizationsPage />} />
+          <Route path="organismes/:id" element={<StaffOrganizationDetailPage />} />
+          <Route path="services" element={<StaffServicesPage />} />
+          <Route path="utilisateurs" element={<StaffUsersPage />} />
+          <Route path="commandes" element={<StaffOrdersPage />} />
+          <Route path="factures" element={<StaffInvoicesPage />} />
+          <Route path="paiements" element={<StaffPaymentRequestsPage />} />
+          <Route path="emails" element={<StaffEmailsPage />} />
+          <Route path="*" element={<Navigate to="organismes" replace />} />
+        </Route>
+      )}
+    </Routes>
   )
 }
 

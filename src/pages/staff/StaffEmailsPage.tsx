@@ -21,7 +21,7 @@ interface StaffEmail {
 }
 
 export function StaffEmailsPage() {
-  const { staffKey } = useStaffAuth()
+  const { staffToken } = useStaffAuth()
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
 
@@ -34,9 +34,9 @@ export function StaffEmailsPage() {
   } = usePaginatedResource<StaffEmail, PageMeta>({
     fetcher: () =>
       apiCall('GET', `/staff/emails?${q ? `q=${encodeURIComponent(q)}&` : ''}page=${page}&perPage=${PER_PAGE}`, {
-        staffKey,
+        staffToken,
       }),
-    deps: [staffKey, q, page],
+    deps: [staffToken, q, page],
   })
 
   return (

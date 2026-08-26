@@ -28,7 +28,7 @@ const ORG_STATUS_TINTS: Record<string, string> = {
 
 export function StaffOrganizationDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { staffKey } = useStaffAuth()
+  const { staffToken } = useStaffAuth()
   const navigate = useNavigate()
   const { showToast } = useToast()
 
@@ -43,7 +43,7 @@ export function StaffOrganizationDetailPage() {
   useEffect(() => {
     setOrg(null)
     setLoadFailed(false)
-    apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffKey }).then((result) => {
+    apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffToken }).then((result) => {
       if (!result.ok) {
         setLoadFailed(true)
         return
@@ -55,18 +55,18 @@ export function StaffOrganizationDetailPage() {
       }
       setOrg(found)
     })
-  }, [staffKey, id, reloadKey])
+  }, [staffToken, id, reloadKey])
 
   useEffect(() => {
     setServices(null)
     setServicesFailed(false)
-    apiCall<{ data: ServiceRow[] }>('GET', `/staff/services?orgId=${id}&perPage=100`, { staffKey }).then(
+    apiCall<{ data: ServiceRow[] }>('GET', `/staff/services?orgId=${id}&perPage=100`, { staffToken }).then(
       (result) => {
         if (result.ok) setServices(result.data.data)
         else setServicesFailed(true)
       }
     )
-  }, [staffKey, id, reloadKey])
+  }, [staffToken, id, reloadKey])
 
   const [editingName, setEditingName] = useState(false)
   const [nameInput, setNameInput] = useState('')
@@ -81,7 +81,7 @@ export function StaffOrganizationDetailPage() {
     if (!org || !nameInput.trim()) return
     setSavingName(true)
     const result = await apiCall<{ data: StaffOrganization }>('PATCH', `/staff/organizations/${org.id}`, {
-      staffKey,
+      staffToken,
       body: { name: nameInput.trim() },
     })
     setSavingName(false)
@@ -102,7 +102,7 @@ export function StaffOrganizationDetailPage() {
     if (!org) return
     setSuspending(true)
     const result = await apiCall<{ data: StaffOrganization }>('PATCH', `/staff/organizations/${org.id}`, {
-      staffKey,
+      staffToken,
       body: { status: 'suspended', suspendedMessage: suspendMessage.trim() || null },
     })
     setSuspending(false)
@@ -120,7 +120,7 @@ export function StaffOrganizationDetailPage() {
     if (!org) return
     setSuspending(true)
     const result = await apiCall<{ data: StaffOrganization }>('PATCH', `/staff/organizations/${org.id}`, {
-      staffKey,
+      staffToken,
       body: { status: 'active' },
     })
     setSuspending(false)
@@ -138,7 +138,7 @@ export function StaffOrganizationDetailPage() {
     setTogglingServiceId(service.id)
     const nextStatus = service.status === 'active' ? 'archived' : 'active'
     const result = await apiCall('PATCH', `/staff/services/${service.id}`, {
-      staffKey,
+      staffToken,
       body: { status: nextStatus },
     })
     setTogglingServiceId(null)
@@ -172,7 +172,7 @@ export function StaffOrganizationDetailPage() {
     setSavingSlug(true)
     setSlugError(null)
     const result = await apiCall('PATCH', `/staff/services/${service.id}`, {
-      staffKey,
+      staffToken,
       body: { slug: trimmed || null },
     })
     setSavingSlug(false)
@@ -209,7 +209,7 @@ export function StaffOrganizationDetailPage() {
     setCreateServiceError(null)
 
     const result = await apiCall('POST', `/staff/organizations/${id}/services`, {
-      staffKey,
+      staffToken,
       body: { name: serviceName, serviceType, numcli },
     })
 

@@ -22,7 +22,7 @@ import type { PageMeta, ServiceRow, StaffOrganization } from '@/lib/types'
 const PER_PAGE = 20
 
 export function StaffServicesPage() {
-  const { staffKey } = useStaffAuth()
+  const { staffToken } = useStaffAuth()
   const { showToast } = useToast()
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
@@ -35,16 +35,16 @@ export function StaffServicesPage() {
     reload,
   } = usePaginatedResource<ServiceRow, PageMeta>({
     fetcher: () =>
-      apiCall('GET', `/staff/services?q=${encodeURIComponent(q)}&page=${page}&perPage=${PER_PAGE}`, { staffKey }),
-    deps: [staffKey, q, page],
+      apiCall('GET', `/staff/services?q=${encodeURIComponent(q)}&page=${page}&perPage=${PER_PAGE}`, { staffToken }),
+    deps: [staffToken, q, page],
   })
 
   const [orgs, setOrgs] = useState<StaffOrganization[]>([])
   useEffect(() => {
-    apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffKey }).then((result) => {
+    apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffToken }).then((result) => {
       if (result.ok) setOrgs(result.data.data)
     })
-  }, [staffKey])
+  }, [staffToken])
   const orgNameById = new Map(orgs.map((o) => [o.id, o.name]))
 
   const [showCreate, setShowCreate] = useState(false)
@@ -70,7 +70,7 @@ export function StaffServicesPage() {
     setCreateError(null)
 
     const result = await apiCall('POST', `/staff/organizations/${orgId}/services`, {
-      staffKey,
+      staffToken,
       body: { name, serviceType, numcli },
     })
 

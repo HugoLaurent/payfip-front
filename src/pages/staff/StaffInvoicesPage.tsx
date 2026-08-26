@@ -26,7 +26,7 @@ interface StaffInvoice {
 }
 
 export function StaffInvoicesPage() {
-  const { staffKey } = useStaffAuth()
+  const { staffToken } = useStaffAuth()
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
 
@@ -39,9 +39,9 @@ export function StaffInvoicesPage() {
   } = usePaginatedResource<StaffInvoice, PageMeta>({
     fetcher: () =>
       apiCall('GET', `/staff/invoices?${q ? `q=${encodeURIComponent(q)}&` : ''}page=${page}&perPage=${PER_PAGE}`, {
-        staffKey,
+        staffToken,
       }),
-    deps: [staffKey, q, page],
+    deps: [staffToken, q, page],
   })
 
   return (

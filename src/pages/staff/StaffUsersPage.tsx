@@ -28,17 +28,17 @@ interface StaffUser {
 }
 
 export function StaffUsersPage() {
-  const { staffKey } = useStaffAuth()
+  const { staffToken } = useStaffAuth()
   const [q, setQ] = useState('')
   const [orgId, setOrgId] = useState('')
   const [page, setPage] = useState(1)
 
   const [orgs, setOrgs] = useState<StaffOrganization[]>([])
   useEffect(() => {
-    apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffKey }).then((result) => {
+    apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffToken }).then((result) => {
       if (result.ok) setOrgs(result.data.data)
     })
-  }, [staffKey])
+  }, [staffToken])
   const orgNameById = new Map(orgs.map((o) => [o.id, o.name]))
 
   const {
@@ -52,9 +52,9 @@ export function StaffUsersPage() {
       apiCall(
         'GET',
         `/staff/users?q=${encodeURIComponent(q)}${orgId ? `&orgId=${orgId}` : ''}&page=${page}&perPage=${PER_PAGE}`,
-        { staffKey }
+        { staffToken }
       ),
-    deps: [staffKey, q, orgId, page],
+    deps: [staffToken, q, orgId, page],
   })
 
   return (

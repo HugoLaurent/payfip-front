@@ -1,12 +1,25 @@
-import { clearStoredAuth } from './storage'
+import { clearStoredAuth, clearStoredStaffToken } from './storage'
 
 export const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL as string) ?? 'http://localhost:3000'
 
-/** Session expirée (JWT client, 2h) : on repart proprement sur l'écran de connexion plutôt que de laisser chaque écran bloqué sur "Chargement…". */
+/**
+ * Session expirée (401 avec un token présent) : on repart proprement sur
+ * l'écran de connexion plutôt que de laisser l'écran bloqué sur
+ * "Chargement…". Distinct de la session staff (stockage et redirection
+ * différents) pour ne jamais vider la mauvaise session ni renvoyer un
+ * membre du staff sur l'accueil citoyen.
+ */
 function handleUnauthorized(status: number, hadToken: boolean) {
   if (status === 401 && hadToken) {
     clearStoredAuth()
     window.location.href = '/'
+  }
+}
+
+function handleStaffUnauthorized(status: number, hadStaffToken: boolean) {
+  if (status === 401 && hadStaffToken) {
+    clearStoredStaffToken()
+    window.location.href = '/staff'
   }
 }
 
@@ -20,11 +33,11 @@ export interface ApiResult<T = unknown> {
 export async function apiCall<T = unknown>(
   method: string,
   path: string,
-  options: { body?: unknown; token?: string; staffKey?: string } = {}
+  options: { body?: unknown; token?: string; staffToken?: string } = {}
 ): Promise<ApiResult<T>> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (options.token) headers.Authorization = `Bearer ${options.token}`
-  if (options.staffKey) headers['x-staff-key'] = options.staffKey
+  else if (options.staffToken) headers.Authorization = `Bearer ${options.staffToken}`
 
   const res = await fetch(`${GATEWAY_URL}${path}`, {
     method,
@@ -33,6 +46,7 @@ export async function apiCall<T = unknown>(
   })
 
   handleUnauthorized(res.status, Boolean(options.token))
+  handleStaffUnauthorized(res.status, Boolean(options.staffToken))
 
   let json: unknown = null
   try {

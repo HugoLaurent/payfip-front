@@ -1,7 +1,9 @@
 import { createContext } from 'react'
 
 export interface StaffAuthContextValue {
-  staffKey: string
+  staffToken: string
+  email: string
+  name: string | null
   onLogout: () => void
 }
 

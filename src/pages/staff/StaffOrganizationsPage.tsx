@@ -16,7 +16,7 @@ const ORG_STATUS_TINTS: Record<string, string> = {
 }
 
 export function StaffOrganizationsPage() {
-  const { staffKey } = useStaffAuth()
+  const { staffToken } = useStaffAuth()
   const navigate = useNavigate()
   const { showToast } = useToast()
   const [orgs, setOrgs] = useState<StaffOrganization[] | null>(null)
@@ -35,11 +35,11 @@ export function StaffOrganizationsPage() {
   useEffect(() => {
     setOrgs(null)
     setLoadFailed(false)
-    apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffKey }).then((result) => {
+    apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffToken }).then((result) => {
       if (result.ok) setOrgs(result.data.data)
       else setLoadFailed(true)
     })
-  }, [staffKey, reloadKey])
+  }, [staffToken, reloadKey])
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -47,7 +47,7 @@ export function StaffOrganizationsPage() {
     setCreateError(null)
 
     const result = await apiCall('POST', '/staff/organizations', {
-      staffKey,
+      staffToken,
       body: { name, domain, adminEmail, adminPassword },
     })
 

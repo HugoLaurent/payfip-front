@@ -51,7 +51,7 @@ export function StaffSidebar({
   mobileOpen: boolean
   onCloseMobile: () => void
 }) {
-  const { onLogout } = useStaffAuth()
+  const { onLogout, email, name } = useStaffAuth()
   const location = useLocation()
 
   useEffect(() => {
@@ -105,6 +105,9 @@ export function StaffSidebar({
         </nav>
 
         <div className="border-t border-black/5 p-3">
+          <p className="truncate px-3 pb-2 text-xs text-gray-500" title={email}>
+            {name ?? email}
+          </p>
           <button
             type="button"
             onClick={onLogout}
