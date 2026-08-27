@@ -28,13 +28,13 @@ export function PublicServiceHeader({
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="flex items-center gap-3 pt-[14px] pb-3 md:gap-5 md:pt-8 md:pb-6"
+      className="flex flex-col items-center gap-3 pt-[14px] pb-3 text-center md:flex-row md:items-center md:gap-5 md:pt-8 md:pb-6 md:text-left"
     >
       {onBack && (
         <button
           type="button"
           onClick={onBack}
-          className="squircle flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[oklch(0.95_0.01_260)] text-[oklch(0.3_0.02_260)] md:h-11 md:w-11"
+          className="squircle flex h-9 w-9 shrink-0 self-start items-center justify-center rounded-[10px] bg-[oklch(0.95_0.01_260)] text-[oklch(0.3_0.02_260)] md:h-11 md:w-11 md:self-auto"
         >
           <ArrowLeft size={16} strokeWidth={2.5} className="md:h-5 md:w-5" />
         </button>
@@ -54,7 +54,7 @@ export function PublicServiceHeader({
           />
         </div>
       )}
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 md:flex-1">
         <p
           className="text-[15px] leading-[1.25] font-bold text-ink md:text-[26px]"
           style={{ fontFamily: 'var(--font-display)' }}
