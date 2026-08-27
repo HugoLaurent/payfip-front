@@ -21,17 +21,22 @@ export function isFieldFilled(field: RegistrationFormField, value: FieldValue | 
   }
 }
 
+// Obligatoire = un point corail (jamais le mot répété partout) ; facultatif
+// = le mot en toutes lettres — convention de la maquette "Parcours
+// Inscription" (écrans A4/D2), reprise ici pour tout champ du formulaire.
 function FieldLabel({ field }: { field: RegistrationFormField }) {
   return (
-    <div className="mb-[7px] flex items-baseline gap-1.5">
+    <div className="mb-[7px] flex items-baseline gap-[5px]">
       <span className="text-[10.5px] leading-none font-semibold tracking-[0.05em] text-ink-soft uppercase">
         {field.label}
       </span>
-      <span
-        className={`text-[10.5px] leading-none font-medium ${field.required ? 'text-aregie-coral' : 'text-ink-faint'}`}
-      >
-        {field.required ? 'obligatoire' : 'facultatif'}
-      </span>
+      {field.required ? (
+        <span className="text-[10.5px] leading-none font-medium text-aregie-coral" aria-label="obligatoire">
+          ·
+        </span>
+      ) : (
+        <span className="text-[10.5px] leading-none font-medium text-ink-faint">facultatif</span>
+      )}
     </div>
   )
 }

@@ -14,6 +14,7 @@ import {
   PublicButton,
   RegistrantIdentityFields,
   RegistrationFieldInput,
+  ServiceQuestionsDivider,
   isFieldFilled,
   type FieldValue,
 } from '@/components/public'
@@ -154,58 +155,112 @@ export function PublicInscriptionDirectPage() {
   const full = event.isFull
 
   if (step === 'form') {
+    const totalCents = event.priceCents * quantity
+    const ctaLabel = submitting ? 'Envoi…' : 'Valider mon inscription →'
+
     return (
       <motion.div key="form" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: 'easeOut' }}>
         <PublicShell
           footer={
-            <div className="bg-white px-6 pt-[14px] pb-[22px] shadow-[0_-8px_24px_-12px_rgba(20,25,60,0.15)]">
+            <div className="bg-white px-6 pt-[14px] pb-[22px] shadow-[0_-8px_24px_-12px_rgba(20,25,60,0.15)] md:hidden">
               <PublicButton type="button" onClick={handleSubmit} disabled={!formValid || submitting} className="w-full">
-                {submitting ? 'Envoi…' : 'Valider mon inscription →'}
+                {ctaLabel}
               </PublicButton>
               {submitError && <p className="mt-2 text-center text-sm text-red-600">{submitError}</p>}
             </div>
           }
         >
-          <div className="flex flex-col gap-4 md:mx-auto md:max-w-md">
-            <div className="flex items-center gap-[11px] border-b border-[oklch(0.94_0.006_260)] pt-[14px] pb-3">
-              <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-success-tint text-[14px] font-bold text-success">
-                ✓
+          <div className="md:mx-auto md:flex md:w-full md:max-w-[1008px] md:items-start md:gap-7">
+            <div className="flex flex-col gap-4 md:w-[640px] md:flex-none md:squircle md:rounded-[22px] md:border-[1.5px] md:border-hairline md:p-[30px]">
+              <div className="flex items-center gap-[11px] border-b border-[oklch(0.94_0.006_260)] pt-[14px] pb-3 md:border-none md:pt-0">
+                <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-success-tint text-[14px] font-bold text-success">
+                  ✓
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] leading-[1.25] font-bold text-ink">{email.trim()}</p>
+                  <p className="text-[11px] leading-[1.3] font-medium text-ink-soft">
+                    Email vérifié · {event.title}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] leading-[1.25] font-bold text-ink">{email.trim()}</p>
-                <p className="text-[11px] leading-[1.3] font-medium text-ink-soft">
-                  Email vérifié · {event.title}
-                </p>
-              </div>
+
+              <p className="text-[21px] leading-[1.25] font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
+                Vos informations
+              </p>
+
+              <RegistrantIdentityFields
+                firstName={firstName}
+                lastName={lastName}
+                onFirstNameChange={setFirstName}
+                onLastNameChange={setLastName}
+                quantity={quantity}
+                maxQuantity={event.maxParticipantsPerRegistration}
+                onQuantityChange={setQuantity}
+              />
+              {(event.formSchema ?? []).length > 0 && <ServiceQuestionsDivider />}
+              {(event.formSchema ?? []).map((field) => (
+                <RegistrationFieldInput
+                  key={field.key}
+                  field={field}
+                  value={values[field.key]}
+                  onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
+                />
+              ))}
+              {event.requiresDocuments && <FileUploadField onFileChange={setDocumentFile} />}
+              <RegistrationFieldInput
+                field={consentField}
+                value={values[consentField.key]}
+                onChange={(v) => setValues((prev) => ({ ...prev, [consentField.key]: v }))}
+              />
             </div>
 
-            <p className="text-[21px] leading-[1.25] font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
-              Vos informations
-            </p>
+            <div className="hidden md:sticky md:top-5 md:flex md:w-[340px] md:flex-none md:flex-col md:gap-[14px]">
+              <div className="squircle overflow-hidden rounded-[22px] border-[1.5px] border-hairline bg-white">
+                <div className="px-6 pt-[22px] pb-5">
+                  <p className="text-[11px] leading-none font-bold tracking-[0.06em] text-ink-soft uppercase">
+                    Vous vous inscrivez à
+                  </p>
+                  <p className="pt-[10px] text-[18px] leading-[1.3] font-bold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
+                    {event.title}
+                  </p>
+                  {event.location && (
+                    <p className="pt-2 text-[13px] leading-[1.55] font-medium text-ink-soft">{event.location}</p>
+                  )}
+                </div>
+                <div className="h-px bg-hairline" />
+                <div className="flex items-center justify-between bg-date-tint px-6 py-[18px]">
+                  <span className="text-[13px] leading-none font-semibold text-[oklch(0.42_0.015_260)]">
+                    {event.requiresDocuments ? 'Montant après validation' : 'À régler'}
+                  </span>
+                  <span className="text-[22px] leading-none font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
+                    {totalCents === 0 ? 'Gratuit' : euros(totalCents)}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-[10px] px-6 pt-[18px] pb-[22px]">
+                  <PublicButton type="button" onClick={handleSubmit} disabled={!formValid || submitting} className="w-full">
+                    {ctaLabel}
+                  </PublicButton>
+                  {event.requiresDocuments && (
+                    <p className="text-center text-[11.5px] leading-[1.5] font-medium text-ink-soft">
+                      Vous ne payez pas maintenant : le paiement vient après validation du justificatif.
+                    </p>
+                  )}
+                  {submitError && <p className="text-center text-sm text-red-600">{submitError}</p>}
+                </div>
+              </div>
 
-            <RegistrantIdentityFields
-              firstName={firstName}
-              lastName={lastName}
-              onFirstNameChange={setFirstName}
-              onLastNameChange={setLastName}
-              quantity={quantity}
-              maxQuantity={event.maxParticipantsPerRegistration}
-              onQuantityChange={setQuantity}
-            />
-            {(event.formSchema ?? []).map((field) => (
-              <RegistrationFieldInput
-                key={field.key}
-                field={field}
-                value={values[field.key]}
-                onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
-              />
-            ))}
-            {event.requiresDocuments && <FileUploadField onFileChange={setDocumentFile} />}
-            <RegistrationFieldInput
-              field={consentField}
-              value={values[consentField.key]}
-              onChange={(v) => setValues((prev) => ({ ...prev, [consentField.key]: v }))}
-            />
+              {event.requiresDocuments && (
+                <div className="squircle rounded-[18px] bg-[oklch(0.96_0.02_265)] p-4">
+                  <p className="text-[11.5px] leading-none font-bold tracking-[0.03em] text-[oklch(0.35_0.09_265)]">
+                    APRÈS L'ENVOI
+                  </p>
+                  <p className="pt-2 text-[12.5px] leading-[1.6] text-[oklch(0.42_0.05_265)]">
+                    Un agent vérifie votre justificatif sous 48 h ouvrées, puis vous recevez un email pour payer et
+                    confirmer votre place.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </PublicShell>
       </motion.div>

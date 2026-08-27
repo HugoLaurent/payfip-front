@@ -16,5 +16,5 @@ export * from './RegistrationFieldInput'
 export * from './FileUploadField'
 export * from './RegistrationConfirmation'
 export * from './RegistrationWaitlist'
-export * from './RegistrantIdentityFields'
+export * from './RegistrantIdentityFields' // also exports ServiceQuestionsDivider
 export * from './RegistrationRejected'
