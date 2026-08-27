@@ -10,7 +10,7 @@ import aregieLogo from '@/assets/aregie-logo.png'
 // contenu.
 function AregieBadge() {
   return (
-    <div className="mt-4 flex items-center justify-end gap-1.5 md:fixed md:right-6 md:bottom-5 md:mt-0">
+    <div className="mt-auto flex items-center justify-end gap-1.5 pt-4 md:fixed md:right-6 md:bottom-5 md:mt-0 md:pt-0">
       <p className="text-[10px] font-medium text-ink-faint">Propulsé par</p>
       <div className="squircle flex shrink-0 items-center rounded-lg bg-aregie-deep px-2.5 py-[5px]">
         <img src={aregieLogo} alt="AREGIE" className="h-[10px] w-auto" />
@@ -42,8 +42,10 @@ export function PublicShell({
     >
       {header}
       <div className="flex-1 overflow-y-auto px-6 py-1 pb-6">
-        {children}
-        <AregieBadge />
+        <div className="flex min-h-full flex-col">
+          {children}
+          <AregieBadge />
+        </div>
       </div>
       {footer}
     </div>
