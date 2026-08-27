@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:oklch(0.97 0.012 75);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+  a{color:oklch(0.62 0.19 35);text-decoration:none}
+  a:hover{color:oklch(0.52 0.17 35)}
+</style>
+</helmet>
+
+<section style="padding:56px 40px 110px;display:flex;flex-direction:column;gap:46px">
+
+  <div style="max-width:840px;display:flex;flex-direction:column;gap:10px">
+    <div style="font:600 12px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.5 0.11 265)">AREGIE — Service d'inscription · formations &amp; événements</div>
+    <h1 style="margin:0;font:700 29px/1.25 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">Deux entrées possibles, un seul parcours</h1>
+    <p style="margin:0;font:400 14px/1.65 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Même châssis que le parcours billetterie : stepper à 3 temps <strong style="font-weight:600;color:oklch(0.24 0.05 265)">Email → Inscription → Paiement</strong>, vérification email en premier, bouton corail collé en bas, titres Outfit. Les deux variantes ne diffèrent que par la porte d'entrée — <a href="#1a">1a</a> arrive sur un catalogue et choisit, <a href="#1b">1b</a> arrive directement sur une formation depuis un lien ou un QR. Tout ce qui suit (formulaire, justificatifs, paiement) est commun.</p>
+    <p style="margin:2px 0 0;font:500 13px/1.6 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Gratuit ou payant : même écran de fin, seule la ligne de montant change. Le formulaire est entièrement composé par l'agent (6 types de champ). Liste d'attente : mail au premier, 48 h pour confirmer.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+
+    <!-- ══ 1a · CATALOGUE ══ -->
+    <div id="1a" style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font:700 12px/1 'Inter',sans-serif;color:#fff;background:oklch(0.62 0.19 35);padding:7px 11px;border-radius:8px">1a</div>
+        <div style="font:700 17px/1 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">Entrée par le catalogue</div>
+      </div>
+      <p style="margin:0;max-width:820px;font:400 13px/1.65 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Pour une collectivité qui publie plusieurs formations et veut une page d'atterrissage unique. Le citoyen compare, filtre, puis entre dans une fiche. Coût : une étape de plus avant l'inscription.</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+        <!-- A1 catalogue -->
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+          <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">A1 · Catalogue</div>
+          <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+            <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+                <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+                <div style="display:flex;gap:4px;align-items:center">
+                  <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+                </div>
+              </div>
+
+              <div style="flex:none;padding:14px 24px 14px;display:flex;align-items:center;gap:12px">
+                <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#223499,#6f80e4);display:flex;align-items:center;justify-content:center;font:700 14px 'Outfit',sans-serif;color:#fff;flex:none">VC</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:700 15px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Ville de Chartres</div>
+                  <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Inscriptions aux formations</div>
+                </div>
+              </div>
+
+              <div style="flex:1;overflow:hidden;padding:0 24px 24px;display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;gap:8px">
+                  <div style="padding:9px 15px;border-radius:100px;background:oklch(0.24 0.05 265);font:600 12.5px/1 'Inter',sans-serif;color:#fff">Tout</div>
+                  <div style="padding:9px 15px;border-radius:100px;background:oklch(0.95 0.01 260);font:600 12.5px/1 'Inter',sans-serif;color:oklch(0.42 0.02 260)">Sport</div>
+                  <div style="padding:9px 15px;border-radius:100px;background:oklch(0.95 0.01 260);font:600 12.5px/1 'Inter',sans-serif;color:oklch(0.42 0.02 260)">Culture</div>
+                  <div style="padding:9px 15px;border-radius:100px;background:oklch(0.95 0.01 260);font:600 12.5px/1 'Inter',sans-serif;color:oklch(0.42 0.02 260)">Famille</div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="border-radius:18px;border:1.5px solid oklch(0.91 0.008 260);padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                      <div style="flex:1;min-width:0">
+                        <div style="font:700 16.5px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Premiers secours — PSC1</div>
+                        <div style="padding-top:4px;font:500 12.5px/1.4 'Inter',sans-serif;color:oklch(0.5 0.015 260)">sam. 12 sept. · 9h–17h · Maison des associations</div>
+                      </div>
+                      <div style="flex:none;font:700 17px/1.2 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">45 €</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <div style="display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:100px;background:oklch(0.96 0.03 150)">
+                        <div style="width:7px;height:7px;border-radius:50%;background:oklch(0.6 0.14 150)"></div>
+                        <span style="font:600 11.5px/1 'Inter',sans-serif;color:oklch(0.44 0.08 150)">Il reste 4 places</span>
+                      </div>
+                      <div style="padding:6px 11px;border-radius:100px;background:oklch(0.95 0.02 265);font:600 11.5px/1 'Inter',sans-serif;color:oklch(0.42 0.08 265)">Justificatif requis</div>
+                    </div>
+                  </div>
+
+                  <div style="border-radius:18px;border:1.5px solid oklch(0.91 0.008 260);padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                      <div style="flex:1;min-width:0">
+                        <div style="font:700 16.5px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Atelier compostage</div>
+                        <div style="padding-top:4px;font:500 12.5px/1.4 'Inter',sans-serif;color:oklch(0.5 0.015 260)">mer. 16 sept. · 14h–16h · Jardin des Plantes</div>
+                      </div>
+                      <div style="flex:none;font:700 15px/1.2 'Outfit',sans-serif;color:oklch(0.5 0.13 150)">Gratuit</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <div style="display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:100px;background:oklch(0.96 0.03 150)">
+                        <div style="width:7px;height:7px;border-radius:50%;background:oklch(0.6 0.14 150)"></div>
+                        <span style="font:600 11.5px/1 'Inter',sans-serif;color:oklch(0.44 0.08 150)">Il reste 11 places</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="border-radius:18px;border:1.5px solid oklch(0.91 0.008 260);padding:16px 18px;display:flex;flex-direction:column;gap:10px;background:oklch(0.985 0.004 260)">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                      <div style="flex:1;min-width:0">
+                        <div style="font:700 16.5px/1.3 'Outfit',sans-serif;color:oklch(0.45 0.02 260)">Initiation à l'aquarelle</div>
+                        <div style="padding-top:4px;font:500 12.5px/1.4 'Inter',sans-serif;color:oklch(0.58 0.012 260)">jeu. 24 sept. · 18h–20h · Médiathèque</div>
+                      </div>
+                      <div style="flex:none;font:700 17px/1.2 'Outfit',sans-serif;color:oklch(0.5 0.015 260)">30 €</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <div style="padding:6px 11px;border-radius:100px;background:oklch(0.93 0.008 260);font:600 11.5px/1 'Inter',sans-serif;color:oklch(0.45 0.015 260)">Complet · liste d'attente</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Le compteur de places est un badge vert, pas une phrase perdue : c'est le premier critère de décision. Une formation complète reste visible mais dévitalisée — elle reste cliquable pour la liste d'attente.</p>
+        </div>
+
+        <!-- A2 fiche -->
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+          <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">A2 · Fiche formation</div>
+          <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+            <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+                <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+                <div style="display:flex;gap:4px;align-items:center">
+                  <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+                </div>
+              </div>
+
+              <div style="flex:none;padding:14px 24px 12px;display:flex;align-items:center;gap:12px">
+                <div style="width:36px;height:36px;border-radius:10px;background:oklch(0.95 0.01 260);display:flex;align-items:center;justify-content:center;font:700 16px/1 'Inter',sans-serif;color:oklch(0.3 0.02 260);flex:none">←</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:700 13.5px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Ville de Chartres</div>
+                  <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Formation</div>
+                </div>
+              </div>
+
+              <div style="flex:1;overflow:hidden;padding:4px 24px 20px;display:flex;flex-direction:column;gap:18px">
+                <div>
+                  <h2 style="margin:0;font:800 24px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260);text-wrap:pretty">Premiers secours — PSC1</h2>
+                  <p style="margin:8px 0 0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Formation certifiante d'une journée, encadrée par les sapeurs-pompiers de Chartres. Ouverte aux habitants à partir de 14 ans.</p>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:1px;border-radius:16px;overflow:hidden;border:1.5px solid oklch(0.91 0.008 260)">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;background:#fff">
+                    <span style="font:500 12.5px/1 'Inter',sans-serif;color:oklch(0.52 0.015 260)">Date</span>
+                    <span style="font:700 13.5px/1.3 'Inter',sans-serif;color:oklch(0.22 0.03 260);text-align:right">samedi 12 septembre · 9h–17h</span>
+                  </div>
+                  <div style="height:1px;background:oklch(0.93 0.008 260)"></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;background:#fff">
+                    <span style="font:500 12.5px/1 'Inter',sans-serif;color:oklch(0.52 0.015 260)">Lieu</span>
+                    <span style="font:700 13.5px/1.3 'Inter',sans-serif;color:oklch(0.22 0.03 260);text-align:right">Maison des associations</span>
+                  </div>
+                  <div style="height:1px;background:oklch(0.93 0.008 260)"></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;background:#fff">
+                    <span style="font:500 12.5px/1 'Inter',sans-serif;color:oklch(0.52 0.015 260)">Tarif</span>
+                    <span style="font:700 15px/1.2 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">45,00 €</span>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:16px;background:oklch(0.96 0.03 150);border:1.5px solid oklch(0.87 0.06 150)">
+                  <div style="width:32px;height:32px;border-radius:50%;background:oklch(0.6 0.14 150);display:flex;align-items:center;justify-content:center;font:700 15px/1 'Inter',sans-serif;color:#fff;flex:none">4</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font:700 13.5px/1.3 'Inter',sans-serif;color:oklch(0.32 0.07 150)">Il reste 4 places sur 16</div>
+                    <div style="font:500 11.5px/1.35 'Inter',sans-serif;color:oklch(0.45 0.06 150)">Inscriptions closes le 8 septembre</div>
+                  </div>
+                </div>
+
+                <div style="padding:14px 16px;border-radius:16px;background:oklch(0.96 0.02 265)">
+                  <div style="font:700 12.5px/1 'Inter',sans-serif;color:oklch(0.35 0.09 265);letter-spacing:.02em">JUSTIFICATIF DEMANDÉ</div>
+                  <div style="padding-top:7px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.42 0.05 265);text-wrap:pretty">Un justificatif de domicile de moins de 3 mois. Vous le déposerez à l'étape suivante ; un agent le vérifie sous 48 h, puis vous recevrez un email pour payer.</div>
+                </div>
+              </div>
+
+              <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15)">
+                <button style="width:100%;border:none;border-radius:100px;padding:15px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">S'inscrire →</button>
+              </div>
+            </div>
+          </div>
+          <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">La fiche annonce le circuit complet avant de commencer : justificatif → vérification 48 h → email de paiement. Personne ne découvre l'attente après avoir rempli le formulaire.</p>
+        </div>
+
+        <!-- A3 email -->
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+          <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">A3 · Étape 1 — Email</div>
+          <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+            <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+                <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+                <div style="display:flex;gap:4px;align-items:center">
+                  <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+                </div>
+              </div>
+
+              <div style="flex:none;padding:0 24px">
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 0 12px">
+                  <div style="width:36px;height:36px;border-radius:10px;background:oklch(0.95 0.01 260);display:flex;align-items:center;justify-content:center;font:700 16px/1 'Inter',sans-serif;color:oklch(0.3 0.02 260);flex:none">←</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font:700 13.5px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Premiers secours — PSC1</div>
+                    <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">sam. 12 sept. · 45,00 €</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;padding-bottom:18px">
+                  <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                    <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">1</div>
+                    <div style="font:700 9.5px/1 'Inter',sans-serif;color:#223499">Email</div>
+                  </div>
+                  <div style="flex:1;height:2px;background:oklch(0.92 0.01 260);margin-top:11px;border-radius:2px"></div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                    <div style="width:22px;height:22px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.6 0.01 260);display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">2</div>
+                    <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Inscription</div>
+                  </div>
+                  <div style="flex:1;height:2px;background:oklch(0.92 0.01 260);margin-top:11px;border-radius:2px"></div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                    <div style="width:22px;height:22px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.6 0.01 260);display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">3</div>
+                    <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Paiement</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="flex:1;overflow:hidden;padding:4px 24px 24px;display:flex;flex-direction:column;gap:22px">
+                <p style="margin:0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Nous vérifions votre adresse email avant de commencer. Toutes les nouvelles de votre inscription y seront envoyées.</p>
+
+                <div style="display:flex;align-items:center;gap:12px;background:oklch(0.96 0.03 150);border:1.5px solid oklch(0.85 0.06 150);border-radius:16px;padding:13px 16px">
+                  <div style="width:32px;height:32px;border-radius:50%;background:oklch(0.65 0.15 150);color:#fff;display:flex;align-items:center;justify-content:center;font:700 15px/1 'Inter',sans-serif;flex:none">✓</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font:600 10px/1 'Inter',sans-serif;color:oklch(0.5 0.03 150);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">Email</div>
+                    <div style="font:700 14px/1.3 'Inter',sans-serif;color:oklch(0.22 0.03 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">marie.leroy@email.fr</div>
+                  </div>
+                  <div style="font:600 12px/1 'Inter',sans-serif;color:#0080c0;flex:none">Modifier</div>
+                </div>
+
+                <div>
+                  <div style="font:700 16px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260);margin-bottom:5px">Code de vérification</div>
+                  <p style="margin:0 0 16px;font:400 12.5px/1.5 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Saisissez le code à 6 chiffres reçu par email.</p>
+                  <div style="display:flex;gap:8px;justify-content:space-between">
+                    <div style="flex:1;height:56px;border-radius:14px;border:2px solid oklch(0.62 0.19 35);display:flex;align-items:center;justify-content:center;font:700 22px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)">4</div>
+                    <div style="flex:1;height:56px;border-radius:14px;border:2px solid oklch(0.62 0.19 35);display:flex;align-items:center;justify-content:center;font:700 22px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)">8</div>
+                    <div style="flex:1;height:56px;border-radius:14px;border:2px solid oklch(0.62 0.19 35);display:flex;align-items:center;justify-content:center;font:700 22px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)">2</div>
+                    <div style="flex:1;height:56px;border-radius:14px;border:2px solid oklch(0.62 0.19 35);background:oklch(0.98 0.01 35);display:flex;align-items:center;justify-content:center"><div style="width:2px;height:24px;background:oklch(0.62 0.19 35)"></div></div>
+                    <div style="flex:1;height:56px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260)"></div>
+                    <div style="flex:1;height:56px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260)"></div>
+                  </div>
+                  <div style="margin-top:16px;font:500 12.5px/1.4 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Renvoyer le code dans <span style="color:oklch(0.22 0.03 260);font-weight:700">00:47</span></div>
+                </div>
+              </div>
+
+              <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15)">
+                <button style="width:100%;border:none;border-radius:100px;padding:15px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Continuer →</button>
+              </div>
+            </div>
+          </div>
+          <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Écran repris tel quel de la billetterie — même code à 6 cases, même compte à rebours. Seuls les libellés du stepper changent.</p>
+        </div>
+
+        <!-- A4 formulaire -->
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+          <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">A4 · Étape 2 — Formulaire agent</div>
+          <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+            <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+                <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+                <div style="display:flex;gap:4px;align-items:center">
+                  <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+                </div>
+              </div>
+
+              <div style="flex:none;padding:0 24px">
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 0 12px">
+                  <div style="width:36px;height:36px;border-radius:10px;background:oklch(0.95 0.01 260);display:flex;align-items:center;justify-content:center;font:700 16px/1 'Inter',sans-serif;color:oklch(0.3 0.02 260);flex:none">←</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font:700 13.5px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Premiers secours — PSC1</div>
+                    <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">sam. 12 sept. · 45,00 €</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;padding-bottom:16px">
+                  <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                    <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">✓</div>
+                    <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.4 0.02 260)">Email</div>
+                  </div>
+                  <div style="flex:1;height:2px;background:#223499;margin-top:11px;border-radius:2px"></div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                    <div style="width:22px;height:22px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">2</div>
+                    <div style="font:700 9.5px/1 'Inter',sans-serif;color:#223499">Inscription</div>
+                  </div>
+                  <div style="flex:1;height:2px;background:oklch(0.92 0.01 260);margin-top:11px;border-radius:2px"></div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:5px;align-items:center">
+                    <div style="width:22px;height:22px;border-radius:50%;background:oklch(0.92 0.01 260);color:oklch(0.6 0.01 260);display:flex;align-items:center;justify-content:center;font:700 11px 'Inter',sans-serif">3</div>
+                    <div style="font:600 9.5px/1 'Inter',sans-serif;color:oklch(0.6 0.01 260)">Paiement</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="flex:1;overflow:hidden;padding:4px 24px 20px;display:flex;flex-direction:column;gap:16px">
+                <div>
+                  <div style="font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:oklch(0.55 0.015 260);margin-bottom:7px">Nom du participant</div>
+                  <div style="height:50px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;padding:0 15px;font:500 14.5px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)">Marie Leroy</div>
+                </div>
+
+                <div>
+                  <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:7px">
+                    <div style="font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:oklch(0.55 0.015 260)">Date de naissance</div>
+                    <div style="font:500 10.5px/1 'Inter',sans-serif;color:oklch(0.62 0.19 35)">obligatoire</div>
+                  </div>
+                  <div style="height:50px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;justify-content:space-between;padding:0 15px;font:500 14.5px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)"><span>14 / 03 / 1988</span><span style="color:oklch(0.6 0.015 260)">▾</span></div>
+                </div>
+
+                <div>
+                  <div style="font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:oklch(0.55 0.015 260);margin-bottom:7px">Niveau déjà acquis</div>
+                  <div style="display:flex;gap:7px">
+                    <div style="flex:1;height:46px;border-radius:14px;border:2px solid oklch(0.62 0.19 35);background:oklch(0.98 0.012 35);display:flex;align-items:center;justify-content:center;font:600 13px/1 'Inter',sans-serif;color:oklch(0.42 0.14 35)">Aucun</div>
+                    <div style="flex:1;height:46px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;justify-content:center;font:500 13px/1 'Inter',sans-serif;color:oklch(0.42 0.02 260)">PSC1</div>
+                    <div style="flex:1;height:46px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;justify-content:center;font:500 13px/1 'Inter',sans-serif;color:oklch(0.42 0.02 260)">PSE1</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px">
+                    <div style="font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:oklch(0.55 0.015 260)">Remarque à l'attention du formateur</div>
+                    <div style="font:500 10.5px/1 'Inter',sans-serif;color:oklch(0.62 0.015 260)">facultatif</div>
+                  </div>
+                  <div style="height:76px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260);padding:13px 15px;font:400 13.5px/1.5 'Inter',sans-serif;color:oklch(0.62 0.015 260)">Allergie, mobilité réduite…</div>
+                </div>
+
+                <div>
+                  <div style="font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:oklch(0.55 0.015 260);margin-bottom:7px">Justificatif de domicile</div>
+                  <div style="border-radius:14px;border:1.5px dashed oklch(0.82 0.01 260);background:oklch(0.985 0.004 260);padding:14px 15px;display:flex;align-items:center;gap:12px">
+                    <div style="width:34px;height:34px;border-radius:10px;background:oklch(0.95 0.02 265);display:flex;align-items:center;justify-content:center;font:700 15px/1 'Inter',sans-serif;color:#223499;flex:none">↑</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font:600 13px/1.3 'Inter',sans-serif;color:oklch(0.28 0.02 260)">Déposer un fichier</div>
+                      <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Photo ou PDF · 10 Mo max</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:flex-start;gap:11px">
+                  <div style="width:24px;height:24px;border-radius:7px;background:oklch(0.62 0.19 35);display:flex;align-items:center;justify-content:center;font:700 13px/1 'Inter',sans-serif;color:#fff;flex:none">✓</div>
+                  <div style="flex:1;font:400 12.5px/1.55 'Inter',sans-serif;color:oklch(0.42 0.015 260);text-wrap:pretty">J'accepte le règlement intérieur de la formation.</div>
+                </div>
+              </div>
+
+              <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15)">
+                <button style="width:100%;border:none;border-radius:100px;padding:15px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Envoyer mon inscription →</button>
+              </div>
+            </div>
+          </div>
+          <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Formulaire entièrement composé par l'agent — les 6 types sont là : texte court, date, choix en boutons (≤ 3 options) ou menu déroulant au-delà, texte long, nombre (même châssis que la date), case à cocher. Chaque champ porte « obligatoire » ou « facultatif », jamais un astérisque muet.</p>
+        </div>
+
+        <!-- A5 confirmation -->
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+          <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">A5 · Fin — payante ou gratuite</div>
+          <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+            <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+                <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+                <div style="display:flex;gap:4px;align-items:center">
+                  <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+                </div>
+              </div>
+
+              <div style="flex:1;overflow:hidden;padding:34px 24px 20px;display:flex;flex-direction:column;gap:22px;align-items:center">
+                <div style="width:78px;height:78px;border-radius:50%;background:oklch(0.96 0.03 150);display:flex;align-items:center;justify-content:center;font:700 38px/1 'Inter',sans-serif;color:oklch(0.55 0.14 150)">✓</div>
+                <div style="text-align:center">
+                  <h2 style="margin:0;font:800 24px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Inscription confirmée</h2>
+                  <p style="margin:8px 0 0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Votre place est réservée. Une confirmation part à l'instant sur marie.leroy@email.fr.</p>
+                </div>
+
+                <div style="width:100%;border-radius:18px;border:1.5px solid oklch(0.91 0.008 260);overflow:hidden">
+                  <div style="padding:15px 17px;background:oklch(0.985 0.004 260)">
+                    <div style="font:700 15.5px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Premiers secours — PSC1</div>
+                    <div style="padding-top:4px;font:500 12.5px/1.4 'Inter',sans-serif;color:oklch(0.5 0.015 260)">samedi 12 septembre · 9h–17h<br>Maison des associations</div>
+                  </div>
+                  <div style="height:1px;background:oklch(0.93 0.008 260)"></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 17px">
+                    <span style="font:500 12.5px/1 'Inter',sans-serif;color:oklch(0.52 0.015 260)">Participant</span>
+                    <span style="font:700 13.5px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)">Marie Leroy</span>
+                  </div>
+                  <div style="height:1px;background:oklch(0.93 0.008 260)"></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 17px">
+                    <span style="font:500 12.5px/1 'Inter',sans-serif;color:oklch(0.52 0.015 260)">N° d'inscription</span>
+                    <span style="font:700 13.5px/1 ui-monospace,monospace;color:oklch(0.22 0.03 260)">IN-052914</span>
+                  </div>
+                  <div style="height:1px;background:oklch(0.93 0.008 260)"></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 17px;background:oklch(0.97 0.012 75)">
+                    <span style="font:600 12.5px/1 'Inter',sans-serif;color:oklch(0.42 0.015 260)">Montant payé</span>
+                    <span style="font:700 19px/1 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">45,00 €</span>
+                  </div>
+                </div>
+
+                <div style="width:100%;padding:13px 16px;border-radius:14px;background:oklch(0.96 0.02 265);font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.4 0.05 265);text-wrap:pretty">Formation gratuite : cet écran est identique, la dernière ligne affiche <strong style="font-weight:700">Gratuit</strong> au lieu du montant. Aucun détour de paiement, aucun autre changement.</div>
+              </div>
+
+              <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15);display:flex;flex-direction:column;gap:9px">
+                <button style="width:100%;border:none;border-radius:100px;padding:15px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Ajouter à mon agenda</button>
+                <button style="width:100%;border:1.5px solid oklch(0.9 0.008 260);background:#fff;border-radius:100px;padding:14px;color:oklch(0.35 0.02 260);font:600 14.5px/1 'Inter',sans-serif;cursor:pointer">Télécharger l'attestation</button>
+              </div>
+            </div>
+          </div>
+          <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Gratuit et payant partagent cet écran : une seule ligne diffère. Pas de billet PDF ici — une attestation d'inscription, document différent du billet A6.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ 1b · LIEN DIRECT ══ -->
+    <div id="1b" style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font:700 12px/1 'Inter',sans-serif;color:#fff;background:oklch(0.62 0.19 35);padding:7px 11px;border-radius:8px">1b</div>
+        <div style="font:700 17px/1 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">Entrée par lien direct</div>
+      </div>
+      <p style="margin:0;max-width:820px;font:400 13px/1.65 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Le citoyen arrive d'une affiche, d'un QR, d'un post ou d'un mail : il connaît déjà la formation, il veut s'inscrire. La fiche fusionne avec l'étape email — un seul écran, l'inscription commence au premier scroll. Deux écrans en moins que <a href="#1a">1a</a>.</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+        <!-- B1 -->
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+          <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">B1 · Arrivée + email fusionnés</div>
+          <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+            <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+                <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+                <div style="display:flex;gap:4px;align-items:center">
+                  <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+                </div>
+              </div>
+
+              <div style="flex:1;overflow:hidden;padding:16px 24px 20px;display:flex;flex-direction:column;gap:18px">
+                <div style="display:flex;align-items:center;gap:11px">
+                  <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#223499,#6f80e4);display:flex;align-items:center;justify-content:center;font:700 13px 'Outfit',sans-serif;color:#fff;flex:none">VC</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font:700 13px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Ville de Chartres</div>
+                    <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Inscription en ligne</div>
+                  </div>
+                </div>
+
+                <div>
+                  <h2 style="margin:0;font:800 25px/1.22 'Outfit',sans-serif;color:oklch(0.22 0.03 260);text-wrap:pretty">Atelier compostage</h2>
+                  <div style="padding-top:9px;font:600 13.5px/1.5 'Inter',sans-serif;color:oklch(0.4 0.02 260)">mercredi 16 septembre · 14h–16h<br>Jardin des Plantes</div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="font:700 17px/1 'Outfit',sans-serif;color:oklch(0.5 0.13 150)">Gratuit</div>
+                  <div style="width:1px;height:16px;background:oklch(0.88 0.01 260)"></div>
+                  <div style="display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:100px;background:oklch(0.96 0.03 150)">
+                    <div style="width:7px;height:7px;border-radius:50%;background:oklch(0.6 0.14 150)"></div>
+                    <span style="font:600 11.5px/1 'Inter',sans-serif;color:oklch(0.44 0.08 150)">Il reste 11 places sur 20</span>
+                  </div>
+                </div>
+
+                <div style="height:1px;background:oklch(0.93 0.008 260)"></div>
+
+                <div>
+                  <div style="font:700 17px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Commençons par votre email</div>
+                  <p style="margin:7px 0 0;font:400 13px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Nous y envoyons un code, puis la confirmation de votre inscription.</p>
+                </div>
+
+                <div>
+                  <div style="font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:oklch(0.55 0.015 260);margin-bottom:7px">Votre email</div>
+                  <div style="height:54px;border-radius:14px;border:2px solid oklch(0.62 0.19 35);background:oklch(0.99 0.006 35);display:flex;align-items:center;padding:0 16px;font:500 15px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)">marie.leroy@email.fr</div>
+                </div>
+
+                <div style="padding:13px 16px;border-radius:14px;background:oklch(0.97 0.012 75);font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.45 0.02 260);text-wrap:pretty">Inscription en <strong style="font-weight:700;color:oklch(0.24 0.05 265)">2 minutes</strong> · aucun compte à créer · vous pourrez annuler jusqu'au 14 septembre.</div>
+              </div>
+
+              <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15)">
+                <button style="width:100%;border:none;border-radius:100px;padding:15px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Recevoir mon code →</button>
+              </div>
+            </div>
+          </div>
+          <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Pas de stepper ici : trois écrans, une intention. La promesse de durée et la possibilité d'annuler remplacent la barre de progression.</p>
+        </div>
+
+        <!-- B2 -->
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+          <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">B2 · Une page, tout le formulaire</div>
+          <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+            <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+                <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+                <div style="display:flex;gap:4px;align-items:center">
+                  <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                  <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+                </div>
+              </div>
+
+              <div style="flex:none;padding:14px 24px 12px;display:flex;align-items:center;gap:11px;border-bottom:1px solid oklch(0.94 0.006 260)">
+                <div style="width:30px;height:30px;border-radius:50%;background:oklch(0.96 0.03 150);display:flex;align-items:center;justify-content:center;font:700 14px/1 'Inter',sans-serif;color:oklch(0.55 0.14 150);flex:none">✓</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:700 13px/1.25 'Inter',sans-serif;color:oklch(0.22 0.03 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">marie.leroy@email.fr</div>
+                  <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Email vérifié · Atelier compostage</div>
+                </div>
+              </div>
+
+              <div style="flex:1;overflow:hidden;padding:18px 24px 20px;display:flex;flex-direction:column;gap:16px">
+                <h2 style="margin:0;font:800 21px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Vos informations</h2>
+
+                <div>
+                  <div style="font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:oklch(0.55 0.015 260);margin-bottom:7px">Nom du participant</div>
+                  <div style="height:50px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;padding:0 15px;font:500 14.5px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)">Marie Leroy</div>
+                </div>
+
+                <div>
+                  <div style="font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:oklch(0.55 0.015 260);margin-bottom:7px">Nombre de participants</div>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:50px;height:50px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;justify-content:center;font:600 20px/1 'Inter',sans-serif;color:oklch(0.45 0.02 260)">−</div>
+                    <div style="flex:1;height:50px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;justify-content:center;font:700 17px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)">2</div>
+                    <div style="width:50px;height:50px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;justify-content:center;font:600 20px/1 'Inter',sans-serif;color:oklch(0.45 0.02 260)">+</div>
+                  </div>
+                  <div style="padding-top:7px;font:500 11.5px/1.4 'Inter',sans-serif;color:oklch(0.55 0.015 260)">4 maximum par inscription</div>
+                </div>
+
+                <div>
+                  <div style="font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:oklch(0.55 0.015 260);margin-bottom:7px">Quartier de résidence</div>
+                  <div style="height:50px;border-radius:14px;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;justify-content:space-between;padding:0 15px;font:500 14.5px/1 'Inter',sans-serif;color:oklch(0.22 0.03 260)"><span>Beaulieu</span><span style="color:oklch(0.6 0.015 260)">▾</span></div>
+                  <div style="padding-top:7px;font:500 11.5px/1.4 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Au-delà de 3 options, l'agent obtient un menu déroulant</div>
+                </div>
+
+                <div style="display:flex;align-items:flex-start;gap:11px">
+                  <div style="width:24px;height:24px;border-radius:7px;background:oklch(0.62 0.19 35);display:flex;align-items:center;justify-content:center;font:700 13px/1 'Inter',sans-serif;color:#fff;flex:none">✓</div>
+                  <div style="flex:1;font:400 12.5px/1.55 'Inter',sans-serif;color:oklch(0.42 0.015 260);text-wrap:pretty">J'autorise la prise de photos pendant l'atelier.</div>
+                </div>
+              </div>
+
+              <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15)">
+                <button style="width:100%;border:none;border-radius:100px;padding:15px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Valider mon inscription →</button>
+              </div>
+            </div>
+          </div>
+          <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">L'email vérifié devient un bandeau permanent en tête plutôt qu'une étape franchie — le contexte reste visible sans coûter de place.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ ÉTATS COMMUNS ══ -->
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div style="max-width:840px;display:flex;flex-direction:column;gap:8px">
+      <h2 style="margin:0;font:700 21px/1.25 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">États du parcours — communs à <a href="#1a">1a</a> et <a href="#1b">1b</a></h2>
+      <p style="margin:0;font:400 13px/1.65 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Chaque état est aussi un email : le citoyen le retrouve sur son écran « Mon inscription » et dans sa boîte. Un seul principe de couleur — vert = c'est fait, marine = en cours côté administration, corail = une action vous attend, gris = terminé sans suite.</p>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+      <!-- E1 liste d'attente -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+        <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">E1 · Liste d'attente</div>
+        <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+          <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+              <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+              <div style="display:flex;gap:4px;align-items:center">
+                <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+              </div>
+            </div>
+
+            <div style="flex:1;overflow:hidden;padding:34px 24px 20px;display:flex;flex-direction:column;gap:20px;align-items:center">
+              <div style="width:78px;height:78px;border-radius:50%;background:oklch(0.95 0.02 265);display:flex;align-items:center;justify-content:center;font:700 30px/1 'Outfit',sans-serif;color:#223499">3</div>
+              <div style="text-align:center">
+                <h2 style="margin:0;font:800 23px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Vous êtes 3<sup style="font-size:.6em;font-weight:700">e</sup> sur la liste d'attente</h2>
+                <p style="margin:8px 0 0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">L'atelier aquarelle est complet. Votre demande est enregistrée — rien de plus à faire pour l'instant.</p>
+              </div>
+
+              <div style="width:100%;border-radius:18px;background:oklch(0.97 0.012 75);padding:17px 18px;display:flex;flex-direction:column;gap:13px">
+                <div style="font:700 12.5px/1 'Inter',sans-serif;letter-spacing:.03em;color:oklch(0.35 0.02 260)">CE QUI SE PASSERA</div>
+                <div style="display:flex;gap:12px">
+                  <div style="width:24px;height:24px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11.5px/1 'Inter',sans-serif;flex:none">1</div>
+                  <div style="flex:1;font:400 12.5px/1.55 'Inter',sans-serif;color:oklch(0.42 0.015 260);text-wrap:pretty">Une place se libère et c'est votre tour : vous recevez un email.</div>
+                </div>
+                <div style="display:flex;gap:12px">
+                  <div style="width:24px;height:24px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11.5px/1 'Inter',sans-serif;flex:none">2</div>
+                  <div style="flex:1;font:400 12.5px/1.55 'Inter',sans-serif;color:oklch(0.42 0.015 260);text-wrap:pretty">Vous avez <strong style="font-weight:700;color:oklch(0.22 0.03 260)">48 heures</strong> pour confirmer votre place.</div>
+                </div>
+                <div style="display:flex;gap:12px">
+                  <div style="width:24px;height:24px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11.5px/1 'Inter',sans-serif;flex:none">3</div>
+                  <div style="flex:1;font:400 12.5px/1.55 'Inter',sans-serif;color:oklch(0.42 0.015 260);text-wrap:pretty">Sans réponse, la place passe à la personne suivante.</div>
+                </div>
+              </div>
+
+              <div style="width:100%;border-radius:18px;border:1.5px solid oklch(0.91 0.008 260);padding:15px 17px">
+                <div style="font:700 14.5px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Initiation à l'aquarelle</div>
+                <div style="padding-top:4px;font:500 12.5px/1.4 'Inter',sans-serif;color:oklch(0.5 0.015 260)">jeudi 24 septembre · 18h–20h · 30,00 €</div>
+                <div style="padding-top:8px;font:500 12px/1.4 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Vous ne payez qu'après confirmation de votre place.</div>
+              </div>
+            </div>
+
+            <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15)">
+              <button style="width:100%;border:1.5px solid oklch(0.9 0.008 260);background:#fff;border-radius:100px;padding:14px;color:oklch(0.4 0.02 260);font:600 14.5px/1 'Inter',sans-serif;cursor:pointer">Quitter la liste d'attente</button>
+            </div>
+          </div>
+        </div>
+        <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Le rang est le chiffre héros — c'est la seule chose que le citoyen revient vérifier. Marine, pas corail : rien ne lui est demandé. La seule action offerte est de partir.</p>
+      </div>
+
+      <!-- E2 justificatif en attente -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+        <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">E2 · Justificatif en vérification</div>
+        <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+          <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+              <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+              <div style="display:flex;gap:4px;align-items:center">
+                <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+              </div>
+            </div>
+
+            <div style="flex:1;overflow:hidden;padding:30px 24px 20px;display:flex;flex-direction:column;gap:20px;align-items:center">
+              <div style="width:78px;height:78px;border-radius:50%;background:oklch(0.95 0.02 265);display:flex;align-items:center;justify-content:center;font:700 32px/1 'Inter',sans-serif;color:#223499">⏱</div>
+              <div style="text-align:center">
+                <h2 style="margin:0;font:800 23px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Votre justificatif est en cours de vérification</h2>
+                <p style="margin:8px 0 0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Un agent le contrôle sous 48 h ouvrées. Vous n'avez rien à faire — nous vous écrivons dès que c'est validé.</p>
+              </div>
+
+              <div style="width:100%;display:flex;flex-direction:column;gap:0">
+                <div style="display:flex;gap:13px">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:none">
+                    <div style="width:26px;height:26px;border-radius:50%;background:oklch(0.6 0.14 150);color:#fff;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Inter',sans-serif">✓</div>
+                    <div style="width:2px;flex:1;background:oklch(0.6 0.14 150);min-height:26px"></div>
+                  </div>
+                  <div style="flex:1;padding-bottom:16px">
+                    <div style="font:700 14px/1.3 'Inter',sans-serif;color:oklch(0.22 0.03 260)">Inscription envoyée</div>
+                    <div style="font:500 12px/1.4 'Inter',sans-serif;color:oklch(0.55 0.015 260)">27 août · 09:38</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:13px">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:none">
+                    <div style="width:26px;height:26px;border-radius:50%;background:#223499;color:#fff;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Inter',sans-serif">2</div>
+                    <div style="width:2px;flex:1;background:oklch(0.9 0.008 260);min-height:26px"></div>
+                  </div>
+                  <div style="flex:1;padding-bottom:16px">
+                    <div style="font:700 14px/1.3 'Inter',sans-serif;color:#223499">Vérification du justificatif</div>
+                    <div style="font:500 12px/1.4 'Inter',sans-serif;color:oklch(0.5 0.05 265)">en cours · réponse avant le 29 août</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:13px">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:none">
+                    <div style="width:26px;height:26px;border-radius:50%;background:oklch(0.94 0.006 260);color:oklch(0.6 0.01 260);display:flex;align-items:center;justify-content:center;font:700 12px/1 'Inter',sans-serif">3</div>
+                    <div style="width:2px;flex:1;background:oklch(0.9 0.008 260);min-height:26px"></div>
+                  </div>
+                  <div style="flex:1;padding-bottom:16px">
+                    <div style="font:600 14px/1.3 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Paiement de 45,00 €</div>
+                    <div style="font:500 12px/1.4 'Inter',sans-serif;color:oklch(0.62 0.012 260)">par email, après validation</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:13px">
+                  <div style="flex:none;width:26px;height:26px;border-radius:50%;background:oklch(0.94 0.006 260);color:oklch(0.6 0.01 260);display:flex;align-items:center;justify-content:center;font:700 12px/1 'Inter',sans-serif">4</div>
+                  <div style="flex:1">
+                    <div style="font:600 14px/1.3 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Place confirmée</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="width:100%;border-radius:16px;border:1.5px solid oklch(0.91 0.008 260);padding:13px 15px;display:flex;align-items:center;gap:12px">
+                <div style="width:38px;height:46px;border-radius:7px;background:oklch(0.95 0.01 260);display:flex;align-items:center;justify-content:center;font:700 11px/1 'Inter',sans-serif;color:oklch(0.45 0.02 260);flex:none">PDF</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:600 13px/1.3 'Inter',sans-serif;color:oklch(0.25 0.02 260)">justificatif-domicile.pdf</div>
+                  <div style="font:500 11.5px/1.3 'Inter',sans-serif;color:oklch(0.55 0.015 260)">déposé le 27 août · 1,2 Mo</div>
+                </div>
+                <div style="font:600 12px/1 'Inter',sans-serif;color:#0080c0;flex:none">Remplacer</div>
+              </div>
+            </div>
+
+            <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15)">
+              <button style="width:100%;border:1.5px solid oklch(0.9 0.008 260);background:#fff;border-radius:100px;padding:14px;color:oklch(0.4 0.02 260);font:600 14.5px/1 'Inter',sans-serif;cursor:pointer">Annuler ma demande</button>
+            </div>
+          </div>
+        </div>
+        <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Une frise à 4 temps, avec un délai daté plutôt qu'un « bientôt ». Le fichier déposé reste remplaçable sans repasser par le formulaire — c'est ce qui évite les doublons d'inscription.</p>
+      </div>
+
+      <!-- E3 refusé -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+        <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">E3 · Justificatif refusé</div>
+        <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+          <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+              <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+              <div style="display:flex;gap:4px;align-items:center">
+                <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+              </div>
+            </div>
+
+            <div style="flex:1;overflow:hidden;padding:30px 24px 20px;display:flex;flex-direction:column;gap:20px;align-items:center">
+              <div style="width:78px;height:78px;border-radius:50%;background:oklch(0.96 0.03 35);display:flex;align-items:center;justify-content:center;font:700 34px/1 'Inter',sans-serif;color:oklch(0.55 0.17 35)">!</div>
+              <div style="text-align:center">
+                <h2 style="margin:0;font:800 23px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Votre justificatif n'a pas pu être accepté</h2>
+                <p style="margin:8px 0 0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Votre place reste réservée jusqu'au 5 septembre. Déposez un nouveau document et la vérification repart.</p>
+              </div>
+
+              <div style="width:100%;border-radius:18px;background:oklch(0.97 0.025 35);border:1.5px solid oklch(0.88 0.07 35);padding:17px 18px">
+                <div style="font:700 12px/1 'Inter',sans-serif;letter-spacing:.03em;color:oklch(0.5 0.16 35)">MOTIF INDIQUÉ PAR L'AGENT</div>
+                <div style="padding-top:9px;font:500 14px/1.6 'Inter',sans-serif;color:oklch(0.32 0.08 35);text-wrap:pretty">Le document date de plus de 3 mois (facture de janvier). Merci d'envoyer un justificatif de domicile émis après le 27 mai.</div>
+                <div style="padding-top:11px;font:500 12px/1.4 'Inter',sans-serif;color:oklch(0.48 0.09 35)">Service des sports · 27 août, 14:12</div>
+              </div>
+
+              <div style="width:100%;border-radius:16px;border:1.5px solid oklch(0.91 0.008 260);padding:13px 15px;display:flex;align-items:center;gap:12px;background:oklch(0.985 0.004 260)">
+                <div style="width:38px;height:46px;border-radius:7px;background:oklch(0.94 0.006 260);display:flex;align-items:center;justify-content:center;font:700 11px/1 'Inter',sans-serif;color:oklch(0.55 0.015 260);flex:none">PDF</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:600 13px/1.3 'Inter',sans-serif;color:oklch(0.45 0.015 260);text-decoration:line-through;text-decoration-color:oklch(0.75 0.01 260)">facture-janvier.pdf</div>
+                  <div style="font:500 11.5px/1.3 'Inter',sans-serif;color:oklch(0.58 0.012 260)">refusé le 27 août</div>
+                </div>
+              </div>
+
+              <div style="width:100%;border-radius:16px;border:2px dashed oklch(0.62 0.19 35);background:oklch(0.99 0.008 35);padding:18px 16px;display:flex;align-items:center;gap:13px">
+                <div style="width:38px;height:38px;border-radius:11px;background:oklch(0.62 0.19 35);display:flex;align-items:center;justify-content:center;font:700 17px/1 'Inter',sans-serif;color:#fff;flex:none">↑</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:700 14px/1.3 'Inter',sans-serif;color:oklch(0.35 0.13 35)">Déposer un nouveau justificatif</div>
+                  <div style="font:500 11.5px/1.35 'Inter',sans-serif;color:oklch(0.48 0.09 35)">Photo ou PDF · 10 Mo max</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15);display:flex;flex-direction:column;gap:9px">
+              <button style="width:100%;border:none;border-radius:100px;padding:15px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Envoyer le nouveau document</button>
+              <div style="text-align:center;font:500 12px/1.4 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Une question ? 02 37 00 00 00 · service des sports</div>
+            </div>
+          </div>
+        </div>
+        <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Le motif de l'agent est cité mot pour mot, daté et signé du service — pas reformulé par le système. La place tenue jusqu'à une date évite l'abandon, et un numéro de téléphone clôt les cas bloqués.</p>
+      </div>
+
+      <!-- E4 à payer -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+        <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">E4 · Validé — à payer</div>
+        <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+          <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+              <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+              <div style="display:flex;gap:4px;align-items:center">
+                <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+              </div>
+            </div>
+
+            <div style="flex:1;overflow:hidden;padding:30px 24px 20px;display:flex;flex-direction:column;gap:19px;align-items:center">
+              <div style="width:78px;height:78px;border-radius:50%;background:oklch(0.96 0.03 150);display:flex;align-items:center;justify-content:center;font:700 38px/1 'Inter',sans-serif;color:oklch(0.55 0.14 150)">✓</div>
+              <div style="text-align:center">
+                <h2 style="margin:0;font:800 23px/1.25 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Justificatif validé — il reste à payer</h2>
+                <p style="margin:8px 0 0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.48 0.015 260);text-wrap:pretty">Votre dossier est accepté. Réglez la formation pour que votre place soit définitive.</p>
+              </div>
+
+              <div style="width:100%;border-radius:18px;background:oklch(0.24 0.05 265);padding:19px 20px;display:flex;flex-direction:column;gap:5px">
+                <div style="font:600 11.5px/1 'Inter',sans-serif;letter-spacing:.05em;color:oklch(0.75 0.06 265)">À RÉGLER AVANT LE</div>
+                <div style="font:800 25px/1.15 'Outfit',sans-serif;color:#fff">lundi 1<sup style="font-size:.55em;font-weight:700">er</sup> septembre, 23h59</div>
+                <div style="padding-top:7px;font:500 12.5px/1.5 'Inter',sans-serif;color:oklch(0.8 0.05 265);text-wrap:pretty">Passé ce délai, la place est proposée à la personne suivante sur la liste d'attente.</div>
+              </div>
+
+              <div style="width:100%;border-radius:18px;border:1.5px solid oklch(0.91 0.008 260);overflow:hidden">
+                <div style="padding:15px 17px">
+                  <div style="font:700 15px/1.3 'Outfit',sans-serif;color:oklch(0.22 0.03 260)">Premiers secours — PSC1</div>
+                  <div style="padding-top:4px;font:500 12.5px/1.4 'Inter',sans-serif;color:oklch(0.5 0.015 260)">samedi 12 septembre · 9h–17h</div>
+                </div>
+                <div style="height:1px;background:oklch(0.93 0.008 260)"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 17px;background:oklch(0.97 0.012 75)">
+                  <span style="font:600 12.5px/1 'Inter',sans-serif;color:oklch(0.42 0.015 260)">Montant dû</span>
+                  <span style="font:800 22px/1 'Outfit',sans-serif;color:oklch(0.24 0.05 265)">45,00 €</span>
+                </div>
+              </div>
+
+              <div style="width:100%;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.52 0.015 260);text-align:center;text-wrap:pretty">Paiement sécurisé par carte bancaire, opéré par AREGIE pour la Ville de Chartres.</div>
+            </div>
+
+            <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15)">
+              <button style="width:100%;border:none;border-radius:100px;padding:15px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Payer 45,00 € →</button>
+            </div>
+          </div>
+        </div>
+        <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Seul état où une action est attendue : la date limite occupe un bloc marine plein, et le montant est dans le bouton — l'usager sait ce qu'il engage avant d'appuyer.</p>
+      </div>
+
+      <!-- E5 expirée -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+        <div style="font:600 12px/1 ui-monospace,monospace;color:#fff;background:oklch(0.24 0.05 265);padding:6px 12px;border-radius:20px">E5 · Inscription expirée</div>
+        <div style="background:#15182b;border-radius:46px;padding:12px;box-shadow:0 30px 60px -20px rgba(20,25,60,.35)">
+          <div style="width:380px;height:824px;background:#fff;border-radius:36px;overflow:hidden;display:flex;flex-direction:column">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex:none">
+              <span style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.24 0.02 260)">09:41</span>
+              <div style="display:flex;gap:4px;align-items:center">
+                <div style="width:16px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                <div style="width:14px;height:8px;border-radius:2px;background:oklch(0.24 0.02 260)"></div>
+                <div style="width:20px;height:9px;border-radius:2px;border:1.5px solid oklch(0.24 0.02 260)"></div>
+              </div>
+            </div>
+
+            <div style="flex:1;overflow:hidden;padding:30px 24px 20px;display:flex;flex-direction:column;gap:20px;align-items:center">
+              <div style="width:78px;height:78px;border-radius:50%;background:oklch(0.94 0.006 260);display:flex;align-items:center;justify-content:center;font:700 32px/1 'Inter',sans-serif;color:oklch(0.55 0.015 260)">⏱</div>
+              <div style="text-align:center">
+                <h2 style="margin:0;font:800 23px/1.25 'Outfit',sans-serif;color:oklch(0.35 0.02 260)">Le délai de paiement est passé</h2>
+                <p style="margin:8px 0 0;font:400 13.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Votre inscription au PSC1 du 12 septembre a expiré le 1<sup style="font-size:.7em">er</sup> septembre à 23h59, faute de paiement. La place a été rendue disponible.</p>
+              </div>
+
+              <div style="width:100%;border-radius:18px;border:1.5px solid oklch(0.92 0.006 260);background:oklch(0.985 0.004 260);overflow:hidden">
+                <div style="padding:15px 17px">
+                  <div style="font:700 15px/1.3 'Outfit',sans-serif;color:oklch(0.45 0.015 260)">Premiers secours — PSC1</div>
+                  <div style="padding-top:4px;font:500 12.5px/1.4 'Inter',sans-serif;color:oklch(0.58 0.012 260)">IN-052914 · justificatif validé le 28 août</div>
+                </div>
+                <div style="height:1px;background:oklch(0.93 0.008 260)"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 17px">
+                  <span style="font:500 12.5px/1 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Statut</span>
+                  <span style="padding:6px 12px;border-radius:100px;background:oklch(0.93 0.008 260);font:600 12px/1 'Inter',sans-serif;color:oklch(0.42 0.015 260)">Expirée</span>
+                </div>
+                <div style="height:1px;background:oklch(0.93 0.008 260)"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 17px">
+                  <span style="font:500 12.5px/1 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Montant prélevé</span>
+                  <span style="font:700 13.5px/1 'Inter',sans-serif;color:oklch(0.45 0.015 260)">aucun</span>
+                </div>
+              </div>
+
+              <div style="width:100%;border-radius:16px;background:oklch(0.97 0.012 75);padding:15px 17px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.45 0.02 260);text-wrap:pretty">Votre justificatif reste conservé 6 mois : si vous vous réinscrivez à une autre session, vous n'aurez pas à le redéposer.</div>
+            </div>
+
+            <div style="flex:none;padding:14px 24px 22px;background:#fff;box-shadow:0 -8px 24px -12px rgba(20,25,60,.15);display:flex;flex-direction:column;gap:9px">
+              <button style="width:100%;border:none;border-radius:100px;padding:15px;background:oklch(0.62 0.19 35);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 10px 24px -8px oklch(0.62 0.19 35 / .6)">Voir les prochaines sessions</button>
+              <button style="width:100%;border:1.5px solid oklch(0.9 0.008 260);background:#fff;border-radius:100px;padding:14px;color:oklch(0.4 0.02 260);font:600 14.5px/1 'Inter',sans-serif;cursor:pointer">Contacter le service</button>
+            </div>
+          </div>
+        </div>
+        <p style="margin:0;width:380px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Tout en gris : aucune action n'est due, l'affaire est close. Deux précisions qui coupent les appels au service : rien n'a été prélevé, et le justificatif reste conservé.</p>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}"></script>
+</body>
+</html>

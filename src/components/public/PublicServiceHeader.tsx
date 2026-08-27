@@ -62,7 +62,11 @@ export function PublicServiceHeader({
           {service.name}
         </p>
         <p className="text-[11px] leading-[1.3] font-medium text-ink-soft md:text-[15px]">
-          {service.serviceType === 'factures' ? 'Paiement en ligne' : 'Réservation en ligne'}
+          {service.serviceType === 'factures'
+            ? 'Paiement en ligne'
+            : service.serviceType === 'inscription'
+              ? 'Inscription en ligne'
+              : 'Réservation en ligne'}
         </p>
       </div>
     </motion.div>

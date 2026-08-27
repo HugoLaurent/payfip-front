@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Image as ImageIcon } from 'lucide-react'
 import { apiCall, apiUpload, GATEWAY_URL } from '@/lib/api'
 import { TariffsManager } from '@/components/org/TariffsManager'
+import { EventsManager } from '@/components/org/EventsManager'
 import { OpeningScheduleManager } from '@/components/org/OpeningScheduleManager'
 import { Card, DangerButton, LoadError, Modal, SecondaryButton, StatusBadge, Textarea } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
@@ -56,7 +57,7 @@ export function ServiceAdmin() {
   const [closedMessageInput, setClosedMessageInput] = useState('')
   const [savingClosedMessage, setSavingClosedMessage] = useState(false)
   const [closedMessageError, setClosedMessageError] = useState<string | null>(null)
-  const [tab, setTab] = useState<'tariffs' | 'settings'>('tariffs')
+  const [tab, setTab] = useState<'tariffs' | 'events' | 'settings'>('tariffs')
 
   useEffect(() => {
     setClosedMessageInput(service?.closedMessage ?? '')
@@ -193,8 +194,11 @@ export function ServiceAdmin() {
     ? `${GATEWAY_URL}/services/${service.id}/cover${coverCacheBust ? `?v=${coverCacheBust}` : ''}`
     : null
   const hasTariffsTab = service.serviceType === 'billetterie'
-  const showTariffs = hasTariffsTab && tab === 'tariffs'
-  const showSettings = !hasTariffsTab || tab === 'settings'
+  const hasEventsTab = service.serviceType === 'inscription'
+  const effectiveTab = tab === 'tariffs' && !hasTariffsTab && hasEventsTab ? 'events' : tab
+  const showTariffs = hasTariffsTab && effectiveTab === 'tariffs'
+  const showEvents = hasEventsTab && effectiveTab === 'events'
+  const showSettings = (!hasTariffsTab && !hasEventsTab) || effectiveTab === 'settings'
 
   return (
     <div>
@@ -261,22 +265,35 @@ export function ServiceAdmin() {
         </div>
       </div>
 
-      {hasTariffsTab && (
+      {(hasTariffsTab || hasEventsTab) && (
         <div className="mb-4 flex gap-1.5">
-          <button
-            type="button"
-            onClick={() => setTab('tariffs')}
-            className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
-              tab === 'tariffs' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
-            }`}
-          >
-            Tarifs
-          </button>
+          {hasTariffsTab && (
+            <button
+              type="button"
+              onClick={() => setTab('tariffs')}
+              className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
+                effectiveTab === 'tariffs' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
+              }`}
+            >
+              Tarifs
+            </button>
+          )}
+          {hasEventsTab && (
+            <button
+              type="button"
+              onClick={() => setTab('events')}
+              className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
+                effectiveTab === 'events' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
+              }`}
+            >
+              Évènements
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setTab('settings')}
             className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
-              tab === 'settings' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
+              effectiveTab === 'settings' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
             }`}
           >
             Paramètres
@@ -285,6 +302,7 @@ export function ServiceAdmin() {
       )}
 
       {showTariffs && <TariffsManager auth={auth} service={service} />}
+      {showEvents && <EventsManager auth={auth} service={service} />}
 
       {showSettings && (
         <>

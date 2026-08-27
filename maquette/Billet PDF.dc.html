@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#f2f5fb;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+  a{color:#e14d28;text-decoration:none}
+  a:hover{color:#b63613}
+</style>
+</helmet>
+
+<section style="padding:56px 44px 110px;display:flex;flex-direction:column;gap:44px">
+
+  <div style="max-width:820px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font:700 11px/1 'Inter',sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#b63613;background:#ffebe4;padding:6px 10px;border-radius:8px">2a</div>
+      <div style="font:600 12px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#7b8189">AREGIE — Billet PDF · A6 105×148 mm · 297×420 pt</div>
+    </div>
+    <h1 style="margin:0;font:800 30px/1.2 'Outfit',sans-serif;letter-spacing:-.02em;color:#121b29">Trois zones, deux aplats, zéro dégradé</h1>
+    <p style="margin:0;font:400 14.5px/1.65 'Inter',sans-serif;color:#4f5661;text-wrap:pretty">Découpage vertical strict : <strong style="font-weight:600;color:#121b29">identité</strong> (aplat marine, logo du service), <strong style="font-weight:600;color:#121b29">info-visite</strong> (blanc, tarif et date en gras, prix dans un encart corail clair), <strong style="font-weight:600;color:#121b29">QR</strong> (blanc, logo en pastille centrale). Chaque information reste portée par le texte et la position : en noir &amp; blanc, seuls les aplats deviennent gris, la hiérarchie tient. Deux aplats pleins seulement (marine #223499, corail #e14d28) + une teinte (#ffebe4) — tout est dessinable en <code style="font:500 13px/1 ui-monospace,monospace;color:#b63613">rect()</code> / <code style="font:500 13px/1 ui-monospace,monospace;color:#b63613">roundedRect()</code> pdfkit.</p>
+    <p style="margin:2px 0 0;font:500 13px/1.6 'Inter',sans-serif;color:#7b8189">Maquettes affichées à l'échelle 2× (1 pt = 2 px). Toutes les cotes ci-dessous sont en points, origine coin haut-gauche.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:#121b29;padding:6px 9px;border-radius:7px">01</span><span style="font:600 14px/1 'Inter',sans-serif;color:#121b29">Service avec logo</span></div>
+      <dc-import name="Billet A6" hint-size="594px,840px"></dc-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:#121b29;padding:6px 9px;border-radius:7px">02</span><span style="font:600 14px/1 'Inter',sans-serif;color:#121b29">Repli sans logo — initiales du service</span></div>
+      <dc-import name="Billet A6" has-logo="{{ false }}" service-name="Musée des Beaux-Arts" initials="MB" tariff="Plein tarif" price="7,00 €" ticket-no="AR-084219-01" order-ref="AR-084219" hint-size="594px,840px"></dc-import>
+      <p style="margin:0;max-width:594px;font:400 12.5px/1.6 'Inter',sans-serif;color:#4f5661;text-wrap:pretty">Pas de logo : la pastille blanche reste, remplie des 2 initiales du service en Helvetica-Bold marine. Même géométrie, aucun trou dans la mise en page. Au centre du QR, la pastille passe en marine plein avec les initiales en blanc.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:#121b29;padding:6px 9px;border-radius:7px">03</span><span style="font:600 14px/1 'Inter',sans-serif;color:#121b29">Contrôle imprimante N&amp;B</span></div>
+      <div style="filter:grayscale(1) contrast(1.06);width:594px">
+        <dc-import name="Billet A6" hint-size="594px,840px"></dc-import>
+      </div>
+      <p style="margin:0;max-width:594px;font:400 12.5px/1.6 'Inter',sans-serif;color:#4f5661;text-wrap:pretty">Marine → gris 30 %, corail → gris 45 %, teinte corail → gris 92 % : les deux bandeaux restent distincts l'un de l'autre et du blanc. Le prix reste lisible parce qu'il est en gras 20 pt, pas parce qu'il est corail.</p>
+    </div>
+
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+
+    <div style="width:560px;background:#fff;border-radius:22px;padding:28px 30px;box-shadow:0 1px 3px rgba(18,27,41,.07);display:flex;flex-direction:column;gap:18px">
+      <div style="font:700 17px/1 'Outfit',sans-serif;color:#121b29">Cotes pdfkit — zone par zone</div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:#223499"></span><span style="font:700 13.5px/1 'Inter',sans-serif;color:#121b29">Zone identité</span><span style="font:500 12px/1 ui-monospace,monospace;color:#7b8189">y 0 → 104</span></div>
+          <div style="font:400 13px/1.7 'Inter',sans-serif;color:#4f5661">Aplat <code style="font:500 12.5px ui-monospace,monospace;color:#b63613">rect(0,0,297,104)</code> #223499 · pastille logo <code style="font:500 12.5px ui-monospace,monospace;color:#b63613">roundedRect(20,20,48,48,12)</code> blanche, logo 32×32 centré (r 8) · nom du service x 80 y 24, Helvetica-Bold 15 pt blanc, largeur max 197 (2 lignes possibles, interligne 17) · organisme x 80, Helvetica 8.5 pt #a9b3e3.</div>
+        </div>
+        <div style="height:1px;background:#dee1e7"></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:#e14d28"></span><span style="font:700 13.5px/1 'Inter',sans-serif;color:#121b29">Bandeau titre</span><span style="font:500 12px/1 ui-monospace,monospace;color:#7b8189">y 104 → 130</span></div>
+          <div style="font:400 13px/1.7 'Inter',sans-serif;color:#4f5661"><code style="font:500 12.5px ui-monospace,monospace;color:#b63613">rect(0,104,297,26)</code> #e14d28 · « BILLET D'ENTRÉE » centré, Helvetica-Bold 9.5 pt blanc, <code style="font:500 12.5px ui-monospace,monospace;color:#b63613">characterSpacing: 1.7</code>.</div>
+        </div>
+        <div style="height:1px;background:#dee1e7"></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:#ffebe4;box-shadow:inset 0 0 0 1px #ffc5b4"></span><span style="font:700 13.5px/1 'Inter',sans-serif;color:#121b29">Zone info-visite</span><span style="font:500 12px/1 ui-monospace,monospace;color:#7b8189">y 130 → 225</span></div>
+          <div style="font:400 13px/1.7 'Inter',sans-serif;color:#4f5661">Colonne gauche x 20, largeur 145 : label « TARIF » y 148 Helvetica 7 pt #7b8189 spacing .8 → valeur y 160 Helvetica-Bold 15 pt #121b29 · label « DATE DE VISITE » y 191 → valeur y 203 Helvetica-Bold 12 pt.<br>Encart prix <code style="font:500 12.5px ui-monospace,monospace;color:#b63613">roundedRect(185,144,92,60,10)</code> #ffebe4 : « PRIX PAYÉ » 7 pt #b63613 centré y 162, montant Helvetica-Bold 20 pt #b63613 centré y 176.<br>Filet <code style="font:500 12.5px ui-monospace,monospace;color:#b63613">rect(20,224,257,1)</code> #dee1e7.</div>
+        </div>
+        <div style="height:1px;background:#dee1e7"></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:#121b29"></span><span style="font:700 13.5px/1 'Inter',sans-serif;color:#121b29">Zone QR</span><span style="font:500 12px/1 ui-monospace,monospace;color:#7b8189">y 225 → 380</span></div>
+          <div style="font:400 13px/1.7 'Inter',sans-serif;color:#4f5661">QR 108×108 en <code style="font:500 12.5px ui-monospace,monospace;color:#b63613">(20,244)</code>, module 4.32 pt (25×25), noir #121b29 sur blanc pur — pas de teinte sous le QR.<br>Pastille centrale <code style="font:500 12.5px ui-monospace,monospace;color:#b63613">roundedRect(61,285,26,26,7)</code> blanche, logo 19×19 centré : 26 pt de côté = <strong style="font-weight:600;color:#121b29">5,8 % de la surface</strong> du QR (plafond conseillé 48 pt = 19,7 % ; rester à 26 garde une marge confortable en correction H).<br>Colonne droite x 144, largeur 133 : « N° DE BILLET » y 244 → valeur Helvetica-Bold 11 pt spacing .3 · « COMMANDE » y 288 → valeur Helvetica-Bold 9.5 pt #4f5661 · consigne y 330, Helvetica 8 pt #4f5661, interligne 12.</div>
+        </div>
+        <div style="height:1px;background:#dee1e7"></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border-radius:4px;background:#f2f5fb;box-shadow:inset 0 0 0 1px #dee1e7"></span><span style="font:700 13.5px/1 'Inter',sans-serif;color:#121b29">Pied</span><span style="font:500 12px/1 ui-monospace,monospace;color:#7b8189">y 380 → 420</span></div>
+          <div style="font:400 13px/1.7 'Inter',sans-serif;color:#4f5661">Pointillé de découpe y 380 : <code style="font:500 12.5px ui-monospace,monospace;color:#b63613">dash(6, {space: 5})</code> #dee1e7 · aplat <code style="font:500 12.5px ui-monospace,monospace;color:#b63613">rect(0,381,297,39)</code> #f2f5fb · mention gauche x 20 Helvetica 7.5 pt #7b8189, « AREGIE » aligné à droite x 277 Helvetica-Bold 7.5 pt #223499.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="width:400px;display:flex;flex-direction:column;gap:16px">
+      <div style="background:#fff;border-radius:22px;padding:24px 26px;box-shadow:0 1px 3px rgba(18,27,41,.07);display:flex;flex-direction:column;gap:12px">
+        <div style="font:700 16px/1 'Outfit',sans-serif;color:#121b29">Palette</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:11px;background:#223499;flex:none"></span><span style="flex:1;font:600 13px/1.35 'Inter',sans-serif;color:#121b29">Marine AREGIE<br><span style="font:500 12px/1 ui-monospace,monospace;color:#7b8189">#223499</span></span></div>
+          <div style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:11px;background:#e14d28;flex:none"></span><span style="flex:1;font:600 13px/1.35 'Inter',sans-serif;color:#121b29">Corail citoyen<br><span style="font:500 12px/1 ui-monospace,monospace;color:#7b8189">#e14d28 · oklch(.62 .19 35)</span></span></div>
+          <div style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:11px;background:#ffebe4;flex:none;box-shadow:inset 0 0 0 1px #ffc5b4"></span><span style="flex:1;font:600 13px/1.35 'Inter',sans-serif;color:#121b29">Teinte corail · texte #b63613<br><span style="font:500 12px/1 ui-monospace,monospace;color:#7b8189">#ffebe4</span></span></div>
+          <div style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:11px;background:#121b29;flex:none"></span><span style="flex:1;font:600 13px/1.35 'Inter',sans-serif;color:#121b29">Encre · secondaire #4f5661 · label #7b8189<br><span style="font:500 12px/1 ui-monospace,monospace;color:#7b8189">#121b29</span></span></div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border-radius:22px;padding:24px 26px;box-shadow:0 1px 3px rgba(18,27,41,.07);display:flex;flex-direction:column;gap:10px">
+        <div style="font:700 16px/1 'Outfit',sans-serif;color:#121b29">Notes d'implémentation</div>
+        <div style="font:400 13px/1.7 'Inter',sans-serif;color:#4f5661;text-wrap:pretty">— <strong style="font-weight:600;color:#121b29">Squircle :</strong> pdfkit ne trace que des coins circulaires. On assume le <code style="font:500 12.5px ui-monospace,monospace;color:#b63613">roundedRect</code>, avec des rayons généreux (12 pt sur 48, 10 pt sur 60) qui donnent la même douceur perçue que la charte web. À ne pas « corriger » en rayons serrés.<br>— <strong style="font-weight:600;color:#121b29">Polices :</strong> Helvetica / Helvetica-Bold uniquement, aucun Outfit embarqué. Le caractère vient des aplats et des tailles, pas de la police — le jour où Outfit sera embarqué, seuls les 3 titres (nom du service, bandeau, montant) sont à basculer.<br>— <strong style="font-weight:600;color:#121b29">Logo du service :</strong> PNG carré, fond transparent ou blanc, dessiné dans un carré de 32 pt (identité) et 19 pt (QR). Si absent : initiales. Aucun logo AREGIE en tête — AREGIE ne signe qu'en pied.<br>— <strong style="font-weight:600;color:#121b29">QR :</strong> correction d'erreur H, marge quiet zone 4 modules incluse dans les 108 pt. Le blanc sous le QR doit rester du blanc papier (pas d'aplat).<br>— <strong style="font-weight:600;color:#121b29">Textes longs :</strong> nom de service sur 2 lignes max (ellipse au-delà), tarif sur 1 ligne (réduire à 13 pt si &gt; 22 caractères).</div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}"></script>
+</body>
+</html>

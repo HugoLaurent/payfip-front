@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:oklch(0.955 0.006 260);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+  a{color:#223499;text-decoration:none}
+  a:hover{color:#0080c0}
+</style>
+</helmet>
+
+<section style="padding:56px 40px 100px;display:flex;flex-direction:column;gap:36px">
+
+  <div style="max-width:780px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font:700 11px/1 'Inter',sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#223499;background:oklch(0.93 0.03 265);padding:6px 10px;border-radius:8px">1a</div>
+      <div style="font:600 12px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.55 0.02 265)">AREGIE — Scanner de billets</div>
+    </div>
+    <h1 style="margin:0;font:800 30px/1.2 'Inter',sans-serif;letter-spacing:-.02em;color:oklch(0.22 0.04 265)">Outil de terrain, pensé pour une main et un coup d'œil</h1>
+    <p style="margin:0;font:400 14.5px/1.65 'Inter',sans-serif;color:oklch(0.46 0.015 260);text-wrap:pretty">Le scan devient l'écran, pas un bloc dans une page. Trois partis pris : <strong style="font-weight:600;color:oklch(0.28 0.02 265)">le résultat prend tout l'écran</strong> en couleur pleine (lisible en plein soleil, compréhensible sans lire), <strong style="font-weight:600;color:oklch(0.28 0.02 265)">tout ce qui n'est pas le scan est un panneau escamotable</strong> (service, saisie manuelle, historique), et <strong style="font-weight:600;color:oklch(0.28 0.02 265)">chaque action utile est dans le pouce</strong>, en bas, 56 px de haut minimum. Accent bleu nuit AREGIE, jamais le corail du parcours citoyen.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:44px 32px;align-items:flex-start">
+
+    <!-- 1 · CAMÉRA -->
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:oklch(0.22 0.04 265);padding:6px 9px;border-radius:7px">01</span><span style="font:600 14px/1 'Inter',sans-serif;color:oklch(0.25 0.03 265)">Scan caméra — écran d'attente</span></div>
+      <div style="width:390px;height:800px;border-radius:46px;background:#0a0d18;box-shadow:0 30px 70px -20px rgba(15,20,50,.45),0 0 0 10px #14161f,0 0 0 11px rgba(255,255,255,.12);overflow:hidden;position:relative;display:flex;flex-direction:column">
+        <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 30%, oklch(0.35 0.02 250) 0%, oklch(0.16 0.015 260) 60%, #05070d 100%)"></div>
+        <div style="position:absolute;inset:0;opacity:.16;background:repeating-linear-gradient(115deg, transparent 0 22px, rgba(255,255,255,.5) 22px 23px)"></div>
+
+        <div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:16px 24px 0;font:600 13.5px/1 'Inter',sans-serif;color:#fff">
+          <span>9:41</span><span style="opacity:.85;letter-spacing:.06em">▮▮▮ ⌁ ▓</span>
+        </div>
+
+        <div style="position:relative;display:flex;align-items:center;gap:10px;padding:14px 16px">
+          <div style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border-radius:16px;background:rgba(10,13,24,.62);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.16)">
+            <div style="width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 4px rgba(61,220,132,.22);flex:none"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font:700 14.5px/1.25 'Inter',sans-serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Piscine municipale</div>
+              <div style="font:500 11.5px/1.3 'Inter',sans-serif;color:rgba(255,255,255,.62)">Service scanné · appuyer pour changer</div>
+            </div>
+            <span style="font:700 13px/1 'Inter',sans-serif;color:rgba(255,255,255,.7);flex:none">⌄</span>
+          </div>
+          <div style="width:52px;height:52px;flex:none;border-radius:16px;background:rgba(10,13,24,.62);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;position:relative">
+            <span style="font:600 18px/1 'Inter',sans-serif;color:#fff">↻</span>
+            <span style="position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#0080c0;border:2px solid #0a0d18;font:700 10.5px/16px 'Inter',sans-serif;color:#fff;text-align:center">18</span>
+          </div>
+        </div>
+
+        <div style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px">
+          <div style="width:268px;height:268px;position:relative">
+            <div style="position:absolute;top:0;left:0;width:56px;height:56px;border-top:5px solid #fff;border-left:5px solid #fff;border-radius:20px 0 0 0"></div>
+            <div style="position:absolute;top:0;right:0;width:56px;height:56px;border-top:5px solid #fff;border-right:5px solid #fff;border-radius:0 20px 0 0"></div>
+            <div style="position:absolute;bottom:0;left:0;width:56px;height:56px;border-bottom:5px solid #fff;border-left:5px solid #fff;border-radius:0 0 0 20px"></div>
+            <div style="position:absolute;bottom:0;right:0;width:56px;height:56px;border-bottom:5px solid #fff;border-right:5px solid #fff;border-radius:0 0 20px 0"></div>
+            <div style="position:absolute;left:14px;right:14px;top:46%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#3ddc84,transparent);box-shadow:0 0 24px 4px rgba(61,220,132,.55)"></div>
+          </div>
+          <div style="font:600 15.5px/1.5 'Inter',sans-serif;color:rgba(255,255,255,.88);text-align:center;max-width:250px">Présentez le QR du billet<br><span style="font-weight:500;color:rgba(255,255,255,.55)">La validation part toute seule</span></div>
+        </div>
+
+        <div style="position:relative;padding:0 16px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px 4px;font:600 12.5px/1 'Inter',sans-serif;color:rgba(255,255,255,.6)">
+            <span><span style="color:#3ddc84;font-weight:800">142</span> validés aujourd'hui</span>
+            <span style="display:flex;align-items:center;gap:6px">☀ Torche</span>
+          </div>
+          <div style="display:flex;gap:8px;padding:6px;border-radius:20px;background:rgba(255,255,255,.1);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14)">
+            <div style="flex:1;height:56px;border-radius:15px;background:#fff;display:flex;align-items:center;justify-content:center;gap:9px;font:700 15.5px/1 'Inter',sans-serif;color:#131a33">▣ Caméra</div>
+            <div style="flex:1;height:56px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:9px;font:600 15.5px/1 'Inter',sans-serif;color:rgba(255,255,255,.82)">⌨ Code</div>
+          </div>
+        </div>
+      </div>
+      <p style="margin:0;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Le viseur occupe l'écran entier. Bascule caméra/code en bas, dans le pouce. Le service actif est toujours visible en haut — première cause d'erreur de terrain.</p>
+    </div>
+
+    <!-- 2 · VALIDE -->
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:oklch(0.22 0.04 265);padding:6px 9px;border-radius:7px">02</span><span style="font:600 14px/1 'Inter',sans-serif;color:oklch(0.25 0.03 265)">Résultat — billet valide</span></div>
+      <div style="width:390px;height:800px;border-radius:46px;background:#03713d;box-shadow:0 30px 70px -20px rgba(15,20,50,.45),0 0 0 10px #14161f,0 0 0 11px rgba(255,255,255,.12);overflow:hidden;position:relative;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px 0;font:600 13.5px/1 'Inter',sans-serif;color:#fff">
+          <span>9:41</span><span style="opacity:.85;letter-spacing:.06em">▮▮▮ ⌁ ▓</span>
+        </div>
+        <div style="padding:14px 20px 0;font:600 12.5px/1 'Inter',sans-serif;color:rgba(255,255,255,.7);text-align:center">Piscine municipale</div>
+
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 28px">
+          <div style="width:136px;height:136px;border-radius:44px;background:#fff;display:flex;align-items:center;justify-content:center;font:900 68px/1 'Inter',sans-serif;color:#03713d">✓</div>
+          <div style="text-align:center;display:flex;flex-direction:column;gap:6px">
+            <div style="font:900 40px/1.05 'Inter',sans-serif;letter-spacing:-.02em;color:#fff;text-transform:uppercase">Entrée<br>autorisée</div>
+          </div>
+          <div style="width:100%;border-radius:22px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:20px 22px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+              <span style="font:500 13px/1 'Inter',sans-serif;color:rgba(255,255,255,.72)">Tarif</span>
+              <span style="font:800 22px/1.1 'Inter',sans-serif;color:#fff">Enfant −12 ans</span>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,.2)"></div>
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+              <span style="font:500 13px/1 'Inter',sans-serif;color:rgba(255,255,255,.72)">Visite</span>
+              <span style="font:700 17px/1.1 'Inter',sans-serif;color:#fff">Aujourd'hui · 24 août</span>
+            </div>
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+              <span style="font:500 13px/1 'Inter',sans-serif;color:rgba(255,255,255,.72)">Billet</span>
+              <span style="font:600 14px/1 ui-monospace,monospace;color:rgba(255,255,255,.9)">AR-084213 · 1/1</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:0 16px 34px;display:flex;flex-direction:column;gap:10px">
+          <div style="height:62px;border-radius:19px;background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font:800 17px/1 'Inter',sans-serif;color:#03713d">▣ Scanner le suivant</div>
+          <div style="text-align:center;font:500 12.5px/1 'Inter',sans-serif;color:rgba(255,255,255,.68)">Retour au viseur dans 2 s</div>
+        </div>
+      </div>
+      <p style="margin:0;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Couleur pleine + pictogramme : l'agent sait avant d'avoir lu. Le retour au viseur est automatique — enchaîner ne demande aucun geste.</p>
+    </div>
+
+    <!-- 3 · DÉJÀ SCANNÉ -->
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:oklch(0.22 0.04 265);padding:6px 9px;border-radius:7px">03</span><span style="font:600 14px/1 'Inter',sans-serif;color:oklch(0.25 0.03 265)">Déjà scanné — ré-autorisation</span></div>
+      <div style="width:390px;height:800px;border-radius:46px;background:#8a4a05;box-shadow:0 30px 70px -20px rgba(15,20,50,.45),0 0 0 10px #14161f,0 0 0 11px rgba(255,255,255,.12);overflow:hidden;position:relative;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px 0;font:600 13.5px/1 'Inter',sans-serif;color:#fff">
+          <span>9:41</span><span style="opacity:.85;letter-spacing:.06em">▮▮▮ ⌁ ▓</span>
+        </div>
+        <div style="padding:14px 20px 0;font:600 12.5px/1 'Inter',sans-serif;color:rgba(255,255,255,.7);text-align:center">Piscine municipale</div>
+
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:0 26px">
+          <div style="width:120px;height:120px;border-radius:40px;background:#fff;display:flex;align-items:center;justify-content:center;font:900 58px/1 'Inter',sans-serif;color:#8a4a05">!</div>
+          <div style="font:900 38px/1.05 'Inter',sans-serif;letter-spacing:-.02em;color:#fff;text-transform:uppercase;text-align:center">Déjà<br>scanné</div>
+          <div style="width:100%;border-radius:20px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:18px 20px;display:flex;flex-direction:column;gap:8px">
+            <div style="font:800 19px/1.15 'Inter',sans-serif;color:#fff">Enfant −12 ans · 24 août</div>
+            <div style="font:600 14px/1.4 'Inter',sans-serif;color:rgba(255,255,255,.82)">Validé à 9:12 par Karim B. — il y a 29 min</div>
+          </div>
+        </div>
+
+        <div style="padding:0 16px 34px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:rgba(0,0,0,.16);border-radius:20px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px">
+            <div style="font:500 12.5px/1.5 'Inter',sans-serif;color:rgba(255,255,255,.8);text-wrap:pretty">Le visiteur est sorti puis revenu ? Remettez le billet en attente de scan.</div>
+            <div style="height:54px;border-radius:16px;border:2px solid rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;gap:9px;font:700 15.5px/1 'Inter',sans-serif;color:#fff">↺ Ré-autoriser l'entrée</div>
+          </div>
+          <div style="height:62px;border-radius:19px;background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font:800 17px/1 'Inter',sans-serif;color:#8a4a05">▣ Scanner le suivant</div>
+        </div>
+      </div>
+      <p style="margin:0;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Ambre, pas rouge : ce n'est pas une fraude, c'est un cas à trancher. Qui a validé et quand — l'agent peut décider seul. Pas de fermeture automatique ici.</p>
+    </div>
+
+    <!-- 4 · INVALIDE -->
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:oklch(0.22 0.04 265);padding:6px 9px;border-radius:7px">04</span><span style="font:600 14px/1 'Inter',sans-serif;color:oklch(0.25 0.03 265)">Refusé — mauvaise date</span></div>
+      <div style="width:390px;height:800px;border-radius:46px;background:#9b1c17;box-shadow:0 30px 70px -20px rgba(15,20,50,.45),0 0 0 10px #14161f,0 0 0 11px rgba(255,255,255,.12);overflow:hidden;position:relative;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px 0;font:600 13.5px/1 'Inter',sans-serif;color:#fff">
+          <span>9:41</span><span style="opacity:.85;letter-spacing:.06em">▮▮▮ ⌁ ▓</span>
+        </div>
+        <div style="padding:14px 20px 0;font:600 12.5px/1 'Inter',sans-serif;color:rgba(255,255,255,.7);text-align:center">Piscine municipale</div>
+
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 28px">
+          <div style="width:136px;height:136px;border-radius:44px;background:#fff;display:flex;align-items:center;justify-content:center;font:900 60px/1 'Inter',sans-serif;color:#9b1c17">✕</div>
+          <div style="font:900 40px/1.05 'Inter',sans-serif;letter-spacing:-.02em;color:#fff;text-transform:uppercase;text-align:center">Entrée<br>refusée</div>
+          <div style="width:100%;border-radius:22px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:20px 22px;display:flex;flex-direction:column;gap:8px">
+            <div style="font:800 21px/1.2 'Inter',sans-serif;color:#fff">Ce n'est pas la date de visite</div>
+            <div style="font:600 15px/1.45 'Inter',sans-serif;color:rgba(255,255,255,.85)">Billet valable le <strong style="font-weight:800">31 août</strong> · Adulte</div>
+          </div>
+        </div>
+
+        <div style="padding:0 16px 34px;display:flex;flex-direction:column;gap:10px">
+          <div style="height:62px;border-radius:19px;background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font:800 17px/1 'Inter',sans-serif;color:#9b1c17">▣ Scanner le suivant</div>
+          <div style="text-align:center;font:500 12.5px/1 'Inter',sans-serif;color:rgba(255,255,255,.68)">Codes illisibles et billets introuvables : même écran, motif différent</div>
+        </div>
+      </div>
+      <p style="margin:0;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Un seul écran de refus, dont le motif est la phrase principale — c'est ce que l'agent doit dire au visiteur, mot pour mot.</p>
+    </div>
+
+    <!-- 5 · GROUPE -->
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:oklch(0.22 0.04 265);padding:6px 9px;border-radius:7px">05</span><span style="font:600 14px/1 'Inter',sans-serif;color:oklch(0.25 0.03 265)">Commande groupée — 4 billets</span></div>
+      <div style="width:390px;height:800px;border-radius:46px;background:#0a0d18;box-shadow:0 30px 70px -20px rgba(15,20,50,.45),0 0 0 10px #14161f,0 0 0 11px rgba(255,255,255,.12);overflow:hidden;position:relative;display:flex;flex-direction:column;justify-content:flex-end">
+        <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 25%, oklch(0.34 0.02 250) 0%, oklch(0.15 0.015 260) 60%, #05070d 100%)"></div>
+        <div style="position:absolute;inset:0;background:rgba(5,7,13,.55)"></div>
+        <div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:16px 24px 0;font:600 13.5px/1 'Inter',sans-serif;color:#fff;position:absolute;top:0;left:0;right:0">
+          <span>9:41</span><span style="opacity:.85;letter-spacing:.06em">▮▮▮ ⌁ ▓</span>
+        </div>
+
+        <div style="position:relative;background:#fff;border-radius:30px 30px 0 0;padding:12px 16px 32px;display:flex;flex-direction:column;gap:14px;max-height:88%">
+          <div style="width:44px;height:5px;border-radius:3px;background:oklch(0.88 0.01 260);align-self:center"></div>
+
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:0 4px">
+            <div style="width:46px;height:46px;flex:none;border-radius:15px;background:oklch(0.93 0.03 265);display:flex;align-items:center;justify-content:center;font:700 18px/1 'Inter',sans-serif;color:#223499">▤</div>
+            <div style="flex:1;min-width:0">
+              <div style="font:800 19px/1.25 'Inter',sans-serif;color:oklch(0.18 0.02 265)">Commande famille</div>
+              <div style="font:500 13px/1.35 'Inter',sans-serif;color:oklch(0.5 0.015 260)">AR-084213 · 4 billets · 1 déjà validé</div>
+            </div>
+          </div>
+
+          <div style="height:60px;border-radius:18px;background:#223499;display:flex;align-items:center;justify-content:center;gap:10px;font:800 17px/1 'Inter',sans-serif;color:#fff">✓✓ Valider les 3 restants</div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:18px;background:oklch(0.975 0.004 260);border:1.5px solid oklch(0.91 0.008 260)">
+              <div style="flex:1;min-width:0">
+                <div style="font:700 16px/1.25 'Inter',sans-serif;color:oklch(0.2 0.02 265)">Adulte</div>
+                <div style="font:500 12.5px/1.35 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Visite du 24 août</div>
+              </div>
+              <div style="flex:none;height:46px;padding:0 20px;border-radius:14px;background:#223499;display:flex;align-items:center;font:700 15px/1 'Inter',sans-serif;color:#fff">Valider</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:18px;background:oklch(0.975 0.004 260);border:1.5px solid oklch(0.91 0.008 260)">
+              <div style="flex:1;min-width:0">
+                <div style="font:700 16px/1.25 'Inter',sans-serif;color:oklch(0.2 0.02 265)">Adulte</div>
+                <div style="font:500 12.5px/1.35 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Visite du 24 août</div>
+              </div>
+              <div style="flex:none;height:46px;padding:0 20px;border-radius:14px;background:#223499;display:flex;align-items:center;font:700 15px/1 'Inter',sans-serif;color:#fff">Valider</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:18px;background:oklch(0.975 0.004 260);border:1.5px solid oklch(0.91 0.008 260)">
+              <div style="flex:1;min-width:0">
+                <div style="font:700 16px/1.25 'Inter',sans-serif;color:oklch(0.2 0.02 265)">Enfant −12 ans</div>
+                <div style="font:500 12.5px/1.35 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Visite du 24 août</div>
+              </div>
+              <div style="flex:none;height:46px;padding:0 20px;border-radius:14px;background:#223499;display:flex;align-items:center;font:700 15px/1 'Inter',sans-serif;color:#fff">Valider</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:18px;background:oklch(0.965 0.02 150);border:1.5px dashed oklch(0.82 0.06 150)">
+              <div style="width:28px;height:28px;flex:none;border-radius:9px;background:#03713d;display:flex;align-items:center;justify-content:center;font:900 15px/1 'Inter',sans-serif;color:#fff">✓</div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 16px/1.25 'Inter',sans-serif;color:oklch(0.42 0.06 155);text-decoration:line-through;text-decoration-color:oklch(0.72 0.05 155)">Enfant −12 ans</div>
+                <div style="font:600 12.5px/1.35 'Inter',sans-serif;color:oklch(0.45 0.07 155)">Validé à 9:38</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:56px;border-radius:18px;border:2px solid oklch(0.88 0.01 260);display:flex;align-items:center;justify-content:center;gap:9px;font:700 16px/1 'Inter',sans-serif;color:oklch(0.3 0.02 265)">▣ Repasser au scan</div>
+        </div>
+      </div>
+      <p style="margin:0;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Panneau posé sur le viseur : le contexte du scan reste derrière. « Valider les 3 restants » compte ce qu'il reste — pas le total. Le billet déjà passé est barré et vert, non actionnable, mais toujours visible pour que l'agent comprenne le décompte.</p>
+    </div>
+
+    <!-- 6 · SAISIE MANUELLE -->
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:oklch(0.22 0.04 265);padding:6px 9px;border-radius:7px">06</span><span style="font:600 14px/1 'Inter',sans-serif;color:oklch(0.25 0.03 265)">Saisie manuelle du code</span></div>
+      <div style="width:390px;height:800px;border-radius:46px;background:#0a0d18;box-shadow:0 30px 70px -20px rgba(15,20,50,.45),0 0 0 10px #14161f,0 0 0 11px rgba(255,255,255,.12);overflow:hidden;position:relative;display:flex;flex-direction:column;justify-content:flex-end">
+        <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 25%, oklch(0.3 0.02 250) 0%, oklch(0.14 0.015 260) 60%, #05070d 100%)"></div>
+        <div style="position:absolute;inset:0;background:rgba(5,7,13,.6)"></div>
+        <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 24px 0;font:600 13.5px/1 'Inter',sans-serif;color:#fff">
+          <span>9:41</span><span style="opacity:.85;letter-spacing:.06em">▮▮▮ ⌁ ▓</span>
+        </div>
+        <div style="position:absolute;top:62px;left:0;right:0;text-align:center;font:600 13px/1 'Inter',sans-serif;color:rgba(255,255,255,.72)">Piscine municipale</div>
+
+        <div style="position:relative;background:#fff;border-radius:30px 30px 0 0;padding:20px 16px 0;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font:800 19px/1.25 'Inter',sans-serif;color:oklch(0.18 0.02 265)">Code du billet</div>
+            <div style="font:700 14px/1 'Inter',sans-serif;color:#223499">Annuler</div>
+          </div>
+          <div style="font:500 13px/1.5 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Sous le QR, sur le billet papier ou l'e-mail de confirmation.</div>
+          <div style="height:72px;border-radius:18px;border:2.5px solid #223499;background:oklch(0.98 0.008 265);display:flex;align-items:center;padding:0 18px;gap:2px">
+            <span style="font:700 26px/1 ui-monospace,monospace;letter-spacing:.06em;color:oklch(0.18 0.02 265)">1284.A9F</span>
+            <span style="width:2.5px;height:30px;background:#223499"></span>
+          </div>
+          <div style="height:62px;border-radius:18px;background:#223499;display:flex;align-items:center;justify-content:center;gap:10px;font:800 17px/1 'Inter',sans-serif;color:#fff">Vérifier le billet</div>
+
+          <div style="margin:6px -16px 0;background:oklch(0.9 0.004 260);padding:8px 6px 12px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;gap:6px;justify-content:center">
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">A</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">Z</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">E</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">R</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">T</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">Y</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">U</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">I</div>
+            </div>
+            <div style="display:flex;gap:6px;justify-content:center;padding:0 14px">
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">Q</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">S</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">D</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">F</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">G</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">H</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">J</div>
+            </div>
+            <div style="display:flex;gap:6px;justify-content:center;padding:0 6px">
+              <div style="width:44px;height:44px;border-radius:7px;background:oklch(0.78 0.008 260);display:flex;align-items:center;justify-content:center;font:500 15px/1 'Inter',sans-serif;color:#111">⇧</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">W</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">X</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">C</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">V</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;font:500 19px/1 'Inter',sans-serif;color:#111;box-shadow:0 1px 0 rgba(0,0,0,.25)">B</div>
+              <div style="width:44px;height:44px;border-radius:7px;background:oklch(0.78 0.008 260);display:flex;align-items:center;justify-content:center;font:500 15px/1 'Inter',sans-serif;color:#111">⌫</div>
+            </div>
+            <div style="display:flex;gap:6px;justify-content:center">
+              <div style="width:64px;height:44px;border-radius:7px;background:oklch(0.78 0.008 260);display:flex;align-items:center;justify-content:center;font:500 14px/1 'Inter',sans-serif;color:#111">123</div>
+              <div style="flex:1;height:44px;border-radius:7px;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.25)"></div>
+              <div style="width:88px;height:44px;border-radius:7px;background:#223499;display:flex;align-items:center;justify-content:center;font:600 14px/1 'Inter',sans-serif;color:#fff">Vérifier</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="margin:0;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Même écran, panneau différent : la caméra reste derrière, l'agent y revient d'un « Annuler ». Champ en monospace 26 px, lisible bras tendu ; la touche entrée du clavier valide.</p>
+    </div>
+
+    <!-- 7 · HISTORIQUE -->
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:oklch(0.22 0.04 265);padding:6px 9px;border-radius:7px">07</span><span style="font:600 14px/1 'Inter',sans-serif;color:oklch(0.25 0.03 265)">Historique — panneau escamotable</span></div>
+      <div style="width:390px;height:800px;border-radius:46px;background:#0a0d18;box-shadow:0 30px 70px -20px rgba(15,20,50,.45),0 0 0 10px #14161f,0 0 0 11px rgba(255,255,255,.12);overflow:hidden;position:relative;display:flex;flex-direction:column;justify-content:flex-end">
+        <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 25%, oklch(0.3 0.02 250) 0%, oklch(0.14 0.015 260) 60%, #05070d 100%)"></div>
+        <div style="position:absolute;inset:0;background:rgba(5,7,13,.6)"></div>
+        <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 24px 0;font:600 13.5px/1 'Inter',sans-serif;color:#fff">
+          <span>9:41</span><span style="opacity:.85;letter-spacing:.06em">▮▮▮ ⌁ ▓</span>
+        </div>
+
+        <div style="position:relative;background:#fff;border-radius:30px 30px 0 0;padding:12px 16px 32px;display:flex;flex-direction:column;gap:14px;height:78%">
+          <div style="width:44px;height:5px;border-radius:3px;background:oklch(0.88 0.01 260);align-self:center"></div>
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font:800 20px/1.25 'Inter',sans-serif;color:oklch(0.18 0.02 265)">Mes derniers scans</div>
+              <div style="font:500 13px/1.4 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Piscine municipale · aujourd'hui</div>
+            </div>
+            <div style="font:700 14px/1 'Inter',sans-serif;color:#223499">Fermer</div>
+          </div>
+
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:14px;background:oklch(0.965 0.02 150);padding:12px 14px">
+              <div style="font:800 22px/1.1 'Inter',sans-serif;color:#03713d">142</div>
+              <div style="font:600 11.5px/1.3 'Inter',sans-serif;color:oklch(0.45 0.05 155)">validés</div>
+            </div>
+            <div style="flex:1;border-radius:14px;background:oklch(0.965 0.03 70);padding:12px 14px">
+              <div style="font:800 22px/1.1 'Inter',sans-serif;color:#8a4a05">6</div>
+              <div style="font:600 11.5px/1.3 'Inter',sans-serif;color:oklch(0.48 0.06 70)">déjà scannés</div>
+            </div>
+            <div style="flex:1;border-radius:14px;background:oklch(0.96 0.02 25);padding:12px 14px">
+              <div style="font:800 22px/1.1 'Inter',sans-serif;color:#9b1c17">2</div>
+              <div style="font:600 11.5px/1.3 'Inter',sans-serif;color:oklch(0.48 0.06 25)">refusés</div>
+            </div>
+          </div>
+
+          <div style="flex:1;display:flex;flex-direction:column;gap:7px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;background:oklch(0.975 0.004 260)">
+              <div style="width:10px;height:10px;border-radius:50%;background:#03713d;flex:none"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 14.5px/1.3 'Inter',sans-serif;color:oklch(0.2 0.02 265)">Billet valide</div>
+                <div style="font:500 12px/1.3 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Enfant −12 ans</div>
+              </div>
+              <div style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.55 0.015 260)">9:41</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;background:oklch(0.975 0.004 260)">
+              <div style="width:10px;height:10px;border-radius:50%;background:#03713d;flex:none"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 14.5px/1.3 'Inter',sans-serif;color:oklch(0.2 0.02 265)">Billet valide</div>
+                <div style="font:500 12px/1.3 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Adulte · commande AR-084213</div>
+              </div>
+              <div style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.55 0.015 260)">9:38</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;background:oklch(0.98 0.02 70)">
+              <div style="width:10px;height:10px;border-radius:50%;background:#8a4a05;flex:none"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 14.5px/1.3 'Inter',sans-serif;color:oklch(0.28 0.04 70)">Ré-autorisé</div>
+                <div style="font:500 12px/1.3 'Inter',sans-serif;color:oklch(0.5 0.03 70)">Adulte · remis en attente de scan</div>
+              </div>
+              <div style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.5 0.03 70)">9:31</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;background:oklch(0.98 0.015 25)">
+              <div style="width:10px;height:10px;border-radius:50%;background:#9b1c17;flex:none"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 14.5px/1.3 'Inter',sans-serif;color:oklch(0.3 0.05 25)">Pas la date de visite</div>
+                <div style="font:500 12px/1.3 'Inter',sans-serif;color:oklch(0.5 0.03 25)">Adulte · valable le 31 août</div>
+              </div>
+              <div style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.5 0.03 25)">9:29</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;background:oklch(0.975 0.004 260)">
+              <div style="width:10px;height:10px;border-radius:50%;background:#03713d;flex:none"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 14.5px/1.3 'Inter',sans-serif;color:oklch(0.2 0.02 265)">Billet valide</div>
+                <div style="font:500 12px/1.3 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Adulte</div>
+              </div>
+              <div style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.55 0.015 260)">9:24</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:16px;background:oklch(0.975 0.004 260);opacity:.5">
+              <div style="width:10px;height:10px;border-radius:50%;background:#03713d;flex:none"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 14.5px/1.3 'Inter',sans-serif;color:oklch(0.2 0.02 265)">Billet valide</div>
+                <div style="font:500 12px/1.3 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Enfant −12 ans</div>
+              </div>
+              <div style="font:600 13px/1 'Inter',sans-serif;color:oklch(0.55 0.015 260)">9:22</div>
+            </div>
+          </div>
+
+          <div style="height:56px;border-radius:18px;background:#223499;display:flex;align-items:center;justify-content:center;gap:9px;font:700 16px/1 'Inter',sans-serif;color:#fff">▣ Reprendre le scan</div>
+        </div>
+      </div>
+      <p style="margin:0;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">L'historique n'est jamais sur le chemin du scan : une icône ↻ en haut à droite du viseur, avec le compteur du jour. Trois compteurs en tête répondent à la seule question qu'on se pose vraiment (« combien ce matin ? »), la liste vient après.</p>
+    </div>
+
+    <!-- 8 · CHOIX DU SERVICE -->
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:oklch(0.22 0.04 265);padding:6px 9px;border-radius:7px">08</span><span style="font:600 14px/1 'Inter',sans-serif;color:oklch(0.25 0.03 265)">Choix du service à scanner</span></div>
+      <div style="width:390px;height:800px;border-radius:46px;background:#0a0d18;box-shadow:0 30px 70px -20px rgba(15,20,50,.45),0 0 0 10px #14161f,0 0 0 11px rgba(255,255,255,.12);overflow:hidden;position:relative;display:flex;flex-direction:column;justify-content:flex-end">
+        <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 25%, oklch(0.3 0.02 250) 0%, oklch(0.14 0.015 260) 60%, #05070d 100%)"></div>
+        <div style="position:absolute;inset:0;background:rgba(5,7,13,.6)"></div>
+        <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 24px 0;font:600 13.5px/1 'Inter',sans-serif;color:#fff">
+          <span>9:41</span><span style="opacity:.85;letter-spacing:.06em">▮▮▮ ⌁ ▓</span>
+        </div>
+
+        <div style="position:relative;background:#fff;border-radius:30px 30px 0 0;padding:12px 16px 32px;display:flex;flex-direction:column;gap:14px">
+          <div style="width:44px;height:5px;border-radius:3px;background:oklch(0.88 0.01 260);align-self:center"></div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font:800 20px/1.25 'Inter',sans-serif;color:oklch(0.18 0.02 265)">Quel service scannez-vous ?</div>
+            <div style="font:500 13px/1.5 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Un billet d'un autre service sera refusé. Le choix reste actif jusqu'à ce que vous le changiez.</div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;gap:14px;padding:18px 18px;border-radius:20px;background:oklch(0.97 0.015 265);border:2.5px solid #223499">
+              <div style="width:26px;height:26px;flex:none;border-radius:50%;border:7px solid #223499;background:#fff"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font:800 17px/1.25 'Inter',sans-serif;color:oklch(0.18 0.02 265)">Piscine municipale</div>
+                <div style="font:500 12.5px/1.35 'Inter',sans-serif;color:oklch(0.45 0.02 265)">142 validés aujourd'hui</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:18px 18px;border-radius:20px;background:#fff;border:2px solid oklch(0.9 0.008 260)">
+              <div style="width:26px;height:26px;flex:none;border-radius:50%;border:2px solid oklch(0.82 0.01 260)"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 17px/1.25 'Inter',sans-serif;color:oklch(0.25 0.02 265)">Piscine des Coteaux</div>
+                <div style="font:500 12.5px/1.35 'Inter',sans-serif;color:oklch(0.55 0.015 260)">Aucun scan aujourd'hui</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:18px 18px;border-radius:20px;background:#fff;border:2px solid oklch(0.9 0.008 260)">
+              <div style="width:26px;height:26px;flex:none;border-radius:50%;border:2px solid oklch(0.82 0.01 260)"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 17px/1.25 'Inter',sans-serif;color:oklch(0.25 0.02 265)">Musée des Beaux-Arts</div>
+                <div style="font:500 12.5px/1.35 'Inter',sans-serif;color:oklch(0.55 0.015 260)">38 validés aujourd'hui</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:60px;border-radius:18px;background:#223499;display:flex;align-items:center;justify-content:center;gap:10px;font:800 17px/1 'Inter',sans-serif;color:#fff">Scanner ce service</div>
+        </div>
+      </div>
+      <p style="margin:0;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Un select déroulant est ingérable debout : cibles de 60 px, une seule colonne, et le compteur du jour à côté de chaque service pour repérer immédiatement une erreur de sélection. N'apparaît que si l'agent a plusieurs services scannables.</p>
+    </div>
+
+  </div>
+
+  <!-- DESKTOP -->
+  <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+    <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:oklch(0.22 0.04 265);padding:6px 9px;border-radius:7px">09</span><span style="font:600 14px/1 'Inter',sans-serif;color:oklch(0.25 0.03 265)">Rendu desktop — usage secondaire (guichet)</span></div>
+    <x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1180 }}" height="{{ 720 }}" url="app.aregie.fr/scanner" hint-size="1180px,720px">
+      <div style="width:100%;height:100%;display:flex;background:oklch(0.965 0.006 260)">
+        <div style="width:220px;flex:none;background:#fff;border-right:1px solid oklch(0.93 0.005 260);display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:10px;padding:18px;border-bottom:1px solid oklch(0.94 0.005 260)">
+            <div style="width:32px;height:32px;border-radius:10px;background:#223499;display:flex;align-items:center;justify-content:center;font:700 13px 'Inter',sans-serif;color:#fff;flex:none">P</div>
+            <div style="flex:1;min-width:0">
+              <div style="font:700 13px/1.3 'Inter',sans-serif;color:oklch(0.2 0.02 260)">Ville de Chartres</div>
+              <div style="font:500 11px/1.3 'Inter',sans-serif;color:oklch(0.55 0.01 260)">Karim B. · Agent</div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:3px;padding:12px">
+            <div style="padding:9px 12px;border-radius:10px;color:oklch(0.42 0.015 260);font:500 13px/1 'Inter',sans-serif">▦ Tableau de bord</div>
+            <div style="padding:9px 12px;border-radius:10px;color:oklch(0.42 0.015 260);font:500 13px/1 'Inter',sans-serif">🛒 Vente</div>
+            <div style="padding:9px 12px;border-radius:10px;color:oklch(0.42 0.015 260);font:500 13px/1 'Inter',sans-serif">↻ Historique</div>
+            <div style="padding:9px 12px;border-radius:10px;background:#223499;color:#fff;font:600 13px/1 'Inter',sans-serif">▥ Scanner</div>
+          </div>
+        </div>
+
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:32px">
+          <div style="width:100%;max-width:760px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+            <div>
+              <div style="font:800 22px/1.3 'Inter',sans-serif;color:oklch(0.2 0.02 265)">Scanner</div>
+              <div style="font:500 13px/1.4 'Inter',sans-serif;color:oklch(0.5 0.015 260)">Piscine municipale · 142 validés aujourd'hui</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <div style="height:40px;padding:0 16px;border-radius:12px;background:#fff;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;font:600 13px/1 'Inter',sans-serif;color:oklch(0.3 0.02 265)">Piscine municipale ⌄</div>
+              <div style="height:40px;padding:0 16px;border-radius:12px;background:#fff;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;gap:7px;font:600 13px/1 'Inter',sans-serif;color:oklch(0.3 0.02 265)">↻ Derniers scans</div>
+            </div>
+          </div>
+
+          <div style="width:100%;max-width:760px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+            <div style="border-radius:22px;background:#0a0d18;aspect-ratio:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+              <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 30%, oklch(0.32 0.02 250) 0%, oklch(0.15 0.015 260) 60%, #05070d 100%)"></div>
+              <div style="position:relative;width:200px;height:200px">
+                <div style="position:absolute;top:0;left:0;width:44px;height:44px;border-top:4px solid #fff;border-left:4px solid #fff;border-radius:16px 0 0 0"></div>
+                <div style="position:absolute;top:0;right:0;width:44px;height:44px;border-top:4px solid #fff;border-right:4px solid #fff;border-radius:0 16px 0 0"></div>
+                <div style="position:absolute;bottom:0;left:0;width:44px;height:44px;border-bottom:4px solid #fff;border-left:4px solid #fff;border-radius:0 0 0 16px"></div>
+                <div style="position:absolute;bottom:0;right:0;width:44px;height:44px;border-bottom:4px solid #fff;border-right:4px solid #fff;border-radius:0 0 16px 0"></div>
+              </div>
+              <div style="position:absolute;bottom:18px;left:0;right:0;text-align:center;font:600 13px/1 'Inter',sans-serif;color:rgba(255,255,255,.8)">Présentez le QR du billet</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="border-radius:22px;background:#03713d;padding:24px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;gap:14px">
+                  <div style="width:56px;height:56px;flex:none;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center;font:900 30px/1 'Inter',sans-serif;color:#03713d">✓</div>
+                  <div style="font:900 26px/1.1 'Inter',sans-serif;color:#fff;text-transform:uppercase;letter-spacing:-.01em">Entrée<br>autorisée</div>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,.22)"></div>
+                <div style="display:flex;flex-direction:column;gap:5px">
+                  <div style="font:800 18px/1.2 'Inter',sans-serif;color:#fff">Enfant −12 ans</div>
+                  <div style="font:600 13.5px/1.3 'Inter',sans-serif;color:rgba(255,255,255,.85)">Visite aujourd'hui · 24 août · AR-084213</div>
+                </div>
+              </div>
+              <div style="border-radius:18px;background:#fff;border:1.5px solid oklch(0.92 0.008 260);padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+                <div style="font:700 13.5px/1 'Inter',sans-serif;color:oklch(0.25 0.02 265)">Saisie manuelle</div>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1;height:44px;border-radius:12px;border:1.5px solid oklch(0.9 0.008 260);display:flex;align-items:center;padding:0 14px;font:500 15px/1 ui-monospace,monospace;color:oklch(0.65 0.01 260)">Code du billet…</div>
+                  <div style="height:44px;padding:0 18px;border-radius:12px;background:#223499;display:flex;align-items:center;font:700 14px/1 'Inter',sans-serif;color:#fff">Vérifier</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-import>
+    <p style="margin:0;max-width:760px;font:400 12.5px/1.6 'Inter',sans-serif;color:oklch(0.5 0.015 260);text-wrap:pretty">Au-delà de 900 px, le plein écran mobile se scinde en deux colonnes : viseur à gauche, résultat + saisie manuelle à droite, sans jamais empiler. Même couleur pleine pour le résultat, mêmes libellés.</p>
+  </div>
+
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}"></script>
+</body>
+</html>

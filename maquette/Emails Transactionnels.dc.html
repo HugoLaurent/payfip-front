@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#e9edf5;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+  a{color:#e14d28;text-decoration:none}
+  a:hover{color:#b63613}
+</style>
+</helmet>
+
+<section style="padding:56px 44px 110px;display:flex;flex-direction:column;gap:40px">
+
+  <div style="max-width:820px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font:700 11px/1 'Inter',sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#b63613;background:#ffebe4;padding:6px 10px;border-radius:8px">1a</div>
+      <div style="font:600 12px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#7b8189">AREGIE — Emails transactionnels · tables imbriquées, 600 px, styles inline</div>
+    </div>
+    <h1 style="margin:0;font:800 30px/1.2 'Outfit',sans-serif;letter-spacing:-.02em;color:#121b29">Le markup ci-dessous EST le template final</h1>
+    <p style="margin:0;font:400 14.5px/1.65 'Inter',sans-serif;color:#4f5661;text-wrap:pretty">Aucun flex, aucune grid, aucun <code style="font:500 13px ui-monospace,monospace;color:#b63613">&lt;style&gt;</code> : tables imbriquées, <code style="font:500 13px ui-monospace,monospace;color:#b63613">cellpadding=0</code>, largeur fixe 600, toutes les couleurs en hex et toutes les tailles en px inline. La pile de polices est <code style="font:500 13px ui-monospace,monospace;color:#b63613">'Outfit','Segoe UI',Helvetica,Arial,sans-serif</code> pour les titres et <code style="font:500 13px ui-monospace,monospace;color:#b63613">'Inter','Segoe UI',Helvetica,Arial,sans-serif</code> pour le texte — si Outfit est bloqué (Gmail, Outlook), Segoe UI prend le relais sans décaler la mise en page : les blocs sont dimensionnés par le padding, jamais par la hauteur du texte.</p>
+    <p style="margin:2px 0 0;font:500 13px/1.6 'Inter',sans-serif;color:#7b8189">Les coins arrondis (<code style="font:500 12.5px ui-monospace,monospace;color:#b63613">border-radius</code>) sont volontairement décoratifs : Outlook desktop les ignore et rend des rectangles nets — la maquette reste juste, c'est la seule dégradation acceptée. Pas de squircle en email.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start">
+
+    <!-- 1a BILLETTERIE -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:#121b29;padding:6px 9px;border-radius:7px">1a</span><span style="font:600 14px/1 'Inter',sans-serif;color:#121b29">Confirmation de réservation — billetterie</span></div>
+
+      <table cellpadding="0" cellspacing="0" border="0" width="664" style="background-color:#f2f5fb;border-radius:20px">
+        <tr><td align="center" style="padding:32px 32px 36px">
+          <table cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(18,27,41,.08)">
+            <tr><td height="6" style="height:6px;background-color:#e14d28;line-height:6px;font-size:0">&nbsp;</td></tr>
+            <tr><td style="padding:28px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="left" style="font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:1.4px;color:#7b8189">AREGIE · BILLETTERIE</td>
+                  <td align="right" style="font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#223499">Ville de Chartres</td>
+                </tr>
+              </table>
+            </td></tr>
+            <tr><td style="padding:18px 32px 0;font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;font-size:26px;font-weight:800;line-height:32px;color:#121b29">Votre réservation est confirmée</td></tr>
+            <tr><td style="padding:10px 32px 0;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;color:#4f5661">Bonjour, voici vos billets pour la <strong style="color:#121b29">Piscine municipale</strong>. Ils sont en pièce jointe de cet email, un PDF par billet.</td></tr>
+
+            <tr><td style="padding:22px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#ffebe4;border-radius:12px">
+                <tr><td style="padding:16px 20px">
+                  <div style="font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:1.4px;color:#b63613">DATE DE VISITE</div>
+                  <div style="padding-top:6px;font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;font-size:20px;font-weight:800;color:#b63613">lundi 24 août 2026</div>
+                </td></tr>
+              </table>
+            </td></tr>
+
+            <tr><td style="padding:24px 32px 0;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:1.4px;color:#7b8189">VOS BILLETS</td></tr>
+            <tr><td style="padding:10px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #dee1e7;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;color:#121b29">Adulte<span style="color:#7b8189;font-weight:400"> × 2</span></td>
+                  <td align="right" style="padding:12px 0;border-bottom:1px solid #dee1e7;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;color:#121b29">9,00 €</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #dee1e7;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;color:#121b29">Enfant −12 ans<span style="color:#7b8189;font-weight:400"> × 1</span></td>
+                  <td align="right" style="padding:12px 0;border-bottom:1px solid #dee1e7;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;color:#121b29">4,50 €</td>
+                </tr>
+              </table>
+            </td></tr>
+
+            <tr><td style="padding:16px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f2f5fb;border-radius:12px">
+                <tr>
+                  <td style="padding:16px 20px;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;color:#4f5661">Total payé</td>
+                  <td align="right" style="padding:16px 20px;font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;font-size:22px;font-weight:800;color:#223499">13,50 €</td>
+                </tr>
+              </table>
+            </td></tr>
+
+            <tr><td style="padding:24px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td width="50%" style="font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:1.4px;color:#7b8189">N° DE COMMANDE</td>
+                  <td width="50%" style="font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:1.4px;color:#7b8189">EMAIL</td>
+                </tr>
+                <tr>
+                  <td style="padding-top:5px;font-family:Consolas,'Courier New',monospace;font-size:15px;font-weight:700;color:#121b29">AR-084213</td>
+                  <td style="padding-top:5px;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#4f5661">marie.l@example.fr</td>
+                </tr>
+              </table>
+            </td></tr>
+
+            <tr><td style="padding:26px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr><td align="center" bgcolor="#e14d28" style="border-radius:100px">
+                  <a href="#" style="display:block;padding:15px 24px;font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none">Retrouver mes billets en ligne</a>
+                </td></tr>
+              </table>
+            </td></tr>
+            <tr><td align="center" style="padding:12px 32px 30px;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:#7b8189">Présentez le QR de chaque billet à l'entrée, imprimé ou sur votre téléphone.</td></tr>
+
+            <tr><td style="padding:20px 32px;background-color:#f2f5fb;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:19px;color:#7b8189">Cet email vous est envoyé par <strong style="color:#223499">AREGIE</strong>, plateforme de paiement du secteur public, pour le compte de la Ville de Chartres. Ne répondez pas à ce message.<br><a href="#" style="color:#e14d28;text-decoration:none">aregie.fr</a> · Mentions légales</td></tr>
+          </table>
+        </td></tr>
+      </table>
+
+      <p style="margin:0;max-width:664px;font:400 12.5px/1.6 'Inter',sans-serif;color:#4f5661;text-wrap:pretty">Un seul encart couleur, réservé à l'information que l'usager cherche en rouvrant l'email six jours plus tard : la date de visite. Le total reste en marine (structurel), le corail ne sert qu'à la date et au bouton.</p>
+    </div>
+
+    <!-- 1b FACTURE -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:#121b29;padding:6px 9px;border-radius:7px">1b</span><span style="font:600 14px/1 'Inter',sans-serif;color:#121b29">Confirmation de paiement — facture</span></div>
+
+      <table cellpadding="0" cellspacing="0" border="0" width="664" style="background-color:#f2f5fb;border-radius:20px">
+        <tr><td align="center" style="padding:32px 32px 36px">
+          <table cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(18,27,41,.08)">
+            <tr><td height="6" style="height:6px;background-color:#e14d28;line-height:6px;font-size:0">&nbsp;</td></tr>
+            <tr><td style="padding:28px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="left" style="font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:1.4px;color:#7b8189">AREGIE · FACTURES</td>
+                  <td align="right" style="font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#223499">Ville de Chartres</td>
+                </tr>
+              </table>
+            </td></tr>
+            <tr><td style="padding:18px 32px 0;font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;font-size:26px;font-weight:800;line-height:32px;color:#121b29">Votre paiement est confirmé</td></tr>
+            <tr><td style="padding:10px 32px 0;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;color:#4f5661">Merci, votre règlement a bien été enregistré. Ce message vaut justificatif de paiement.</td></tr>
+
+            <tr><td style="padding:22px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#ffebe4;border-radius:12px">
+                <tr><td style="padding:16px 20px">
+                  <div style="font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:1.4px;color:#b63613">MONTANT RÉGLÉ</div>
+                  <div style="padding-top:6px;font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;font-size:28px;font-weight:800;color:#b63613">84,20 €</div>
+                  <div style="padding-top:4px;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#b63613">le 24 août 2026 à 09:41 · carte bancaire</div>
+                </td></tr>
+              </table>
+            </td></tr>
+
+            <tr><td style="padding:24px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td width="42%" style="padding:12px 0;border-bottom:1px solid #dee1e7;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#7b8189">Objet</td>
+                  <td align="right" style="padding:12px 0;border-bottom:1px solid #dee1e7;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;color:#121b29">Restauration scolaire — juin 2026</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #dee1e7;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#7b8189">N° de confirmation</td>
+                  <td align="right" style="padding:12px 0;border-bottom:1px solid #dee1e7;font-family:Consolas,'Courier New',monospace;font-size:15px;font-weight:700;color:#121b29">PF-2026-084213</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #dee1e7;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#7b8189">N° client</td>
+                  <td align="right" style="padding:12px 0;border-bottom:1px solid #dee1e7;font-family:Consolas,'Courier New',monospace;font-size:15px;font-weight:700;color:#121b29">C-40912</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#7b8189">Payeur</td>
+                  <td align="right" style="padding:12px 0;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#4f5661">marie.l@example.fr</td>
+                </tr>
+              </table>
+            </td></tr>
+
+            <tr><td style="padding:24px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr><td align="center" bgcolor="#e14d28" style="border-radius:100px">
+                  <a href="#" style="display:block;padding:15px 24px;font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none">Télécharger le justificatif (PDF)</a>
+                </td></tr>
+              </table>
+            </td></tr>
+            <tr><td align="center" style="padding:12px 32px 30px;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:#7b8189">Conservez ce numéro de confirmation pour toute question sur ce paiement.</td></tr>
+
+            <tr><td style="padding:20px 32px;background-color:#f2f5fb;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:19px;color:#7b8189">Cet email vous est envoyé par <strong style="color:#223499">AREGIE</strong>, plateforme de paiement du secteur public, pour le compte de la Ville de Chartres. Ne répondez pas à ce message.<br><a href="#" style="color:#e14d28;text-decoration:none">aregie.fr</a> · Mentions légales</td></tr>
+          </table>
+        </td></tr>
+      </table>
+
+      <p style="margin:0;max-width:664px;font:400 12.5px/1.6 'Inter',sans-serif;color:#4f5661;text-wrap:pretty">Même squelette que 1a — seul l'encart change de contenu (montant au lieu de date). Le n° client est une ligne du tableau : s'il est absent, la ligne disparaît sans laisser de vide. Valeurs de référence en Consolas/Courier : l'usager les recopie au téléphone.</p>
+    </div>
+
+    <!-- 1c OTP -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:9px"><span style="font:700 11px/1 'Inter',sans-serif;color:#fff;background:#121b29;padding:6px 9px;border-radius:7px">1c</span><span style="font:600 14px/1 'Inter',sans-serif;color:#121b29">Code de vérification (OTP)</span></div>
+
+      <table cellpadding="0" cellspacing="0" border="0" width="664" style="background-color:#f2f5fb;border-radius:20px">
+        <tr><td align="center" style="padding:32px 32px 36px">
+          <table cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(18,27,41,.08)">
+            <tr><td height="6" style="height:6px;background-color:#e14d28;line-height:6px;font-size:0">&nbsp;</td></tr>
+            <tr><td align="center" style="padding:30px 32px 0;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:1.4px;color:#7b8189">AREGIE · VÉRIFICATION</td></tr>
+            <tr><td align="center" style="padding:14px 32px 0;font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;font-size:24px;font-weight:800;line-height:30px;color:#121b29">Votre code de vérification</td></tr>
+            <tr><td align="center" style="padding:8px 44px 0;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:23px;color:#4f5661">Saisissez ce code pour continuer votre paiement.</td></tr>
+
+            <tr><td align="center" style="padding:26px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#121b29;border-radius:14px">
+                <tr><td align="center" style="padding:26px 20px 22px">
+                  <div style="font-family:Consolas,'Courier New',monospace;font-size:44px;font-weight:700;letter-spacing:12px;line-height:52px;color:#ffffff;padding-left:12px">482913</div>
+                  <div style="padding-top:10px;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;color:#ffc5b4">Valable 10 minutes</div>
+                </td></tr>
+              </table>
+            </td></tr>
+
+            <tr><td align="center" style="padding:18px 44px 0;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#4f5661">Nos codes ne contiennent que des chiffres — jamais de lettres, donc aucune confusion possible entre O et 0 ou entre I et 1.</td></tr>
+
+            <tr><td style="padding:24px 32px 0">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f2f5fb;border-radius:12px">
+                <tr><td style="padding:16px 20px;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:#4f5661">Vous n'avez rien demandé ? Ignorez cet email : sans ce code, aucun paiement ne peut aboutir. Ne le transmettez à personne, même à un agent.</td></tr>
+              </table>
+            </td></tr>
+
+            <tr><td style="padding:20px 32px;background-color:#ffffff">&nbsp;</td></tr>
+            <tr><td style="padding:20px 32px;background-color:#f2f5fb;font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:19px;color:#7b8189">Cet email vous est envoyé par <strong style="color:#223499">AREGIE</strong>, plateforme de paiement du secteur public. Ne répondez pas à ce message.<br><a href="#" style="color:#e14d28;text-decoration:none">aregie.fr</a> · Mentions légales</td></tr>
+          </table>
+        </td></tr>
+      </table>
+
+      <p style="margin:0;max-width:664px;font:400 12.5px/1.6 'Inter',sans-serif;color:#4f5661;text-wrap:pretty">Le code est le seul élément à fort contraste de l'email : encre pleine #121b29, Courier 44 px, <code style="font:500 12px ui-monospace,monospace;color:#b63613">letter-spacing:12px</code> (avec 12 px de padding-left pour compenser l'espace final ajouté à droite par le letter-spacing). Pas de bouton : rien à cliquer, donc rien à hameçonner.</p>
+    </div>
+
+  </div>
+
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}"></script>
+</body>
+</html>

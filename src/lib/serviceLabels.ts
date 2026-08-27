@@ -13,4 +13,5 @@ export const SERVICE_STATUS_TINTS: Record<string, string> = {
 export const SERVICE_TYPE_LABELS: Record<string, string> = {
   billetterie: 'Billetterie',
   factures: 'Facture',
+  inscription: 'Inscription',
 }

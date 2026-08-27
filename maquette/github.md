@@ -2,9 +2,10 @@ repo: HugoLaurent/payfip-front
 branch: main
 
 ## Last sync
-date: 2026-08-20T14:25:49Z
+date: 2026-08-24T08:36:04Z
 
 ### Updated in this project
+- Nouvelle maquette "Scanner Terrain.dc.html" : refonte mobile-first de ScannerPage.tsx (9 écrans — viseur plein écran, résultats en couleur pleine valide/déjà scanné/refusé, panneau commande groupée avec "Valider tout", saisie manuelle en bottom sheet, historique et choix du service escamotables, rendu desktop deux colonnes). Comportement conservé du code réel (RESULT_LABELS, reset-scan, OrderScanPanel) ; accent aregie-deep uniquement.
 - Réaligné la maquette "Parcours Billetterie.dc.html" sur le parcours réel implémenté : ordre Email → Billets → Paiement (pas d'étape "Date" séparée, date modifiable en ligne sur l'écran Billets).
 - Repris les tokens exacts (aregie-coral, success, date-tint, ref-tint, otp-bg, hairline) et le style bouton coral plein/ghost du code réel (PublicButtons.tsx).
 - Repris la structure des écrans réels : PublicServiceHeader + StepIndicator (email/tickets), OtpDigitInput, PublicBottomBar, carte billet "ticket déchiré" + QR de PurchaseReturnPage.
@@ -24,5 +25,6 @@ date: 2026-08-20T14:25:49Z
 | Espace Organisme.dc.html — Vente | src/pages/org/VentePage.tsx |
 | Espace Organisme.dc.html — Historique | src/pages/org/HistoriquePage.tsx |
 | Espace Organisme.dc.html — Scanner | src/pages/org/ScannerPage.tsx |
+| Scanner Terrain.dc.html — 9 écrans mobile + desktop | src/pages/org/ScannerPage.tsx (OrderScanPanel, RESULT_LABELS, TICKET_STATUS_LABELS, /tickets/scan, /orders/scan, /reset-scan) |
 | Espace Organisme.dc.html — Utilisateurs | src/pages/org/UsersManager.tsx |
 | Tokens couleur / typo | src/index.css |

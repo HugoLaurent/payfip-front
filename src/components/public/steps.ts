@@ -20,3 +20,14 @@ export const INVOICE_STEPS = [
 ] as const
 
 export type InvoiceStepKey = (typeof INVOICE_STEPS)[number]['key']
+
+// Parcours inscription (entrée catalogue, 1a) — même châssis que la
+// billetterie : Email → Inscription → Paiement. L'entrée par lien direct
+// (1b) n'affiche pas ce stepper (voir PublicInscriptionDirectPage).
+export const INSCRIPTION_STEPS = [
+  { key: 'email', label: 'Email' },
+  { key: 'inscription', label: 'Inscription' },
+  { key: 'paiement', label: 'Paiement' },
+] as const
+
+export type InscriptionStepKey = (typeof INSCRIPTION_STEPS)[number]['key']

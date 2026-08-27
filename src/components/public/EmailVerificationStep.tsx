@@ -22,6 +22,7 @@ export function EmailVerificationStep({
   introText,
   otp,
   onContinue,
+  onBack,
 }: {
   service: ServiceLookup
   logoFailed: boolean
@@ -31,6 +32,7 @@ export function EmailVerificationStep({
   introText: string
   otp: EmailOtpState
   onContinue: () => void
+  onBack?: () => void
 }) {
   const {
     email,
@@ -73,7 +75,7 @@ export function EmailVerificationStep({
       <PublicShell
         header={
           <div className="md:mx-auto md:w-full md:max-w-md">
-            <PublicServiceHeader service={service} logoFailed={logoFailed} onLogoFail={onLogoFail} />
+            <PublicServiceHeader service={service} logoFailed={logoFailed} onLogoFail={onLogoFail} onBack={onBack} />
             <div className="pt-[2px] pb-5">
               <StepIndicator steps={steps} current="email" />
             </div>

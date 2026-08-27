@@ -73,6 +73,146 @@ export interface StaffOrganization {
   suspendedMessage: string | null
 }
 
+// Les 6 types de champ que l'agent peut composer pour le formulaire
+// d'inscription — voir maquette "Parcours Inscription", écran A4.
+export type RegistrationFieldType =
+  | 'short_text'
+  | 'date'
+  | 'choice'
+  | 'long_text'
+  | 'number'
+  | 'checkbox'
+
+export interface RegistrationFormField {
+  key: string
+  label: string
+  type: RegistrationFieldType
+  required: boolean
+  helperText?: string
+  // 'choice' uniquement — ≤3 options affichées en boutons, au-delà en
+  // menu déroulant (voir maquette, écran B2).
+  options?: string[]
+}
+
+// Forme réelle renvoyée par GET /inscription/events (résumé),
+// GET /inscription/events/:id et GET /inscription/events/by-slug/:slug
+// (même forme) — pas de dateLabel/timeLabel précalculés (eventDate +
+// timeLabel bruts, formatés côté front), pas de spotsTotal séparé
+// (capacity, éventuellement null = illimité).
+export interface Formation {
+  id: number
+  slug: string
+  type: 'formation' | 'evenement'
+  title: string
+  description: string | null
+  eventDate: string | null
+  // "HH:mm", pour l'export calendrier uniquement — timeLabel reste la
+  // source d'affichage.
+  startTime: string | null
+  endTime: string | null
+  timeLabel: string | null
+  location: string | null
+  category: string | null
+  registrationDeadline: string | null
+  priceCents: number
+  requiresDocuments: boolean
+  documentInstructions: string | null
+  capacity: number | null
+  maxParticipantsPerRegistration: number
+  formSchema: RegistrationFormField[] | null
+  seatsRemaining: number | null
+  isFull: boolean
+}
+
+// Forme réelle renvoyée par GET /inscription/registrations/by-token/:accessToken
+export interface RegistrationCitizen {
+  id: number
+  status: 'waitlisted' | 'awaiting_review' | 'rejected' | 'awaiting_payment' | 'confirmed' | 'cancelled' | 'expired'
+  eventId: number
+  eventTitle: string
+  eventDate: string | null
+  firstName: string
+  lastName: string
+  email: string
+  quantity: number
+  amountCents: number
+  paymentMethod: 'payfip' | 'free'
+  registrationReference: string
+  rejectionReason: string | null
+  reviewedByLabel: string | null
+  reviewedAt: string | null
+  documentDeadlineAt: string | null
+  waitlistPosition: number | null
+  waitlistNotifiedAt: string | null
+  waitlistResponseDeadline: string | null
+  cancelledAt: string | null
+  createdAt: string
+  canCancel: boolean
+  canPay: boolean
+  canConfirmWaitlistOffer: boolean
+  canRetryPayment: boolean
+  canReplaceDocuments: boolean
+  canDownloadAttestation: boolean
+}
+
+export type EventStatus = 'draft' | 'published' | 'closed' | 'archived'
+
+// Forme agent — GET/POST/PATCH /inscription/events (gateway), tous
+// statuts (pas seulement published) contrairement à Formation.
+export interface EventAgent {
+  id: number
+  slug: string
+  type: 'formation' | 'evenement'
+  title: string
+  description: string | null
+  eventDate: string | null
+  startTime: string | null
+  endTime: string | null
+  timeLabel: string | null
+  location: string | null
+  category: string | null
+  registrationDeadline: string | null
+  priceCents: number
+  requiresDocuments: boolean
+  documentInstructions: string | null
+  capacity: number | null
+  maxParticipantsPerRegistration: number
+  formSchema: RegistrationFormField[] | null
+  status: EventStatus
+  createdAt: string
+}
+
+export interface RegistrationDocumentSummary {
+  id: number
+  filename: string
+  mimeType: string
+  sizeBytes: number
+  isCurrent: boolean
+  createdAt: string
+}
+
+// Forme agent — GET /inscription/events/:id/registrations (gateway).
+export interface RegistrationAgent {
+  id: number
+  status: RegistrationCitizen['status']
+  firstName: string
+  lastName: string
+  email: string
+  quantity: number
+  formResponses: Record<string, unknown> | null
+  amountCents: number
+  paymentMethod: 'payfip' | 'free'
+  registrationReference: string
+  rejectionReason: string | null
+  documentDeadlineAt: string | null
+  waitlistPosition: number | null
+  reviewedByLabel: string | null
+  reviewedAt: string | null
+  cancelledAt: string | null
+  createdAt: string
+  documents?: RegistrationDocumentSummary[]
+}
+
 export interface ServiceLookup {
   orgId: number
   serviceId: number

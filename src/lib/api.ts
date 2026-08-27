@@ -88,3 +88,35 @@ export async function apiUpload<T = unknown>(
 
   return { ok: res.ok, status: res.status, data: json as T }
 }
+
+/**
+ * Upload multipart citoyen (pas de session/JWT client, contrairement à
+ * apiUpload) — plusieurs fichiers sous une même clé + des champs texte à
+ * côté (ex. dépôt de justificatifs d'inscription : eventId/email/nom/
+ * prénom + 1 à N fichiers). Pas de Content-Type manuel, FormData génère
+ * lui-même le boundary.
+ */
+export async function apiUploadWithFields<T = unknown>(
+  path: string,
+  files: File[],
+  fields: Record<string, string>,
+  fieldName = 'documents'
+): Promise<ApiResult<T>> {
+  const formData = new FormData()
+  for (const file of files) formData.append(fieldName, file)
+  for (const [key, value] of Object.entries(fields)) formData.append(key, value)
+
+  const res = await fetch(`${GATEWAY_URL}${path}`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  let json: unknown = null
+  try {
+    json = await res.json()
+  } catch {
+    // pas de corps JSON
+  }
+
+  return { ok: res.ok, status: res.status, data: json as T }
+}

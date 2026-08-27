@@ -10,6 +10,10 @@ const PublicPurchasePage = lazy(() => import('@/pages/public/PublicPurchasePage'
 const PurchaseReturnPage = lazy(() => import('@/pages/public/PurchaseReturnPage'))
 const PublicInvoicePage = lazy(() => import('@/pages/public/PublicInvoicePage'))
 const InvoiceReturnPage = lazy(() => import('@/pages/public/InvoiceReturnPage'))
+const PublicInscriptionCataloguePage = lazy(() => import('@/pages/public/PublicInscriptionCataloguePage'))
+const PublicInscriptionFormationPage = lazy(() => import('@/pages/public/PublicInscriptionFormationPage'))
+const PublicInscriptionDirectPage = lazy(() => import('@/pages/public/PublicInscriptionDirectPage'))
+const InscriptionReturnPage = lazy(() => import('@/pages/public/InscriptionReturnPage'))
 
 function App() {
   return (
@@ -19,6 +23,10 @@ function App() {
         <Route path="/billetterie/:slug/retour" element={<PurchaseReturnPage />} />
         <Route path="/factures/:slug" element={<PublicInvoicePage />} />
         <Route path="/factures/:slug/retour" element={<InvoiceReturnPage />} />
+        <Route path="/inscription/:slug" element={<PublicInscriptionCataloguePage />} />
+        <Route path="/inscription/:slug/retour" element={<InscriptionReturnPage />} />
+        <Route path="/inscription/:slug/f/:eventSlug" element={<PublicInscriptionFormationPage />} />
+        <Route path="/inscription/:slug/f/:eventSlug/direct" element={<PublicInscriptionDirectPage />} />
         <Route path="/staff/*" element={<StaffGate />} />
         <Route path="/*" element={<AuthGate />} />
       </Routes>
