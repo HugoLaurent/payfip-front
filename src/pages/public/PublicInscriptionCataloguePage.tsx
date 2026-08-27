@@ -72,12 +72,12 @@ export function PublicInscriptionCataloguePage() {
   return (
     <PublicShell
       header={
-        <div className="md:mx-auto md:w-full md:max-w-[640px]">
+        <div className="md:mx-auto md:w-full md:max-w-[1120px]">
           <PublicServiceHeader service={service} logoFailed={logoFailed} onLogoFail={() => setLogoFailed(true)} />
         </div>
       }
     >
-      <div className="flex flex-col gap-4 md:mx-auto md:w-full md:max-w-[640px]">
+      <div className="flex flex-col gap-4 md:mx-auto md:w-full md:max-w-[1120px]">
         {categories.length > 1 && (
           <div className="flex gap-2 overflow-x-auto pb-1">
             {categories.map((c) => (
@@ -102,7 +102,7 @@ export function PublicInscriptionCataloguePage() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="flex flex-col gap-3"
+          className="flex flex-col gap-3 md:grid md:grid-cols-3 md:gap-[18px]"
         >
           {formations.map((f) => (
             <FormationCard key={f.id} formation={f} to={`/inscription/${slug}/f/${f.slug}`} />

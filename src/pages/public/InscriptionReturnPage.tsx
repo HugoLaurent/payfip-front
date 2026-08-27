@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { apiCall } from '@/lib/api'
 import { usePaymentStatusPolling, isPendingPaymentStatus } from '@/lib/usePaymentStatusPolling'
-import { euros } from '@/lib/format'
+import { euros, formatDateLabel } from '@/lib/format'
 import type { RegistrationCitizen } from '@/lib/types'
 import { PublicShell } from '@/layouts/PublicShell'
 import {
@@ -214,17 +214,19 @@ export function InscriptionReturnPage() {
         )}
 
         {registration.status === 'awaiting_review' && (
-          <div className="flex flex-col items-center gap-3 pt-10 text-center">
-            <div className="flex h-[78px] w-[78px] items-center justify-center rounded-full bg-[oklch(0.95_0.02_265)] text-[30px]">
+          <div className="flex flex-col items-center gap-4 pt-10 text-center md:mx-auto md:max-w-[540px] md:flex-row md:items-start md:gap-5 md:text-left">
+            <div className="flex h-[78px] w-[78px] shrink-0 items-center justify-center rounded-full bg-[oklch(0.95_0.02_265)] text-[30px]">
               📄
             </div>
-            <p className="text-xl font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
-              Votre justificatif est en cours de vérification
-            </p>
-            <p className="max-w-sm text-sm text-ink-soft">
-              Un agent le contrôle sous 48 h ouvrées. Vous n'avez rien à faire — nous vous écrivons dès que c'est
-              validé.
-            </p>
+            <div className="md:pt-1">
+              <p className="text-xl leading-[1.25] font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
+                Votre justificatif est en cours de vérification
+              </p>
+              <p className="mt-2 max-w-sm text-sm leading-[1.6] text-ink-soft">
+                Un agent le contrôle sous 48 h ouvrées. Vous n'avez rien à faire — nous vous écrivons dès que c'est
+                validé.
+              </p>
+            </div>
           </div>
         )}
 
@@ -241,28 +243,87 @@ export function InscriptionReturnPage() {
         )}
 
         {registration.status === 'awaiting_payment' && accessToken && orgId && (
-          <div className="flex flex-col items-center gap-3 pt-10 text-center">
-            <p className="font-semibold text-ink">Votre dossier est accepté — il reste à payer</p>
-            <p className="max-w-sm text-sm text-ink-soft">
-              Réglez la formation pour que votre place soit définitive : {euros(registration.amountCents)}.
-            </p>
-            <PublicButton type="button" onClick={handlePayNow} disabled={payingNow} className="w-full max-w-xs">
-              {payingNow ? 'Redirection…' : 'Payer maintenant →'}
-            </PublicButton>
-            {payNowError && <p className="text-sm text-red-600">{payNowError}</p>}
+          <div className="flex flex-col gap-5 pt-10 md:mx-auto md:max-w-[760px]">
+            <div className="flex flex-col items-center gap-4 text-center md:flex-row md:items-start md:gap-5 md:text-left">
+              <div className="flex h-[78px] w-[78px] shrink-0 items-center justify-center rounded-full bg-success-tint text-[30px] font-bold text-success">
+                ✓
+              </div>
+              <div className="md:pt-1">
+                <p className="text-[21px] leading-[1.25] font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
+                  Justificatif validé — il reste à payer
+                </p>
+                <p className="mt-2 text-[13.5px] leading-[1.6] text-ink-soft">
+                  Votre dossier est accepté. Réglez la formation pour que votre place soit définitive.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-[13px] md:grid md:grid-cols-[1fr_320px] md:items-start">
+              <div className="squircle overflow-hidden rounded-[18px] border-[1.5px] border-hairline text-left md:rounded-[22px]">
+                <div className="px-[17px] py-[15px] md:px-[22px] md:py-[18px]">
+                  <p className="text-[15.5px] leading-[1.3] font-bold text-ink md:text-[17px]" style={{ fontFamily: 'var(--font-display)' }}>
+                    {registration.eventTitle}
+                  </p>
+                  {registration.eventDate && (
+                    <p className="pt-1 text-[12.5px] leading-[1.4] font-medium text-ink-soft md:text-[13.5px]">
+                      {formatDateLabel(registration.eventDate)}
+                    </p>
+                  )}
+                </div>
+                <div className="h-px bg-hairline" />
+                <div className="flex items-center justify-between px-[17px] py-[14px] md:px-[22px]">
+                  <span className="text-[12.5px] font-medium text-ink-soft md:text-[13px]">Participant</span>
+                  <span className="text-[13.5px] font-bold text-ink">
+                    {registration.firstName} {registration.lastName}
+                  </span>
+                </div>
+                <div className="h-px bg-hairline" />
+                <div className="flex items-center justify-between px-[17px] py-[14px] md:px-[22px]">
+                  <span className="text-[12.5px] font-medium text-ink-soft md:text-[13px]">Justificatif</span>
+                  <span className="flex items-center gap-2 text-[13px] font-bold text-[oklch(0.42_0.09_150)]">
+                    <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-success text-[10px] text-white">
+                      ✓
+                    </span>
+                    validé
+                  </span>
+                </div>
+                <div className="h-px bg-hairline" />
+                <div className="flex items-center justify-between bg-date-tint px-[17px] py-[15px] md:px-[22px] md:py-[18px]">
+                  <span className="text-[12.5px] font-semibold text-[oklch(0.42_0.015_260)] md:text-[13px]">Montant dû</span>
+                  <span className="text-[19px] font-bold text-aregie-deep md:text-[22px]" style={{ fontFamily: 'var(--font-display)' }}>
+                    {euros(registration.amountCents)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-[10px]">
+                <PublicButton type="button" onClick={handlePayNow} disabled={payingNow} className="w-full">
+                  {payingNow ? 'Redirection…' : `Payer ${euros(registration.amountCents)} →`}
+                </PublicButton>
+                <p className="text-center text-[11.5px] leading-[1.55] font-medium text-ink-soft">
+                  Paiement sécurisé par carte bancaire.
+                </p>
+                {payNowError && <p className="text-center text-sm text-red-600">{payNowError}</p>}
+              </div>
+            </div>
           </div>
         )}
 
         {(registration.status === 'cancelled' || registration.status === 'expired') && (
-          <div className="flex flex-col items-center gap-3 pt-10 text-center">
-            <p className="font-semibold text-ink">
-              {registration.status === 'expired' ? 'Le délai de paiement est passé' : 'Inscription annulée'}
-            </p>
-            <p className="max-w-sm text-sm text-ink-soft">
-              {registration.status === 'expired'
-                ? `Votre inscription à « ${registration.eventTitle} » a expiré faute de paiement. La place a été rendue disponible.`
-                : `Votre inscription à « ${registration.eventTitle} » a été annulée. Aucune somme n'a été prélevée.`}
-            </p>
+          <div className="flex flex-col items-center gap-3 pt-10 text-center md:mx-auto md:max-w-[540px] md:flex-row md:items-start md:gap-5 md:text-left">
+            <div className="flex h-[78px] w-[78px] shrink-0 items-center justify-center rounded-full bg-[oklch(0.93_0.008_260)] text-[30px] font-bold text-[oklch(0.45_0.015_260)]">
+              {registration.status === 'expired' ? '!' : '×'}
+            </div>
+            <div className="md:pt-1">
+              <p className="font-semibold text-ink">
+                {registration.status === 'expired' ? 'Le délai de paiement est passé' : 'Inscription annulée'}
+              </p>
+              <p className="mt-2 max-w-sm text-sm leading-[1.6] text-ink-soft">
+                {registration.status === 'expired'
+                  ? `Votre inscription à « ${registration.eventTitle} » a expiré faute de paiement. La place a été rendue disponible.`
+                  : `Votre inscription à « ${registration.eventTitle} » a été annulée. Aucune somme n'a été prélevée.`}
+              </p>
+            </div>
           </div>
         )}
       </div>
