@@ -155,7 +155,7 @@ export interface RegistrationCitizen {
   canDownloadAttestation: boolean
 }
 
-export type EventStatus = 'draft' | 'published' | 'closed' | 'archived'
+export type EventStatus = 'draft' | 'published' | 'closed' | 'archived' | 'cancelled'
 
 // Forme agent — GET/POST/PATCH /inscription/events (gateway), tous
 // statuts (pas seulement published) contrairement à Formation.

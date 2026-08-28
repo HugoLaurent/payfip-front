@@ -5,7 +5,10 @@ import { PrimaryButton, SelectInput, Switch, TextInput, Textarea } from '@/compo
 import { FormSchemaBuilder } from './FormSchemaBuilder'
 import type { EventAgent, RegistrationFormField } from '@/lib/types'
 
-const STATUS_LABELS: Record<EventAgent['status'], string> = {
+// 'cancelled' n'apparaît jamais ici : il ne se pose que via l'action
+// "Annuler l'évènement" (voir EventsManager.tsx), qui notifie aussi les
+// inscrits — jamais un choix silencieux dans ce menu de statut.
+const EDITABLE_STATUS_LABELS: Record<Exclude<EventAgent['status'], 'cancelled'>, string> = {
   draft: 'Brouillon',
   published: 'Publié',
   closed: 'Clos',
@@ -359,7 +362,7 @@ export function EventFormPanel({
                   onChange={(e) => onChange({ status: e.target.value as EventAgent['status'] })}
                   className="w-[200px]"
                 >
-                  {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                  {Object.entries(EDITABLE_STATUS_LABELS).map(([value, label]) => (
                     <option key={value} value={value}>
                       {label}
                     </option>

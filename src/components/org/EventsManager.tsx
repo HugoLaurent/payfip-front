@@ -14,6 +14,12 @@ const STATUS_LABELS: Record<EventAgent['status'], string> = {
   published: 'Publié',
   closed: 'Clos',
   archived: 'Archivé',
+  cancelled: 'Annulé',
+}
+
+function isPastEvent(event: EventAgent): boolean {
+  if (!event.eventDate) return false
+  return event.eventDate < new Date().toISOString().slice(0, 10)
 }
 
 // Gestion des évènements/formations d'un service `inscription` — création,
@@ -36,6 +42,9 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
 
   const [deletingEvent, setDeletingEvent] = useState<EventAgent | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  const [cancellingEvent, setCancellingEvent] = useState<EventAgent | null>(null)
+  const [cancelling, setCancelling] = useState(false)
 
   const [viewingRegistrationsFor, setViewingRegistrationsFor] = useState<EventAgent | null>(null)
 
@@ -121,8 +130,25 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
     }
   }
 
-  const activeEvents = events?.filter((e) => e.status !== 'archived') ?? []
-  const archivedEvents = events?.filter((e) => e.status === 'archived') ?? []
+  // Annulation : bascule l'évènement et ses inscriptions actives en
+  // `cancelled` côté back, qui envoie l'email d'annulation à chaque
+  // inscrit — ne supprime aucune ligne, contrairement à handleDelete.
+  async function handleCancelEvent() {
+    if (!cancellingEvent) return
+    setCancelling(true)
+    const result = await apiCall('POST', `/inscription/events/${cancellingEvent.id}/cancel`, { token: auth.token })
+    setCancelling(false)
+    setCancellingEvent(null)
+    if (result.ok) {
+      showToast('success', 'Évènement annulé', `Les inscrits ont été prévenus par email.`)
+      await loadEvents()
+    } else {
+      showToast('error', 'Échec', "Impossible d'annuler l'évènement.")
+    }
+  }
+
+  const activeEvents = events?.filter((e) => e.status !== 'archived' && e.status !== 'cancelled') ?? []
+  const archivedEvents = events?.filter((e) => e.status === 'archived' || e.status === 'cancelled') ?? []
 
   return (
     <div>
@@ -194,6 +220,25 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
                   Archiver
                 </button>
               )}
+              {canManage && !isPastEvent(event) && (
+                <button
+                  type="button"
+                  onClick={() => setCancellingEvent(event)}
+                  className="shrink-0 text-xs font-semibold text-aregie-coral transition hover:text-aregie-coral/80"
+                >
+                  Annuler l'évènement
+                </button>
+              )}
+              {canManage && isPastEvent(event) && (
+                <button
+                  type="button"
+                  onClick={() => setDeletingEvent(event)}
+                  className="shrink-0 text-gray-400 transition hover:text-red-600"
+                  aria-label={`Supprimer « ${event.title} »`}
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -201,12 +246,15 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
 
       {canManage && archivedEvents.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">Évènements archivés</p>
+          <p className="mb-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">Archivés &amp; annulés</p>
           <Card>
             <div className="divide-y divide-gray-100">
               {archivedEvents.map((event) => (
                 <div key={event.id} className="flex items-center gap-3 py-3 opacity-60">
-                  <p className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">{event.title}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-gray-900">{event.title}</p>
+                    <p className="truncate text-xs text-gray-400">{STATUS_LABELS[event.status]}</p>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setDeletingEvent(event)}
@@ -245,6 +293,24 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
             </DangerButton>
             <SecondaryButton type="button" onClick={() => setDeletingEvent(null)}>
               Annuler
+            </SecondaryButton>
+          </div>
+        </Modal>
+      )}
+
+      {cancellingEvent && (
+        <Modal title="Annuler cet évènement ?" onClose={() => setCancellingEvent(null)}>
+          <p className="mb-4 text-sm text-gray-600">
+            Tous les inscrits à « {cancellingEvent.title} » recevront un email les informant de l'annulation. Ceux
+            qui avaient déjà payé seront invités à vous contacter directement pour convenir d'un remboursement —
+            aucun remboursement automatique n'est déclenché. Cette action est irréversible.
+          </p>
+          <div className="flex gap-2">
+            <DangerButton type="button" onClick={handleCancelEvent} disabled={cancelling} className="px-4 py-2">
+              {cancelling ? 'Annulation…' : "Annuler l'évènement"}
+            </DangerButton>
+            <SecondaryButton type="button" onClick={() => setCancellingEvent(null)}>
+              Retour
             </SecondaryButton>
           </div>
         </Modal>
