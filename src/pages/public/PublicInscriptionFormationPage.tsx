@@ -346,7 +346,7 @@ export function PublicInscriptionFormationPage() {
           </div>
         }
         footer={
-          <div className="bg-white px-6 pt-[14px] pb-[22px] shadow-[0_-8px_24px_-12px_rgba(20,25,60,0.15)]">
+          <div className="bg-white px-6 pt-[14px] pb-[22px] shadow-[0_-8px_24px_-12px_rgba(20,25,60,0.15)] md:hidden">
             <PublicButton type="button" onClick={() => setStep('email')} className="w-full">
               {full ? "Rejoindre la liste d'attente →" : "S'inscrire →"}
             </PublicButton>
@@ -431,6 +431,12 @@ export function PublicInscriptionFormationPage() {
               </p>
             </div>
           )}
+
+          <div className="hidden md:block">
+            <PublicButton type="button" onClick={() => setStep('email')} className="w-full">
+              {full ? "Rejoindre la liste d'attente →" : "S'inscrire →"}
+            </PublicButton>
+          </div>
         </div>
       </PublicShell>
     </motion.div>
