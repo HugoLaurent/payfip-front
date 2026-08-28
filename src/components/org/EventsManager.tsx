@@ -1,115 +1,19 @@
 import { useEffect, useState } from 'react'
 import { CalendarDays, Plus, Trash2, Users } from 'lucide-react'
 import { apiCall } from '@/lib/api'
-import {
-  Card,
-  DangerButton,
-  EmptyState,
-  LoadError,
-  Modal,
-  PrimaryButton,
-  SecondaryButton,
-  SelectInput,
-  Switch,
-  TextInput,
-  Textarea,
-} from '@/components/ui'
-import { FormSchemaBuilder } from './FormSchemaBuilder'
+import { Card, DangerButton, EmptyState, LoadError, Modal, SecondaryButton } from '@/components/ui'
+import { EventFormPanel, EMPTY_EVENT_FORM, eventToForm, eventFormToPayload, type EventFormState } from './EventFormPanel'
 import { EventRegistrationsPanel } from './EventRegistrationsPanel'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { useToast } from '@/lib/useToast'
 import { euros } from '@/lib/format'
-import type { AuthState, EventAgent, RegistrationFormField, ServiceRow } from '@/lib/types'
+import type { AuthState, EventAgent, ServiceRow } from '@/lib/types'
 
 const STATUS_LABELS: Record<EventAgent['status'], string> = {
   draft: 'Brouillon',
   published: 'Publié',
   closed: 'Clos',
   archived: 'Archivé',
-}
-
-interface EventFormState {
-  type: 'formation' | 'evenement'
-  title: string
-  description: string
-  eventDate: string
-  startTime: string
-  endTime: string
-  timeLabel: string
-  location: string
-  category: string
-  registrationDeadline: string
-  priceCents: string
-  requiresDocuments: boolean
-  documentInstructions: string
-  capacity: string
-  maxParticipantsPerRegistration: string
-  formSchema: RegistrationFormField[]
-  status: EventAgent['status']
-}
-
-const EMPTY_FORM: EventFormState = {
-  type: 'formation',
-  title: '',
-  description: '',
-  eventDate: '',
-  startTime: '',
-  endTime: '',
-  timeLabel: '',
-  location: '',
-  category: '',
-  registrationDeadline: '',
-  priceCents: '0',
-  requiresDocuments: false,
-  documentInstructions: '',
-  capacity: '',
-  maxParticipantsPerRegistration: '1',
-  formSchema: [],
-  status: 'draft',
-}
-
-function eventToForm(event: EventAgent): EventFormState {
-  return {
-    type: event.type,
-    title: event.title,
-    description: event.description ?? '',
-    eventDate: event.eventDate ?? '',
-    startTime: event.startTime ?? '',
-    endTime: event.endTime ?? '',
-    timeLabel: event.timeLabel ?? '',
-    location: event.location ?? '',
-    category: event.category ?? '',
-    registrationDeadline: event.registrationDeadline ? event.registrationDeadline.slice(0, 16) : '',
-    priceCents: (event.priceCents / 100).toString(),
-    requiresDocuments: event.requiresDocuments,
-    documentInstructions: event.documentInstructions ?? '',
-    capacity: event.capacity !== null ? String(event.capacity) : '',
-    maxParticipantsPerRegistration: String(event.maxParticipantsPerRegistration),
-    formSchema: event.formSchema ?? [],
-    status: event.status,
-  }
-}
-
-function formToPayload(form: EventFormState) {
-  return {
-    type: form.type,
-    title: form.title.trim(),
-    description: form.description.trim() || undefined,
-    eventDate: form.eventDate || undefined,
-    startTime: form.startTime || undefined,
-    endTime: form.endTime || undefined,
-    timeLabel: form.timeLabel.trim() || undefined,
-    location: form.location.trim() || undefined,
-    category: form.category.trim() || undefined,
-    registrationDeadline: form.registrationDeadline || undefined,
-    priceCents: Math.round(Number(form.priceCents || '0') * 100),
-    requiresDocuments: form.requiresDocuments,
-    documentInstructions: form.documentInstructions.trim() || undefined,
-    capacity: form.capacity ? Number(form.capacity) : undefined,
-    maxParticipantsPerRegistration: Number(form.maxParticipantsPerRegistration || '1'),
-    formSchema: form.formSchema.length > 0 ? form.formSchema : undefined,
-    status: form.status,
-  }
 }
 
 // Gestion des évènements/formations d'un service `inscription` — création,
@@ -126,7 +30,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
 
   const [showFormModal, setShowFormModal] = useState(false)
   const [editingEvent, setEditingEvent] = useState<EventAgent | null>(null)
-  const [form, setForm] = useState<EventFormState>(EMPTY_FORM)
+  const [form, setForm] = useState<EventFormState>(EMPTY_EVENT_FORM)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -153,7 +57,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
 
   function openCreate() {
     setEditingEvent(null)
-    setForm(EMPTY_FORM)
+    setForm(EMPTY_EVENT_FORM)
     setFormError(null)
     setShowFormModal(true)
   }
@@ -172,7 +76,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
     setSaving(true)
     setFormError(null)
 
-    const payload = formToPayload(form)
+    const payload = eventFormToPayload(form)
     const result = editingEvent
       ? await apiCall('PATCH', `/inscription/events/${editingEvent.id}`, { token: auth.token, body: payload })
       : await apiCall('POST', `/inscription/services/${service.id}/events`, { token: auth.token, body: payload })
@@ -319,165 +223,15 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
       )}
 
       {showFormModal && (
-        <Modal title={editingEvent ? `Modifier « ${editingEvent.title} »` : 'Nouvel évènement'} onClose={() => setShowFormModal(false)}>
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="flex gap-2">
-              <SelectInput
-                value={form.type}
-                onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as 'formation' | 'evenement' }))}
-                className="w-40"
-              >
-                <option value="formation">Formation</option>
-                <option value="evenement">Évènement</option>
-              </SelectInput>
-              <TextInput
-                type="text"
-                placeholder="Titre"
-                value={form.title}
-                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                required
-                className="flex-1"
-              />
-            </div>
-
-            <Textarea
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              placeholder="Description"
-              rows={2}
-            />
-
-            <div className="flex gap-2">
-              <TextInput
-                type="date"
-                value={form.eventDate}
-                onChange={(e) => setForm((f) => ({ ...f, eventDate: e.target.value }))}
-                className="flex-1"
-              />
-              <TextInput
-                type="time"
-                value={form.startTime}
-                onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
-                className="w-28"
-              />
-              <TextInput
-                type="time"
-                value={form.endTime}
-                onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
-                className="w-28"
-              />
-            </div>
-            <TextInput
-              type="text"
-              placeholder="Libellé horaire affiché (ex: 9h–17h) — facultatif"
-              value={form.timeLabel}
-              onChange={(e) => setForm((f) => ({ ...f, timeLabel: e.target.value }))}
-            />
-            <div className="flex gap-2">
-              <TextInput
-                type="text"
-                placeholder="Lieu"
-                value={form.location}
-                onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-                className="flex-1"
-              />
-              <TextInput
-                type="text"
-                placeholder="Catégorie (ex: Sport)"
-                value={form.category}
-                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                className="flex-1"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-500">Clôture des inscriptions</label>
-              <TextInput
-                type="datetime-local"
-                value={form.registrationDeadline}
-                onChange={(e) => setForm((f) => ({ ...f, registrationDeadline: e.target.value }))}
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <label className="mb-1 block text-xs font-medium text-gray-500">Tarif (€)</label>
-                <TextInput
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={form.priceCents}
-                  onChange={(e) => setForm((f) => ({ ...f, priceCents: e.target.value }))}
-                />
-              </div>
-              <div className="flex-1">
-                <label className="mb-1 block text-xs font-medium text-gray-500">Places (vide = illimité)</label>
-                <TextInput
-                  type="number"
-                  min="1"
-                  value={form.capacity}
-                  onChange={(e) => setForm((f) => ({ ...f, capacity: e.target.value }))}
-                />
-              </div>
-              <div className="flex-1">
-                <label className="mb-1 block text-xs font-medium text-gray-500">Participants max/inscription</label>
-                <TextInput
-                  type="number"
-                  min="1"
-                  value={form.maxParticipantsPerRegistration}
-                  onChange={(e) => setForm((f) => ({ ...f, maxParticipantsPerRegistration: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between squircle rounded-xl border border-gray-200 px-3 py-2.5">
-              <div>
-                <p className="text-sm font-medium text-gray-700">Justificatif requis</p>
-                <p className="text-xs text-gray-400">L'agent devra valider le document avant confirmation.</p>
-              </div>
-              <Switch
-                checked={form.requiresDocuments}
-                onChange={() => setForm((f) => ({ ...f, requiresDocuments: !f.requiresDocuments }))}
-              />
-            </div>
-            {form.requiresDocuments && (
-              <Textarea
-                value={form.documentInstructions}
-                onChange={(e) => setForm((f) => ({ ...f, documentInstructions: e.target.value }))}
-                placeholder="Instructions affichées au citoyen (ex: justificatif de domicile de moins de 3 mois)"
-                rows={2}
-              />
-            )}
-
-            <div>
-              <label className="mb-2 block text-xs font-medium text-gray-500">Formulaire d'inscription</label>
-              <FormSchemaBuilder
-                fields={form.formSchema}
-                onChange={(formSchema) => setForm((f) => ({ ...f, formSchema }))}
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-500">Statut</label>
-              <SelectInput
-                value={form.status}
-                onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as EventAgent['status'] }))}
-              >
-                {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </SelectInput>
-            </div>
-
-            {formError && <p className="text-sm text-red-600">{formError}</p>}
-
-            <PrimaryButton type="submit" disabled={saving} className="w-full">
-              {saving ? 'Enregistrement…' : editingEvent ? 'Enregistrer' : 'Créer'}
-            </PrimaryButton>
-          </form>
-        </Modal>
+        <EventFormPanel
+          editingEvent={editingEvent}
+          form={form}
+          onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
+          onSubmit={handleSubmit}
+          onClose={() => setShowFormModal(false)}
+          saving={saving}
+          error={formError}
+        />
       )}
 
       {deletingEvent && (

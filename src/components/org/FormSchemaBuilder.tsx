@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from 'lucide-react'
+import { Cake, MapPin, MessageSquare, Phone, Plus, Trash2, Users, Utensils } from 'lucide-react'
 import { SelectInput, TextInput } from '@/components/ui'
 import type { RegistrationFieldType, RegistrationFormField } from '@/lib/types'
 
@@ -10,6 +10,33 @@ const FIELD_TYPE_LABELS: Record<RegistrationFieldType, string> = {
   choice: 'Choix (boutons/menu)',
   checkbox: 'Case à cocher',
 }
+
+// Champs génériques qui reviennent souvent — un clic ajoute le champ déjà
+// configuré (libellé + type pertinent), l'agent ajuste ensuite s'il le
+// faut plutôt que de repartir d'un champ vide à chaque fois. Pas
+// "Email" : l'adresse est déjà collectée et vérifiée par OTP à
+// l'inscription, en faire un champ dupliquerait la question.
+const FIELD_PRESETS: { icon: typeof Phone; label: string; field: Omit<RegistrationFormField, 'key'> }[] = [
+  { icon: Phone, label: 'Téléphone', field: { label: 'Téléphone', type: 'short_text', required: false } },
+  { icon: Cake, label: 'Date de naissance', field: { label: 'Date de naissance', type: 'date', required: false } },
+  { icon: MapPin, label: 'Adresse postale', field: { label: 'Adresse postale', type: 'long_text', required: false } },
+  {
+    icon: Utensils,
+    label: 'Régime alimentaire',
+    field: {
+      label: 'Régime alimentaire',
+      type: 'choice',
+      required: false,
+      options: ['Aucun', 'Végétarien', 'Sans gluten'],
+    },
+  },
+  {
+    icon: Users,
+    label: 'Personnes accompagnantes',
+    field: { label: 'Personnes accompagnantes', type: 'number', required: false },
+  },
+  { icon: MessageSquare, label: 'Remarque libre', field: { label: 'Remarque', type: 'long_text', required: false } },
+]
 
 function slugifyKey(label: string, index: number): string {
   const base = label
@@ -44,6 +71,10 @@ export function FormSchemaBuilder({
       ...fields,
       { key: slugifyKey(label || `champ_${fields.length + 1}`, fields.length), label, type: 'short_text', required: true },
     ])
+  }
+
+  function addPreset(preset: Omit<RegistrationFormField, 'key'>) {
+    onChange([...fields, { ...preset, key: slugifyKey(preset.label, fields.length) }])
   }
 
   function removeField(index: number) {
@@ -112,13 +143,30 @@ export function FormSchemaBuilder({
         </div>
       ))}
 
+      <div>
+        <p className="mb-2 text-[11px] font-semibold text-gray-400">Champs courants</p>
+        <div className="flex flex-wrap gap-1.5">
+          {FIELD_PRESETS.map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => addPreset(preset.field)}
+              className="squircle inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-[7px] text-xs font-semibold text-gray-600 transition hover:border-aregie-deep/30 hover:bg-aregie-deep/5 hover:text-aregie-deep"
+            >
+              <preset.icon size={13} />
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <button
         type="button"
         onClick={addField}
         className="squircle inline-flex items-center gap-1.5 rounded-full bg-aregie-deep/10 px-4 py-2 text-xs font-bold text-aregie-deep transition hover:bg-aregie-deep/15"
       >
         <Plus size={14} />
-        Ajouter un champ
+        Ajouter un champ personnalisé
       </button>
     </div>
   )
