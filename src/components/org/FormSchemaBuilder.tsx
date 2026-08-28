@@ -38,6 +38,12 @@ const FIELD_PRESETS: { icon: typeof Phone; label: string; field: Omit<Registrati
   { icon: MessageSquare, label: 'Remarque libre', field: { label: 'Remarque', type: 'long_text', required: false } },
 ]
 
+const PRESET_KEYS = new Set(FIELD_PRESETS.map((p) => slugifyKeyForPreset(p.field.label)))
+
+function slugifyKeyForPreset(label: string): string {
+  return slugifyKey(label, 0)
+}
+
 function slugifyKey(label: string, index: number): string {
   const base = label
     .normalize('NFD')
@@ -73,8 +79,11 @@ export function FormSchemaBuilder({
     ])
   }
 
-  function addPreset(preset: Omit<RegistrationFormField, 'key'>) {
-    onChange([...fields, { ...preset, key: slugifyKey(preset.label, fields.length) }])
+  function togglePreset(preset: Omit<RegistrationFormField, 'key'>) {
+    const key = slugifyKeyForPreset(preset.label)
+    const existingIndex = fields.findIndex((f) => f.key === key)
+    if (existingIndex >= 0) onChange(fields.filter((_, i) => i !== existingIndex))
+    else onChange([...fields, { ...preset, key }])
   }
 
   function removeField(index: number) {
@@ -83,7 +92,8 @@ export function FormSchemaBuilder({
 
   return (
     <div className="space-y-3">
-      {fields.map((field, index) => (
+      {fields.map((field, index) =>
+        PRESET_KEYS.has(field.key) ? null : (
         <div key={index} className="squircle space-y-2 rounded-xl border border-gray-200 p-3">
           <div className="flex items-center gap-2">
             <TextInput
@@ -141,22 +151,30 @@ export function FormSchemaBuilder({
             />
           )}
         </div>
-      ))}
+        ),
+      )}
 
       <div>
         <p className="mb-2 text-[11px] font-semibold text-gray-400">Champs courants</p>
         <div className="flex flex-wrap gap-1.5">
-          {FIELD_PRESETS.map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              onClick={() => addPreset(preset.field)}
-              className="squircle inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-[7px] text-xs font-semibold text-gray-600 transition hover:border-aregie-deep/30 hover:bg-aregie-deep/5 hover:text-aregie-deep"
-            >
-              <preset.icon size={13} />
-              {preset.label}
-            </button>
-          ))}
+          {FIELD_PRESETS.map((preset) => {
+            const active = fields.some((f) => f.key === slugifyKeyForPreset(preset.field.label))
+            return (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => togglePreset(preset.field)}
+                className={`squircle inline-flex items-center gap-1.5 rounded-full border px-3 py-[7px] text-xs font-semibold transition ${
+                  active
+                    ? 'border-aregie-blue bg-aregie-blue text-white'
+                    : 'border-gray-200 text-gray-600 hover:border-aregie-deep/30 hover:bg-aregie-deep/5 hover:text-aregie-deep'
+                }`}
+              >
+                <preset.icon size={13} />
+                {preset.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 
