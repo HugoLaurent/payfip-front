@@ -25,6 +25,7 @@ export function RegistrationRejected({
   reviewedByLabel,
   reviewedAt,
   documentDeadlineAt,
+  keepExistingDocuments,
   accessToken,
   orgId,
   onReplaced,
@@ -33,6 +34,7 @@ export function RegistrationRejected({
   reviewedByLabel: string | null
   reviewedAt: string | null
   documentDeadlineAt: string | null
+  keepExistingDocuments: boolean
   accessToken: string
   orgId: number
   onReplaced: () => void
@@ -68,12 +70,16 @@ export function RegistrationRejected({
         </div>
         <div className="md:pt-1">
           <p className="text-[21px] leading-[1.25] font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
-            Votre justificatif n'a pas pu être accepté
+            {keepExistingDocuments ? 'Un document supplémentaire est nécessaire' : "Votre justificatif n'a pas pu être accepté"}
           </p>
           <p className="mt-2 text-[13.5px] leading-[1.6] text-ink-soft">
-            {documentDeadlineAt
-              ? `Votre place reste réservée jusqu'au ${formatDeadline(documentDeadlineAt)}. Déposez un nouveau document et la vérification repart.`
-              : 'Déposez un nouveau document et la vérification repart.'}
+            {keepExistingDocuments
+              ? documentDeadlineAt
+                ? `Vos documents déjà envoyés restent valables. Votre place reste réservée jusqu'au ${formatDeadline(documentDeadlineAt)} — ajoutez le document demandé et la vérification repart.`
+                : 'Vos documents déjà envoyés restent valables — ajoutez le document demandé et la vérification repart.'
+              : documentDeadlineAt
+                ? `Votre place reste réservée jusqu'au ${formatDeadline(documentDeadlineAt)}. Déposez un nouveau document et la vérification repart.`
+                : 'Déposez un nouveau document et la vérification repart.'}
           </p>
         </div>
       </div>
@@ -82,7 +88,7 @@ export function RegistrationRejected({
         {rejectionReason ? (
           <div className="squircle w-full rounded-[16px] bg-[oklch(0.96_0.02_265)] px-4 py-[14px] text-left md:rounded-[22px] md:px-6 md:py-5">
             <p className="text-[12.5px] leading-none font-bold tracking-[0.02em] text-[oklch(0.35_0.09_265)]">
-              MOTIF INDIQUÉ PAR L'AGENT
+              {keepExistingDocuments ? "MESSAGE DE L'AGENT" : "MOTIF INDIQUÉ PAR L'AGENT"}
             </p>
             <p className="pt-[7px] text-[12.5px] leading-[1.6] text-[oklch(0.42_0.05_265)]">{rejectionReason}</p>
             {(reviewedByLabel || reviewedAt) && (
@@ -98,9 +104,12 @@ export function RegistrationRejected({
         )}
 
         <div className="squircle flex flex-col gap-[10px] rounded-[18px] border-[1.5px] border-hairline p-4 text-left md:rounded-[22px] md:p-5">
-          <FileUploadField label="Déposer un nouveau justificatif" onFileChange={setFile} />
+          <FileUploadField
+            label={keepExistingDocuments ? 'Déposer le document demandé' : 'Déposer un nouveau justificatif'}
+            onFileChange={setFile}
+          />
           <PublicButton type="button" onClick={handleSubmit} disabled={!file || submitting} className="w-full">
-            {submitting ? 'Envoi…' : 'Envoyer le nouveau document'}
+            {submitting ? 'Envoi…' : keepExistingDocuments ? 'Envoyer le document' : 'Envoyer le nouveau document'}
           </PublicButton>
           {error && <p className="text-center text-sm text-red-600">{error}</p>}
         </div>

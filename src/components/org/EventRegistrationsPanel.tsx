@@ -59,19 +59,21 @@ export function EventRegistrationsPanel({
     deps: [event.id, status, q, page],
   })
 
-  async function handleReview(decision: 'approve' | 'reject') {
+  async function handleReview(decision: 'approve' | 'reject' | 'request_more_documents') {
     if (!reviewing) return
-    if (decision === 'reject' && !rejectionReason.trim()) return
+    if (decision !== 'approve' && !rejectionReason.trim()) return
 
     setSubmittingReview(true)
     const result = await apiCall('POST', `/inscription/registrations/${reviewing.id}/review`, {
       token: auth.token,
-      body: decision === 'reject' ? { decision, rejectionReason: rejectionReason.trim() } : { decision },
+      body: decision === 'approve' ? { decision } : { decision, rejectionReason: rejectionReason.trim() },
     })
     setSubmittingReview(false)
 
     if (result.ok) {
-      showToast('success', decision === 'approve' ? 'Justificatifs validés' : 'Inscription rejetée', `${reviewing.firstName} ${reviewing.lastName}`)
+      const successLabel =
+        decision === 'approve' ? 'Justificatifs validés' : decision === 'reject' ? 'Inscription rejetée' : 'Complément demandé'
+      showToast('success', successLabel, `${reviewing.firstName} ${reviewing.lastName}`)
       setReviewing(null)
       setRejectionReason('')
       await reload()
@@ -224,12 +226,13 @@ export function EventRegistrationsPanel({
               {reviewing.firstName} {reviewing.lastName}
             </h3>
             <p className="mb-3 text-sm text-gray-500">
-              Valider les justificatifs déposés, ou rejeter avec un motif — le citoyen le verra tel quel.
+              Valider les justificatifs déposés, demander un document en plus (les documents déjà envoyés restent
+              valables), ou rejeter — le message est vu tel quel par le citoyen.
             </p>
             <Textarea
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
-              placeholder="Motif du rejet (obligatoire si vous rejetez)"
+              placeholder="Message pour le citoyen (obligatoire sauf pour valider)"
               rows={3}
               className="mb-3"
             />
@@ -242,6 +245,14 @@ export function EventRegistrationsPanel({
               >
                 {submittingReview ? '…' : 'Valider'}
               </PrimaryButton>
+              <SecondaryButton
+                type="button"
+                onClick={() => handleReview('request_more_documents')}
+                disabled={submittingReview || !rejectionReason.trim()}
+                className="flex-1 justify-center py-2.5"
+              >
+                + de documents
+              </SecondaryButton>
               <DangerButton
                 type="button"
                 onClick={() => handleReview('reject')}

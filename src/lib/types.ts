@@ -142,6 +142,7 @@ export interface RegistrationCitizen {
   reviewedByLabel: string | null
   reviewedAt: string | null
   documentDeadlineAt: string | null
+  keepExistingDocuments: boolean
   waitlistPosition: number | null
   waitlistNotifiedAt: string | null
   waitlistResponseDeadline: string | null
@@ -205,6 +206,7 @@ export interface RegistrationAgent {
   registrationReference: string
   rejectionReason: string | null
   documentDeadlineAt: string | null
+  keepExistingDocuments: boolean
   waitlistPosition: number | null
   reviewedByLabel: string | null
   reviewedAt: string | null
