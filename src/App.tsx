@@ -14,6 +14,7 @@ const PublicInscriptionCataloguePage = lazy(() => import('@/pages/public/PublicI
 const PublicInscriptionFormationPage = lazy(() => import('@/pages/public/PublicInscriptionFormationPage'))
 const PublicInscriptionDirectPage = lazy(() => import('@/pages/public/PublicInscriptionDirectPage'))
 const InscriptionReturnPage = lazy(() => import('@/pages/public/InscriptionReturnPage'))
+const LegalNoticePage = lazy(() => import('@/pages/public/LegalNoticePage'))
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/inscription/:slug/retour" element={<InscriptionReturnPage />} />
         <Route path="/inscription/:slug/f/:eventSlug" element={<PublicInscriptionFormationPage />} />
         <Route path="/inscription/:slug/f/:eventSlug/direct" element={<PublicInscriptionDirectPage />} />
+        <Route path="/mentions-legales" element={<LegalNoticePage />} />
         <Route path="/staff/*" element={<StaffGate />} />
         <Route path="/*" element={<AuthGate />} />
       </Routes>

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import aregieLogo from '@/assets/aregie-logo.png'
 
 // Badge "AREGIE" — vrai logo institutionnel (voir FORGEJO_REPO/AREGIE),
@@ -10,10 +11,15 @@ import aregieLogo from '@/assets/aregie-logo.png'
 // contenu.
 function AregieBadge() {
   return (
-    <div className="mt-auto flex items-center justify-end gap-1.5 pt-4 md:fixed md:right-6 md:bottom-5 md:mt-0 md:pt-0">
-      <p className="text-[10px] font-medium text-ink-faint">Propulsé par</p>
-      <div className="squircle flex shrink-0 items-center rounded-lg bg-aregie-deep px-2.5 py-[5px]">
-        <img src={aregieLogo} alt="AREGIE" className="h-[10px] w-auto" />
+    <div className="mt-auto flex items-center justify-end gap-3 pt-4 md:fixed md:right-6 md:bottom-5 md:mt-0 md:pt-0">
+      <Link to="/mentions-legales" className="text-[10px] font-medium text-ink-faint underline-offset-2 hover:text-ink-soft hover:underline">
+        Mentions légales
+      </Link>
+      <div className="flex items-center gap-1.5">
+        <p className="text-[10px] font-medium text-ink-faint">Propulsé par</p>
+        <div className="squircle flex shrink-0 items-center rounded-lg bg-aregie-deep px-2.5 py-[5px]">
+          <img src={aregieLogo} alt="AREGIE" className="h-[10px] w-auto" />
+        </div>
       </div>
     </div>
   )
