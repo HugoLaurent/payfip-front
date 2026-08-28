@@ -43,9 +43,12 @@ export function LegalNoticePage() {
         <div className="flex flex-col gap-2">
           <SectionLabel>Éditeur du site</SectionLabel>
           <p className="text-[13.5px] leading-[1.7] text-ink-soft">
-            Ce site est édité par l'entreprise AREGIE, dont le siège est situé à Neuilly-sur-Seine (92200).
+            Ce site est édité par AREGIE (A REGIE), société à responsabilité limitée (SARL) au capital de
+            107 600 €, dont le siège social est situé 49 rue de Ponthieu, 75008 Paris.
             <br />
-            Directeur de la publication : AREGIE.
+            RCS Paris 402 939 813 — SIRET 402 939 813 00059.
+            <br />
+            Directeur de la publication : Caroline Dalmaz, gérante.
             <br />
             Contact : <a href="mailto:a-regie@aregie.com" className="font-semibold text-aregie-blue">a-regie@aregie.com</a>
           </p>
