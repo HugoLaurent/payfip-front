@@ -129,6 +129,16 @@ export function LegalNoticePage() {
             Les données ne sont jamais vendues à des tiers. Les emails sont envoyés via les serveurs sécurisés de
             Microsoft Outlook. Les données sont hébergées en Europe chez IONOS.
           </p>
+          <p className="text-[13.5px] leading-[1.7] text-ink-soft">
+            Lorsqu'un paiement est effectué, les informations nécessaires (adresse email, montant, référence) sont
+            transmises à PayFiP, la plateforme de paiement en ligne de la Direction générale des Finances publiques
+            (DGFiP), pour le compte de l'organisme auprès duquel vous réglez.
+          </p>
+          <p className="text-[13.5px] leading-[1.7] text-ink-soft">
+            Les erreurs techniques du site sont surveillées via GlitchTip, un outil d'observabilité hébergé par
+            AREGIE — aucune donnée personnelle identifiante n'y est transmise, uniquement des informations
+            techniques (message d'erreur, page concernée).
+          </p>
         </div>
 
         <div className="flex flex-col gap-2">
