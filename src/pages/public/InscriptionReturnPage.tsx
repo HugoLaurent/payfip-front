@@ -273,26 +273,29 @@ export function InscriptionReturnPage() {
                   )}
                 </div>
                 <div className="h-px bg-hairline" />
-                <div className="flex items-center justify-between px-[17px] py-[14px] md:px-[22px]">
-                  <span className="text-[12.5px] font-medium text-ink-soft md:text-[13px]">Participant</span>
-                  <span className="text-[13.5px] font-bold text-ink">
+                <div className="flex items-center justify-between gap-3 px-[17px] py-[14px] md:px-[22px]">
+                  <span className="shrink-0 text-[12.5px] font-medium text-ink-soft md:text-[13px]">Participant</span>
+                  <span className="min-w-0 truncate text-right text-[13.5px] font-bold text-ink">
                     {registration.firstName} {registration.lastName}
                   </span>
                 </div>
                 <div className="h-px bg-hairline" />
-                <div className="flex items-center justify-between px-[17px] py-[14px] md:px-[22px]">
-                  <span className="text-[12.5px] font-medium text-ink-soft md:text-[13px]">Justificatif</span>
-                  <span className="flex items-center gap-2 text-[13px] font-bold text-[oklch(0.42_0.09_150)]">
-                    <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-success text-[10px] text-white">
+                <div className="flex items-center justify-between gap-3 px-[17px] py-[14px] md:px-[22px]">
+                  <span className="shrink-0 text-[12.5px] font-medium text-ink-soft md:text-[13px]">Justificatif</span>
+                  <span className="flex min-w-0 shrink-0 items-center gap-2 text-[13px] font-bold text-[oklch(0.42_0.09_150)]">
+                    <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-success text-[10px] text-white">
                       ✓
                     </span>
                     validé
                   </span>
                 </div>
                 <div className="h-px bg-hairline" />
-                <div className="flex items-center justify-between bg-date-tint px-[17px] py-[15px] md:px-[22px] md:py-[18px]">
-                  <span className="text-[12.5px] font-semibold text-[oklch(0.42_0.015_260)] md:text-[13px]">Montant dû</span>
-                  <span className="text-[19px] font-bold text-aregie-deep md:text-[22px]" style={{ fontFamily: 'var(--font-display)' }}>
+                <div className="flex items-center justify-between gap-3 bg-date-tint px-[17px] py-[15px] md:px-[22px] md:py-[18px]">
+                  <span className="shrink-0 text-[12.5px] font-semibold text-[oklch(0.42_0.015_260)] md:text-[13px]">Montant dû</span>
+                  <span
+                    className="min-w-0 truncate text-right text-[19px] font-bold text-aregie-deep md:text-[22px]"
+                    style={{ fontFamily: 'var(--font-display)' }}
+                  >
                     {euros(registration.amountCents)}
                   </span>
                 </div>
