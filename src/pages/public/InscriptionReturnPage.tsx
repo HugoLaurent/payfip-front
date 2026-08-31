@@ -83,7 +83,12 @@ export function InscriptionReturnPage() {
 
   useEffect(() => {
     if (missingParams) return
-    if (!isInstant && status !== 'paid' && status !== 'confirmed') return
+    // Ne pas encore charger tant que le paiement est en cours de
+    // vérification (draft/awaiting_payment, voir usePaymentStatusPolling) —
+    // mais pour tout statut terminal, y compris un échec, il faut charger
+    // l'inscription : c'est elle qui fournit l'accessToken dont a besoin
+    // handleRetryPayment pour le bouton "Réessayer le paiement".
+    if (!isInstant && (!status || isPendingPaymentStatus(status))) return
 
     setRegistration(null)
     setRegistrationFailed(false)
