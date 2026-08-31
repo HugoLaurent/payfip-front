@@ -38,28 +38,34 @@ export function OrgSpace() {
     >
       <Sidebar mobileOpen={mobileNavOpen} onCloseMobile={() => setMobileNavOpen(false)} />
 
+      {/* Cloche de notif en survol (fixed) — jamais un bandeau qui pousse
+          le contenu. Une seule instance montée, positionnée au-dessus de
+          tout, plutôt qu'une copie par barre responsive (double polling). */}
+      {!isScanner && (
+        <div className="fixed top-3 right-4 z-30 md:top-4 md:right-6">
+          <NotificationBell auth={auth} />
+        </div>
+      )}
+
       <div className="flex min-w-0 flex-1 flex-col">
         <div
-          className={`flex items-center gap-3 border-b px-4 ${
-            isScanner ? 'border-white/10 bg-[#0a0d18] py-1.5 md:hidden' : 'border-black/5 bg-white py-3'
+          className={`flex items-center gap-3 border-b px-4 md:hidden ${
+            isScanner ? 'border-white/10 bg-[#0a0d18] py-1.5' : 'border-black/5 bg-white py-3'
           }`}
         >
           <button
             type="button"
             onClick={() => setMobileNavOpen(true)}
-            className={`flex shrink-0 items-center justify-center squircle rounded-lg transition md:hidden ${
+            className={`flex shrink-0 items-center justify-center squircle rounded-lg transition ${
               isScanner ? 'h-7 w-7 text-white/80 hover:bg-white/10' : 'h-9 w-9 text-gray-500 hover:bg-gray-100'
             }`}
             aria-label="Ouvrir le menu"
           >
             <Menu size={isScanner ? 17 : 20} />
           </button>
-          <p className={`truncate font-semibold md:hidden ${isScanner ? 'text-xs text-white/85' : 'text-sm text-gray-900'}`}>
+          <p className={`truncate font-semibold ${isScanner ? 'text-xs text-white/85' : 'text-sm text-gray-900'}`}>
             {auth.orgName}
           </p>
-          <div className="ml-auto">
-            <NotificationBell auth={auth} />
-          </div>
         </div>
 
         <main
