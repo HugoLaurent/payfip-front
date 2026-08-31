@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { Download, Eye, Paperclip, Search, X } from 'lucide-react'
+import { Check, Download, Eye, Paperclip, Search, X } from 'lucide-react'
 import { apiCall, GATEWAY_URL } from '@/lib/api'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useToast } from '@/lib/useToast'
@@ -60,6 +60,11 @@ export function EventRegistrationsPanel({
   const [reviewing, setReviewing] = useState<RegistrationAgent | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
+  // Documents cochés "conforme" par l'agent pour l'inscription en cours de
+  // revue — état local uniquement, jamais envoyé au serveur : sert juste à
+  // empêcher un clic sur "Valider" avant d'avoir vraiment regardé chaque
+  // pièce (voir openReview, qui le réinitialise à chaque ouverture).
+  const [checkedDocIds, setCheckedDocIds] = useState<Set<number>>(new Set())
   const [previewing, setPreviewing] = useState<{ url: string; mimeType: string; filename: string; label: string } | null>(null)
   const [previewLoadingId, setPreviewLoadingId] = useState<number | null>(null)
 
@@ -73,23 +78,45 @@ export function EventRegistrationsPanel({
     deps: [event.id, status, q, page],
   })
 
-  async function handleReview(decision: 'approve' | 'reject' | 'request_more_documents') {
+  function openReview(r: RegistrationAgent) {
+    setReviewing(r)
+    setRejectionReason('')
+    setCheckedDocIds(new Set())
+  }
+
+  function toggleDocChecked(documentId: number) {
+    setCheckedDocIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(documentId)) next.delete(documentId)
+      else next.add(documentId)
+      return next
+    })
+  }
+
+  async function handleReview(decision: 'approve' | 'reject' | 'request_more_documents' | 'revert') {
     if (!reviewing) return
-    if (decision !== 'approve' && !rejectionReason.trim()) return
+    if ((decision === 'reject' || decision === 'request_more_documents') && !rejectionReason.trim()) return
 
     setSubmittingReview(true)
     const result = await apiCall('POST', `/inscription/registrations/${reviewing.id}/review`, {
       token: auth.token,
-      body: decision === 'approve' ? { decision } : { decision, rejectionReason: rejectionReason.trim() },
+      body: decision === 'approve' || decision === 'revert' ? { decision } : { decision, rejectionReason: rejectionReason.trim() },
     })
     setSubmittingReview(false)
 
     if (result.ok) {
       const successLabel =
-        decision === 'approve' ? 'Justificatifs validés' : decision === 'reject' ? 'Inscription rejetée' : 'Complément demandé'
+        decision === 'approve'
+          ? 'Justificatifs validés'
+          : decision === 'reject'
+            ? 'Inscription rejetée'
+            : decision === 'revert'
+              ? 'Validation annulée'
+              : 'Complément demandé'
       showToast('success', successLabel, `${reviewing.firstName} ${reviewing.lastName}`)
       setReviewing(null)
       setRejectionReason('')
+      setCheckedDocIds(new Set())
       await reload()
     } else {
       showToast('error', 'Échec', "Impossible d'enregistrer la décision.")
@@ -214,7 +241,7 @@ export function EventRegistrationsPanel({
                 {r.documents && r.documents.filter((d) => d.isCurrent).length > 0 && (
                   <button
                     type="button"
-                    onClick={() => setReviewing(r)}
+                    onClick={() => openReview(r)}
                     className="squircle flex shrink-0 items-center gap-1 rounded-lg bg-gray-100 px-2 py-1.5 text-xs font-medium text-gray-500 transition hover:bg-gray-200 hover:text-aregie-deep"
                     aria-label={`Voir les ${r.documents.filter((d) => d.isCurrent).length} document(s) de ${r.firstName} ${r.lastName}`}
                   >
@@ -223,7 +250,7 @@ export function EventRegistrationsPanel({
                   </button>
                 )}
                 {r.status === 'awaiting_review' && (
-                  <PrimaryButton type="button" onClick={() => setReviewing(r)} className="shrink-0 px-3 py-1.5 text-xs">
+                  <PrimaryButton type="button" onClick={() => openReview(r)} className="shrink-0 px-3 py-1.5 text-xs">
                     Vérifier
                   </PrimaryButton>
                 )}
@@ -253,91 +280,143 @@ export function EventRegistrationsPanel({
               {reviewing.email} · {reviewing.registrationReference}
             </p>
 
-            {reviewing.documents && reviewing.documents.filter((d) => d.isCurrent).length > 0 && (
-              <div className="mt-5 space-y-2">
-                <p className="text-[11.5px] font-semibold text-gray-500">Documents déposés</p>
-                <div className="space-y-1.5">
-                  {reviewing.documents
-                    .filter((d) => d.isCurrent)
-                    .map((d) => {
-                      const label = event.documentRequirements?.find((req) => req.key === d.documentKey)?.label
-                      return (
-                        <button
-                          key={d.id}
-                          type="button"
-                          onClick={() => openPreview(reviewing.id, d, label ?? d.filename)}
-                          disabled={previewLoadingId === d.id}
-                          className="squircle flex w-full items-center justify-between gap-3 rounded-xl border border-gray-200 px-3.5 py-2.5 text-left transition hover:border-aregie-deep/30 hover:bg-aregie-deep/5 disabled:opacity-60"
-                        >
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-gray-800">{label ?? d.filename}</p>
-                            {label && <p className="truncate text-xs text-gray-400">{d.filename}</p>}
-                          </div>
-                          {previewLoadingId === d.id ? (
-                            <span className="shrink-0 text-xs text-gray-400">…</span>
-                          ) : (
-                            <Eye size={15} className="shrink-0 text-gray-400" />
-                          )}
-                        </button>
-                      )
-                    })}
-                </div>
-              </div>
-            )}
+            {(() => {
+              const currentDocs = reviewing.documents?.filter((d) => d.isCurrent) ?? []
+              const isPending = reviewing.status === 'awaiting_review'
+              const allDocsChecked = currentDocs.length === 0 || currentDocs.every((d) => checkedDocIds.has(d.id))
+              const canRevert =
+                reviewing.status === 'awaiting_payment' ||
+                (reviewing.status === 'confirmed' && reviewing.paymentMethod === 'free')
 
-            {reviewing.status === 'awaiting_review' ? (
-              <>
-                <p className="mt-5 mb-3 text-sm text-gray-500">
-                  Valider les justificatifs déposés, demander un document en plus (les documents déjà envoyés
-                  restent valables), ou rejeter — le message est vu tel quel par le citoyen.
-                </p>
-                <label className="mb-1.5 block text-[11.5px] font-semibold text-gray-500">
-                  Message pour le citoyen
-                  {rejectionReason.trim() === '' && <span className="ml-1 font-normal text-gray-400">(obligatoire sauf pour valider)</span>}
-                </label>
-                <Textarea
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="Ex. Le document fourni est illisible, merci d'en déposer un nouveau."
-                  rows={3}
-                  className="mb-4"
-                />
-                <div className="flex gap-2">
-                  <PrimaryButton
-                    type="button"
-                    onClick={() => handleReview('approve')}
-                    disabled={submittingReview}
-                    className="flex-1 justify-center"
-                  >
-                    {submittingReview ? '…' : 'Valider'}
-                  </PrimaryButton>
-                  <SecondaryButton
-                    type="button"
-                    onClick={() => handleReview('request_more_documents')}
-                    disabled={submittingReview || !rejectionReason.trim()}
-                    className="flex-1 justify-center py-2.5"
-                  >
-                    + de documents
+              return (
+                <>
+                  {currentDocs.length > 0 && (
+                    <div className="mt-5 space-y-2">
+                      <p className="text-[11.5px] font-semibold text-gray-500">
+                        Documents déposés
+                        {isPending && <span className="ml-1 font-normal text-gray-400">— cochez chaque pièce conforme</span>}
+                      </p>
+                      <div className="space-y-1.5">
+                        {currentDocs.map((d) => {
+                          const label = event.documentRequirements?.find((req) => req.key === d.documentKey)?.label
+                          const checked = checkedDocIds.has(d.id)
+                          return (
+                            <div
+                              key={d.id}
+                              className="squircle flex w-full items-center gap-2.5 rounded-xl border border-gray-200 px-3.5 py-2.5"
+                            >
+                              {isPending && (
+                                <button
+                                  type="button"
+                                  onClick={() => toggleDocChecked(d.id)}
+                                  aria-pressed={checked}
+                                  aria-label={`Marquer ${label ?? d.filename} comme conforme`}
+                                  className={`squircle flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 transition ${
+                                    checked
+                                      ? 'border-emerald-500 bg-emerald-500 text-white'
+                                      : 'border-gray-300 text-transparent hover:border-gray-400'
+                                  }`}
+                                >
+                                  <Check size={14} strokeWidth={3} />
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => openPreview(reviewing.id, d, label ?? d.filename)}
+                                disabled={previewLoadingId === d.id}
+                                className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left transition disabled:opacity-60"
+                              >
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-medium text-gray-800">{label ?? d.filename}</p>
+                                  {label && <p className="truncate text-xs text-gray-400">{d.filename}</p>}
+                                </div>
+                                {previewLoadingId === d.id ? (
+                                  <span className="shrink-0 text-xs text-gray-400">…</span>
+                                ) : (
+                                  <Eye size={15} className="shrink-0 text-gray-400" />
+                                )}
+                              </button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {isPending ? (
+                    <>
+                      <p className="mt-5 mb-3 text-sm text-gray-500">
+                        Valider les justificatifs déposés, demander un document en plus (les documents déjà envoyés
+                        restent valables), ou rejeter — le message est vu tel quel par le citoyen.
+                      </p>
+                      <label className="mb-1.5 block text-[11.5px] font-semibold text-gray-500">
+                        Message pour le citoyen
+                        {rejectionReason.trim() === '' && <span className="ml-1 font-normal text-gray-400">(obligatoire sauf pour valider)</span>}
+                      </label>
+                      <Textarea
+                        value={rejectionReason}
+                        onChange={(e) => setRejectionReason(e.target.value)}
+                        placeholder="Ex. Le document fourni est illisible, merci d'en déposer un nouveau."
+                        rows={3}
+                        className="mb-4"
+                      />
+                      <div className="flex gap-2">
+                        <PrimaryButton
+                          type="button"
+                          onClick={() => handleReview('approve')}
+                          disabled={submittingReview || !allDocsChecked}
+                          title={!allDocsChecked ? 'Cochez chaque document comme conforme avant de valider' : undefined}
+                          className="flex-1 justify-center"
+                        >
+                          {submittingReview ? '…' : 'Valider'}
+                        </PrimaryButton>
+                        <SecondaryButton
+                          type="button"
+                          onClick={() => handleReview('request_more_documents')}
+                          disabled={submittingReview || !rejectionReason.trim()}
+                          className="flex-1 justify-center py-2.5"
+                        >
+                          + de documents
+                        </SecondaryButton>
+                        <DangerButton
+                          type="button"
+                          onClick={() => handleReview('reject')}
+                          disabled={submittingReview || !rejectionReason.trim()}
+                          className="flex-1 justify-center py-2.5"
+                        >
+                          Rejeter
+                        </DangerButton>
+                      </div>
+                      {currentDocs.length > 0 && !allDocsChecked && (
+                        <p className="mt-2 text-center text-xs text-gray-400">
+                          Cochez les {currentDocs.length} document(s) comme conformes pour activer la validation.
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="mt-5 mb-3">
+                      <p className="text-sm text-gray-500">
+                        Statut : <span className="font-semibold text-gray-700">{STATUS_LABELS[reviewing.status]}</span> —
+                        déjà traité.
+                      </p>
+                      {canRevert && (
+                        <SecondaryButton
+                          type="button"
+                          onClick={() => handleReview('revert')}
+                          disabled={submittingReview}
+                          className="mt-3 w-full justify-center"
+                        >
+                          {submittingReview ? '…' : 'Annuler la validation (erreur ?)'}
+                        </SecondaryButton>
+                      )}
+                    </div>
+                  )}
+                  <SecondaryButton type="button" onClick={() => setReviewing(null)} className="mt-2 w-full justify-center">
+                    {isPending ? 'Annuler' : 'Fermer'}
                   </SecondaryButton>
-                  <DangerButton
-                    type="button"
-                    onClick={() => handleReview('reject')}
-                    disabled={submittingReview || !rejectionReason.trim()}
-                    className="flex-1 justify-center py-2.5"
-                  >
-                    Rejeter
-                  </DangerButton>
-                </div>
-              </>
-            ) : (
-              <p className="mt-5 mb-3 text-sm text-gray-500">
-                Statut : <span className="font-semibold text-gray-700">{STATUS_LABELS[reviewing.status]}</span> —
-                déjà traité, aucune action à faire ici.
-              </p>
-            )}
-            <SecondaryButton type="button" onClick={() => setReviewing(null)} className="mt-2 w-full justify-center">
-              {reviewing.status === 'awaiting_review' ? 'Annuler' : 'Fermer'}
-            </SecondaryButton>
+                </>
+              )
+            })()}
           </div>
         </motion.div>
       )}
