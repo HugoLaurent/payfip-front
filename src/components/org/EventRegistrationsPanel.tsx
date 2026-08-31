@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { Download, X } from 'lucide-react'
+import { Download, Paperclip, X } from 'lucide-react'
 import { apiCall, GATEWAY_URL } from '@/lib/api'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useToast } from '@/lib/useToast'
@@ -180,29 +180,16 @@ export function EventRegistrationsPanel({
                 <p className="w-20 shrink-0 text-right text-sm font-bold text-gray-900">
                   {r.amountCents === 0 ? 'Gratuit' : euros(r.amountCents)}
                 </p>
-                {r.documents && r.documents.length > 0 && (
-                  <div className="flex shrink-0 gap-1">
-                    {r.documents
-                      .filter((d) => d.isCurrent)
-                      .map((d) => {
-                        const requirementLabel = event.documentRequirements?.find(
-                          (req) => req.key === d.documentKey,
-                        )?.label
-                        const title = requirementLabel ? `${requirementLabel} — ${d.filename}` : d.filename
-                        return (
-                          <button
-                            key={d.id}
-                            type="button"
-                            onClick={() => downloadDocument(r.id, d.id, d.filename)}
-                            className="squircle rounded-lg bg-gray-100 p-1.5 text-gray-500 transition hover:bg-gray-200 hover:text-aregie-deep"
-                            aria-label={`Télécharger ${title}`}
-                            title={title}
-                          >
-                            <Download size={14} />
-                          </button>
-                        )
-                      })}
-                  </div>
+                {r.documents && r.documents.filter((d) => d.isCurrent).length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setReviewing(r)}
+                    className="squircle flex shrink-0 items-center gap-1 rounded-lg bg-gray-100 px-2 py-1.5 text-xs font-medium text-gray-500 transition hover:bg-gray-200 hover:text-aregie-deep"
+                    aria-label={`Voir les ${r.documents.filter((d) => d.isCurrent).length} document(s) de ${r.firstName} ${r.lastName}`}
+                  >
+                    <Paperclip size={13} />
+                    {r.documents.filter((d) => d.isCurrent).length}
+                  </button>
                 )}
                 {r.status === 'awaiting_review' && (
                   <PrimaryButton type="button" onClick={() => setReviewing(r)} className="shrink-0 px-3 py-1.5 text-xs">
@@ -231,45 +218,80 @@ export function EventRegistrationsPanel({
             <h3 className="mb-3 text-[17px] font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
               {reviewing.firstName} {reviewing.lastName}
             </h3>
-            <p className="mb-3 text-sm text-gray-500">
-              Valider les justificatifs déposés, demander un document en plus (les documents déjà envoyés restent
-              valables), ou rejeter — le message est vu tel quel par le citoyen.
-            </p>
-            <Textarea
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              placeholder="Message pour le citoyen (obligatoire sauf pour valider)"
-              rows={3}
-              className="mb-3"
-            />
-            <div className="flex gap-2">
-              <PrimaryButton
-                type="button"
-                onClick={() => handleReview('approve')}
-                disabled={submittingReview}
-                className="flex-1 justify-center"
-              >
-                {submittingReview ? '…' : 'Valider'}
-              </PrimaryButton>
-              <SecondaryButton
-                type="button"
-                onClick={() => handleReview('request_more_documents')}
-                disabled={submittingReview || !rejectionReason.trim()}
-                className="flex-1 justify-center py-2.5"
-              >
-                + de documents
-              </SecondaryButton>
-              <DangerButton
-                type="button"
-                onClick={() => handleReview('reject')}
-                disabled={submittingReview || !rejectionReason.trim()}
-                className="flex-1 justify-center py-2.5"
-              >
-                Rejeter
-              </DangerButton>
-            </div>
+
+            {reviewing.documents && reviewing.documents.filter((d) => d.isCurrent).length > 0 && (
+              <div className="mb-4 space-y-1.5">
+                <p className="text-[11px] font-semibold tracking-wide text-gray-400 uppercase">Documents déposés</p>
+                {reviewing.documents
+                  .filter((d) => d.isCurrent)
+                  .map((d) => {
+                    const label = event.documentRequirements?.find((req) => req.key === d.documentKey)?.label
+                    return (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => downloadDocument(reviewing.id, d.id, d.filename)}
+                        className="squircle flex w-full items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2 text-left transition hover:border-aregie-deep/30 hover:bg-aregie-deep/5"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-gray-800">{label ?? d.filename}</p>
+                          {label && <p className="truncate text-xs text-gray-400">{d.filename}</p>}
+                        </div>
+                        <Download size={15} className="shrink-0 text-gray-400" />
+                      </button>
+                    )
+                  })}
+              </div>
+            )}
+
+            {reviewing.status === 'awaiting_review' ? (
+              <>
+                <p className="mb-3 text-sm text-gray-500">
+                  Valider les justificatifs déposés, demander un document en plus (les documents déjà envoyés
+                  restent valables), ou rejeter — le message est vu tel quel par le citoyen.
+                </p>
+                <Textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Message pour le citoyen (obligatoire sauf pour valider)"
+                  rows={3}
+                  className="mb-3"
+                />
+                <div className="flex gap-2">
+                  <PrimaryButton
+                    type="button"
+                    onClick={() => handleReview('approve')}
+                    disabled={submittingReview}
+                    className="flex-1 justify-center"
+                  >
+                    {submittingReview ? '…' : 'Valider'}
+                  </PrimaryButton>
+                  <SecondaryButton
+                    type="button"
+                    onClick={() => handleReview('request_more_documents')}
+                    disabled={submittingReview || !rejectionReason.trim()}
+                    className="flex-1 justify-center py-2.5"
+                  >
+                    + de documents
+                  </SecondaryButton>
+                  <DangerButton
+                    type="button"
+                    onClick={() => handleReview('reject')}
+                    disabled={submittingReview || !rejectionReason.trim()}
+                    className="flex-1 justify-center py-2.5"
+                  >
+                    Rejeter
+                  </DangerButton>
+                </div>
+              </>
+            ) : (
+              <p className="mb-3 text-sm text-gray-500">
+                Statut : <span className="font-semibold text-gray-700">{STATUS_LABELS[reviewing.status]}</span> —
+                déjà traité, aucune action à faire ici.
+              </p>
+            )}
             <SecondaryButton type="button" onClick={() => setReviewing(null)} className="mt-2 w-full justify-center">
-              Annuler
+              {reviewing.status === 'awaiting_review' ? 'Annuler' : 'Fermer'}
             </SecondaryButton>
           </div>
         </motion.div>
