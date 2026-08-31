@@ -194,6 +194,11 @@ export interface EventAgent {
   // Inscriptions en attente de vérification — voir EventsManager.tsx, seul
   // indicateur visuel côté agent qu'une action est requise.
   pendingReviewCount: number
+  // Places occupées (somme des quantity en statut réservant une place +
+  // offres de liste d'attente actives — voir capacity_service.ts côté
+  // svc-inscription) — remplissage affiché à la place du seul nombre de
+  // places, voir EventsManager.tsx.
+  registeredCount: number
 }
 
 export interface RegistrationDocumentSummary {
