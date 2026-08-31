@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { Download, Paperclip, X } from 'lucide-react'
+import { Download, Eye, Paperclip, X } from 'lucide-react'
 import { apiCall, GATEWAY_URL } from '@/lib/api'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useToast } from '@/lib/useToast'
 import { euros } from '@/lib/format'
 import { DangerButton, EmptyState, LoadError, Pagination, PrimaryButton, SecondaryButton, SelectInput, TextInput, Textarea } from '@/components/ui'
-import type { AuthState, EventAgent, PageMeta, RegistrationAgent } from '@/lib/types'
+import type { AuthState, EventAgent, PageMeta, RegistrationAgent, RegistrationDocumentSummary } from '@/lib/types'
 
 const STATUS_LABELS: Record<RegistrationAgent['status'], string> = {
   waitlisted: "Liste d'attente",
@@ -48,6 +48,8 @@ export function EventRegistrationsPanel({
   const [reviewing, setReviewing] = useState<RegistrationAgent | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
+  const [previewing, setPreviewing] = useState<{ url: string; mimeType: string; filename: string; label: string } | null>(null)
+  const [previewLoadingId, setPreviewLoadingId] = useState<number | null>(null)
 
   const { data, meta, loadFailed, showLoading, reload } = usePaginatedResource<RegistrationAgent, PageMeta>({
     fetcher: () =>
@@ -82,20 +84,29 @@ export function EventRegistrationsPanel({
     }
   }
 
-  function downloadDocument(registrationId: number, documentId: number, filename: string) {
-    fetch(`${GATEWAY_URL}/inscription/registrations/${registrationId}/documents/${documentId}`, {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    })
-      .then((res) => (res.ok ? res.blob() : Promise.reject(new Error('download_failed'))))
-      .then((blob) => {
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = filename
-        link.click()
-        URL.revokeObjectURL(url)
+  // Aperçu inline (image/PDF) au lieu de forcer un téléchargement pour
+  // consulter une pièce — le blob devient une URL d'objet affichée dans une
+  // lightbox, qui offre elle-même un vrai téléchargement si besoin.
+  async function openPreview(registrationId: number, doc: RegistrationDocumentSummary, label: string) {
+    setPreviewLoadingId(doc.id)
+    try {
+      const res = await fetch(`${GATEWAY_URL}/inscription/registrations/${registrationId}/documents/${doc.id}`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
       })
-      .catch(() => showToast('error', 'Échec', 'Impossible de télécharger le document.'))
+      if (!res.ok) throw new Error('preview_failed')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      setPreviewing({ url, mimeType: doc.mimeType, filename: doc.filename, label })
+    } catch {
+      showToast('error', 'Échec', "Impossible d'afficher le document.")
+    } finally {
+      setPreviewLoadingId(null)
+    }
+  }
+
+  function closePreview() {
+    if (previewing) URL.revokeObjectURL(previewing.url)
+    setPreviewing(null)
   }
 
   return createPortal(
@@ -219,50 +230,64 @@ export function EventRegistrationsPanel({
           onClick={() => setReviewing(null)}
         >
           <div
-            className="squircle w-full max-w-md rounded-[20px] bg-white p-6 shadow-[0_30px_60px_-20px_rgba(20,25,60,0.4)]"
+            className="squircle w-full max-w-lg rounded-[22px] bg-white p-7 shadow-[0_30px_60px_-20px_rgba(20,25,60,0.4)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="mb-3 text-[17px] font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
+            <h3 className="text-[17px] font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
               {reviewing.firstName} {reviewing.lastName}
             </h3>
+            <p className="mt-0.5 text-xs text-gray-400">
+              {reviewing.email} · {reviewing.registrationReference}
+            </p>
 
             {reviewing.documents && reviewing.documents.filter((d) => d.isCurrent).length > 0 && (
-              <div className="mb-4 space-y-1.5">
-                <p className="text-[11px] font-semibold tracking-wide text-gray-400 uppercase">Documents déposés</p>
-                {reviewing.documents
-                  .filter((d) => d.isCurrent)
-                  .map((d) => {
-                    const label = event.documentRequirements?.find((req) => req.key === d.documentKey)?.label
-                    return (
-                      <button
-                        key={d.id}
-                        type="button"
-                        onClick={() => downloadDocument(reviewing.id, d.id, d.filename)}
-                        className="squircle flex w-full items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2 text-left transition hover:border-aregie-deep/30 hover:bg-aregie-deep/5"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-gray-800">{label ?? d.filename}</p>
-                          {label && <p className="truncate text-xs text-gray-400">{d.filename}</p>}
-                        </div>
-                        <Download size={15} className="shrink-0 text-gray-400" />
-                      </button>
-                    )
-                  })}
+              <div className="mt-5 space-y-2">
+                <p className="text-[11.5px] font-semibold text-gray-500">Documents déposés</p>
+                <div className="space-y-1.5">
+                  {reviewing.documents
+                    .filter((d) => d.isCurrent)
+                    .map((d) => {
+                      const label = event.documentRequirements?.find((req) => req.key === d.documentKey)?.label
+                      return (
+                        <button
+                          key={d.id}
+                          type="button"
+                          onClick={() => openPreview(reviewing.id, d, label ?? d.filename)}
+                          disabled={previewLoadingId === d.id}
+                          className="squircle flex w-full items-center justify-between gap-3 rounded-xl border border-gray-200 px-3.5 py-2.5 text-left transition hover:border-aregie-deep/30 hover:bg-aregie-deep/5 disabled:opacity-60"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-gray-800">{label ?? d.filename}</p>
+                            {label && <p className="truncate text-xs text-gray-400">{d.filename}</p>}
+                          </div>
+                          {previewLoadingId === d.id ? (
+                            <span className="shrink-0 text-xs text-gray-400">…</span>
+                          ) : (
+                            <Eye size={15} className="shrink-0 text-gray-400" />
+                          )}
+                        </button>
+                      )
+                    })}
+                </div>
               </div>
             )}
 
             {reviewing.status === 'awaiting_review' ? (
               <>
-                <p className="mb-3 text-sm text-gray-500">
+                <p className="mt-5 mb-3 text-sm text-gray-500">
                   Valider les justificatifs déposés, demander un document en plus (les documents déjà envoyés
                   restent valables), ou rejeter — le message est vu tel quel par le citoyen.
                 </p>
+                <label className="mb-1.5 block text-[11.5px] font-semibold text-gray-500">
+                  Message pour le citoyen
+                  {rejectionReason.trim() === '' && <span className="ml-1 font-normal text-gray-400">(obligatoire sauf pour valider)</span>}
+                </label>
                 <Textarea
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="Message pour le citoyen (obligatoire sauf pour valider)"
+                  placeholder="Ex. Le document fourni est illisible, merci d'en déposer un nouveau."
                   rows={3}
-                  className="mb-3"
+                  className="mb-4"
                 />
                 <div className="flex gap-2">
                   <PrimaryButton
@@ -292,7 +317,7 @@ export function EventRegistrationsPanel({
                 </div>
               </>
             ) : (
-              <p className="mb-3 text-sm text-gray-500">
+              <p className="mt-5 mb-3 text-sm text-gray-500">
                 Statut : <span className="font-semibold text-gray-700">{STATUS_LABELS[reviewing.status]}</span> —
                 déjà traité, aucune action à faire ici.
               </p>
@@ -300,6 +325,59 @@ export function EventRegistrationsPanel({
             <SecondaryButton type="button" onClick={() => setReviewing(null)} className="mt-2 w-full justify-center">
               {reviewing.status === 'awaiting_review' ? 'Annuler' : 'Fermer'}
             </SecondaryButton>
+          </div>
+        </motion.div>
+      )}
+
+      {previewing && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4"
+          onClick={closePreview}
+        >
+          <div
+            className="squircle flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_30px_60px_-20px_rgba(20,25,60,0.5)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3.5">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-gray-900">{previewing.label}</p>
+                <p className="truncate text-xs text-gray-400">{previewing.filename}</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <a
+                  href={previewing.url}
+                  download={previewing.filename}
+                  className="squircle flex items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-200"
+                >
+                  <Download size={13} />
+                  Télécharger
+                </a>
+                <button
+                  type="button"
+                  onClick={closePreview}
+                  className="squircle rounded-lg bg-gray-100 p-1.5 text-gray-500 transition hover:bg-gray-200 hover:text-gray-700"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto bg-gray-50 p-4">
+              {previewing.mimeType.startsWith('image/') ? (
+                <img
+                  src={previewing.url}
+                  alt={previewing.filename}
+                  className="mx-auto max-h-full max-w-full rounded-lg"
+                />
+              ) : (
+                <iframe
+                  src={previewing.url}
+                  title={previewing.filename}
+                  className="h-[75vh] w-full rounded-lg border-0 bg-white"
+                />
+              )}
+            </div>
           </div>
         </motion.div>
       )}
