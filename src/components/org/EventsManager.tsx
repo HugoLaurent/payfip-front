@@ -196,10 +196,19 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
                 <button
                   type="button"
                   onClick={() => setViewingRegistrationsFor(event)}
-                  className="squircle inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-200"
+                  className={`squircle inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                    event.pendingReviewCount > 0
+                      ? 'bg-aregie-coral/10 text-aregie-coral hover:bg-aregie-coral/15'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
                 >
                   <Users size={13} />
                   Inscrits
+                  {event.pendingReviewCount > 0 && (
+                    <span className="squircle flex h-4 min-w-4 items-center justify-center rounded-full bg-aregie-coral px-1 text-[10px] font-bold text-white">
+                      {event.pendingReviewCount}
+                    </span>
+                  )}
                 </button>
               )}
               {canManage && (

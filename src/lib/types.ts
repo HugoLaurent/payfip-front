@@ -191,6 +191,9 @@ export interface EventAgent {
   formSchema: RegistrationFormField[] | null
   status: EventStatus
   createdAt: string
+  // Inscriptions en attente de vérification — voir EventsManager.tsx, seul
+  // indicateur visuel côté agent qu'une action est requise.
+  pendingReviewCount: number
 }
 
 export interface RegistrationDocumentSummary {

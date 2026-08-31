@@ -118,7 +118,14 @@ export function EventRegistrationsPanel({
             <h3 className="text-[17px] font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
               Inscrits — {event.title}
             </h3>
-            {meta && <p className="text-xs text-gray-400">{meta.total} inscription(s)</p>}
+            {meta && (
+              <p className="text-xs text-gray-400">
+                {meta.total} inscription(s)
+                {event.pendingReviewCount > 0 && (
+                  <span className="font-semibold text-aregie-coral"> · {event.pendingReviewCount} à vérifier</span>
+                )}
+              </p>
+            )}
           </div>
           <button
             type="button"
