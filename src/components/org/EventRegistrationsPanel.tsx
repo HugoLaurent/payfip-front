@@ -1,12 +1,24 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { Download, Eye, Paperclip, X } from 'lucide-react'
+import { Download, Eye, Paperclip, Search, X } from 'lucide-react'
 import { apiCall, GATEWAY_URL } from '@/lib/api'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useToast } from '@/lib/useToast'
 import { euros } from '@/lib/format'
-import { DangerButton, EmptyState, LoadError, Pagination, PrimaryButton, SecondaryButton, SelectInput, TextInput, Textarea } from '@/components/ui'
+import {
+  Card,
+  DangerButton,
+  EmptyState,
+  LoadError,
+  Pagination,
+  PrimaryButton,
+  SecondaryButton,
+  SelectInput,
+  StatusBadge,
+  TextInput,
+  Textarea,
+} from '@/components/ui'
 import type { AuthState, EventAgent, PageMeta, RegistrationAgent, RegistrationDocumentSummary } from '@/lib/types'
 
 const STATUS_LABELS: Record<RegistrationAgent['status'], string> = {
@@ -147,17 +159,20 @@ export function EventRegistrationsPanel({
           </button>
         </div>
 
-        <div className="flex gap-2 border-b border-gray-100 px-6 py-3">
-          <TextInput
-            type="text"
-            placeholder="Rechercher (nom, email, référence)…"
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value)
-              setPage(1)
-            }}
-            className="flex-1"
-          />
+        <div className="flex flex-wrap gap-2 border-b border-gray-100 px-6 py-3">
+          <div className="relative min-w-0 flex-1">
+            <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+            <TextInput
+              type="text"
+              placeholder="Rechercher (nom, email, référence)…"
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value)
+                setPage(1)
+              }}
+              className="pl-9"
+            />
+          </div>
           <SelectInput
             value={status}
             onChange={(e) => {
@@ -180,9 +195,9 @@ export function EventRegistrationsPanel({
           {!loadFailed && showLoading && <p className="py-6 text-sm text-gray-500">Chargement…</p>}
           {!loadFailed && data?.length === 0 && <EmptyState label="Aucune inscription pour ce filtre." />}
 
-          <div className="divide-y divide-gray-100">
+          <div className="flex flex-col gap-2">
             {data?.map((r) => (
-              <div key={r.id} className="flex flex-wrap items-center gap-3 py-3">
+              <Card key={r.id} className="flex flex-wrap items-center gap-3 p-0 px-4 py-3">
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-gray-900">
                     {r.firstName} {r.lastName}
@@ -192,9 +207,7 @@ export function EventRegistrationsPanel({
                     {r.quantity > 1 ? ` · ${r.quantity} participants` : ''}
                   </p>
                 </div>
-                <span className={`squircle shrink-0 rounded-full px-3 py-1 text-xs font-bold ${STATUS_TINTS[r.status]}`}>
-                  {STATUS_LABELS[r.status]}
-                </span>
+                <StatusBadge label={STATUS_LABELS[r.status]} className={STATUS_TINTS[r.status]} />
                 <p className="w-20 shrink-0 text-right text-sm font-bold text-gray-900">
                   {r.amountCents === 0 ? 'Gratuit' : euros(r.amountCents)}
                 </p>
@@ -214,7 +227,7 @@ export function EventRegistrationsPanel({
                     Vérifier
                   </PrimaryButton>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
 
