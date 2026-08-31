@@ -67,6 +67,7 @@ export function EventRegistrationsPanel({
   const [checkedDocIds, setCheckedDocIds] = useState<Set<number>>(new Set())
   const [previewing, setPreviewing] = useState<{ url: string; mimeType: string; filename: string; label: string } | null>(null)
   const [previewLoadingId, setPreviewLoadingId] = useState<number | null>(null)
+  const [resendingId, setResendingId] = useState<number | null>(null)
 
   const { data, meta, loadFailed, showLoading, reload } = usePaginatedResource<RegistrationAgent, PageMeta>({
     fetcher: () =>
@@ -120,6 +121,23 @@ export function EventRegistrationsPanel({
       await reload()
     } else {
       showToast('error', 'Échec', "Impossible d'enregistrer la décision.")
+    }
+  }
+
+  // Relance manuelle (le citoyen a le mail attendu — paiement ou redépôt —
+  // mais tarde à agir) : renvoie le même email, sans changer le statut. Le
+  // serveur applique un délai anti-spam entre deux relances (429).
+  async function handleResendReminder(r: RegistrationAgent) {
+    setResendingId(r.id)
+    const result = await apiCall('POST', `/inscription/registrations/${r.id}/resend-reminder`, { token: auth.token })
+    setResendingId(null)
+
+    if (result.ok) {
+      showToast('success', 'Relance envoyée', `${r.firstName} ${r.lastName}`)
+    } else if (result.status === 429) {
+      showToast('error', 'Trop tôt', 'Une relance a déjà été envoyée récemment pour cette inscription.')
+    } else {
+      showToast('error', 'Échec', "Impossible d'envoyer la relance.")
     }
   }
 
@@ -253,6 +271,16 @@ export function EventRegistrationsPanel({
                   <PrimaryButton type="button" onClick={() => openReview(r)} className="shrink-0 px-3 py-1.5 text-xs">
                     Vérifier
                   </PrimaryButton>
+                )}
+                {(r.status === 'awaiting_payment' || r.status === 'rejected') && (
+                  <SecondaryButton
+                    type="button"
+                    onClick={() => handleResendReminder(r)}
+                    disabled={resendingId === r.id}
+                    className="shrink-0 px-3 py-1.5 text-xs"
+                  >
+                    {resendingId === r.id ? '…' : 'Relancer'}
+                  </SecondaryButton>
                 )}
               </Card>
             ))}
