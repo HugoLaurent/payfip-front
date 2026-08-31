@@ -237,6 +237,7 @@ export function InscriptionReturnPage() {
             reviewedAt={registration.reviewedAt}
             documentDeadlineAt={registration.documentDeadlineAt}
             keepExistingDocuments={registration.keepExistingDocuments}
+            documentRequirements={registration.documentRequirements}
             accessToken={accessToken}
             orgId={Number(orgId)}
             onReplaced={() => setRefreshKey((k) => k + 1)}

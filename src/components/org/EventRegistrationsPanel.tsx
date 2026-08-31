@@ -184,18 +184,24 @@ export function EventRegistrationsPanel({
                   <div className="flex shrink-0 gap-1">
                     {r.documents
                       .filter((d) => d.isCurrent)
-                      .map((d) => (
-                        <button
-                          key={d.id}
-                          type="button"
-                          onClick={() => downloadDocument(r.id, d.id, d.filename)}
-                          className="squircle rounded-lg bg-gray-100 p-1.5 text-gray-500 transition hover:bg-gray-200 hover:text-aregie-deep"
-                          aria-label={`Télécharger ${d.filename}`}
-                          title={d.filename}
-                        >
-                          <Download size={14} />
-                        </button>
-                      ))}
+                      .map((d) => {
+                        const requirementLabel = event.documentRequirements?.find(
+                          (req) => req.key === d.documentKey,
+                        )?.label
+                        const title = requirementLabel ? `${requirementLabel} — ${d.filename}` : d.filename
+                        return (
+                          <button
+                            key={d.id}
+                            type="button"
+                            onClick={() => downloadDocument(r.id, d.id, d.filename)}
+                            className="squircle rounded-lg bg-gray-100 p-1.5 text-gray-500 transition hover:bg-gray-200 hover:text-aregie-deep"
+                            aria-label={`Télécharger ${title}`}
+                            title={title}
+                          >
+                            <Download size={14} />
+                          </button>
+                        )
+                      })}
                   </div>
                 )}
                 {r.status === 'awaiting_review' && (

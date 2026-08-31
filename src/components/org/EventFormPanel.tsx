@@ -1,9 +1,10 @@
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
-import { PrimaryButton, SelectInput, Switch, TextInput, Textarea } from '@/components/ui'
+import { PrimaryButton, SelectInput, TextInput, Textarea } from '@/components/ui'
 import { FormSchemaBuilder } from './FormSchemaBuilder'
-import type { EventAgent, RegistrationFormField } from '@/lib/types'
+import { DocumentRequirementsBuilder } from './DocumentRequirementsBuilder'
+import type { DocumentRequirement, EventAgent, RegistrationFormField } from '@/lib/types'
 
 // 'cancelled' n'apparaît jamais ici : il ne se pose que via l'action
 // "Annuler l'évènement" (voir EventsManager.tsx), qui notifie aussi les
@@ -27,8 +28,7 @@ export interface EventFormState {
   category: string
   registrationDeadline: string
   priceCents: string
-  requiresDocuments: boolean
-  documentInstructions: string
+  documentRequirements: DocumentRequirement[]
   capacity: string
   maxParticipantsPerRegistration: string
   formSchema: RegistrationFormField[]
@@ -47,8 +47,7 @@ export const EMPTY_EVENT_FORM: EventFormState = {
   category: '',
   registrationDeadline: '',
   priceCents: '0',
-  requiresDocuments: false,
-  documentInstructions: '',
+  documentRequirements: [],
   capacity: '',
   maxParticipantsPerRegistration: '1',
   formSchema: [],
@@ -68,8 +67,7 @@ export function eventToForm(event: EventAgent): EventFormState {
     category: event.category ?? '',
     registrationDeadline: event.registrationDeadline ? event.registrationDeadline.slice(0, 16) : '',
     priceCents: (event.priceCents / 100).toString(),
-    requiresDocuments: event.requiresDocuments,
-    documentInstructions: event.documentInstructions ?? '',
+    documentRequirements: event.documentRequirements ?? [],
     capacity: event.capacity !== null ? String(event.capacity) : '',
     maxParticipantsPerRegistration: String(event.maxParticipantsPerRegistration),
     formSchema: event.formSchema ?? [],
@@ -90,8 +88,11 @@ export function eventFormToPayload(form: EventFormState) {
     category: form.category.trim() || undefined,
     registrationDeadline: form.registrationDeadline || undefined,
     priceCents: Math.round(Number(form.priceCents || '0') * 100),
-    requiresDocuments: form.requiresDocuments,
-    documentInstructions: form.documentInstructions.trim() || undefined,
+    // null (pas undefined) quand la liste est vide : signale explicitement
+    // "plus aucune pièce requise" au PATCH, sans quoi une liste déjà
+    // présente en base ne serait jamais effacée (voir updateEventValidator :
+    // undefined = ne pas toucher, null = vider).
+    documentRequirements: form.documentRequirements.length > 0 ? form.documentRequirements : null,
     capacity: form.capacity ? Number(form.capacity) : undefined,
     maxParticipantsPerRegistration: Number(form.maxParticipantsPerRegistration || '1'),
     formSchema: form.formSchema.length > 0 ? form.formSchema : undefined,
@@ -325,27 +326,14 @@ export function EventFormPanel({
               </div>
             </Section>
 
-            <Section title="Justificatif">
-              <div className="flex items-center justify-between squircle rounded-xl border border-gray-200 px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Justificatif requis</p>
-                  <p className="text-xs text-gray-400">L'agent devra valider le document avant confirmation.</p>
-                </div>
-                <Switch
-                  checked={form.requiresDocuments}
-                  onChange={() => onChange({ requiresDocuments: !form.requiresDocuments })}
-                />
-              </div>
-              {form.requiresDocuments && (
-                <FieldGroup label="Instructions affichées au citoyen">
-                  <Textarea
-                    value={form.documentInstructions}
-                    onChange={(e) => onChange({ documentInstructions: e.target.value })}
-                    placeholder="Ex. Justificatif de domicile de moins de 3 mois"
-                    rows={2}
-                  />
-                </FieldGroup>
-              )}
+            <Section
+              title="Justificatifs"
+              description="Chaque pièce ajoutée devient un dépôt distinct côté citoyen — jamais un fichier unique à tout fusionner. L'agent devra les valider avant confirmation."
+            >
+              <DocumentRequirementsBuilder
+                requirements={form.documentRequirements}
+                onChange={(documentRequirements) => onChange({ documentRequirements })}
+              />
             </Section>
 
             <Section

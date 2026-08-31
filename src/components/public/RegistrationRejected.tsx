@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { apiUploadWithFields } from '@/lib/api'
+import type { DocumentRequirement } from '@/lib/types'
 import { FileUploadField } from './FileUploadField'
 import { PublicButton } from './PublicButtons'
 
@@ -26,6 +27,7 @@ export function RegistrationRejected({
   reviewedAt,
   documentDeadlineAt,
   keepExistingDocuments,
+  documentRequirements,
   accessToken,
   orgId,
   onReplaced,
@@ -35,21 +37,28 @@ export function RegistrationRejected({
   reviewedAt: string | null
   documentDeadlineAt: string | null
   keepExistingDocuments: boolean
+  documentRequirements: DocumentRequirement[] | null
   accessToken: string
   orgId: number
   onReplaced: () => void
 }) {
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<Record<string, File | null>>({})
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const requirements = documentRequirements ?? []
+  const filesToSend = Object.fromEntries(
+    Object.entries(files).filter((entry): entry is [string, File] => entry[1] !== null),
+  )
+  const hasFile = Object.keys(filesToSend).length > 0
+
   async function handleSubmit() {
-    if (!file) return
+    if (!hasFile) return
     setSubmitting(true)
     setError(null)
     const result = await apiUploadWithFields(
       `/inscription/registrations/by-token/${accessToken}/documents`,
-      [file],
+      filesToSend,
       { orgId: String(orgId) },
     )
     setSubmitting(false)
@@ -104,11 +113,22 @@ export function RegistrationRejected({
         )}
 
         <div className="squircle flex flex-col gap-[10px] rounded-[18px] border-[1.5px] border-hairline p-4 text-left md:rounded-[22px] md:p-5">
-          <FileUploadField
-            label={keepExistingDocuments ? 'Déposer le document demandé' : 'Déposer un nouveau justificatif'}
-            onFileChange={setFile}
-          />
-          <PublicButton type="button" onClick={handleSubmit} disabled={!file || submitting} className="w-full">
+          {requirements.length > 0 ? (
+            requirements.map((requirement) => (
+              <FileUploadField
+                key={requirement.key}
+                label={requirement.label}
+                instructions={requirement.instructions}
+                onFileChange={(file) => setFiles((prev) => ({ ...prev, [requirement.key]: file }))}
+              />
+            ))
+          ) : (
+            <FileUploadField
+              label={keepExistingDocuments ? 'Déposer le document demandé' : 'Déposer un nouveau justificatif'}
+              onFileChange={(file) => setFiles((prev) => ({ ...prev, justificatif: file }))}
+            />
+          )}
+          <PublicButton type="button" onClick={handleSubmit} disabled={!hasFile || submitting} className="w-full">
             {submitting ? 'Envoi…' : keepExistingDocuments ? 'Envoyer le document' : 'Envoyer le nouveau document'}
           </PublicButton>
           {error && <p className="text-center text-sm text-red-600">{error}</p>}

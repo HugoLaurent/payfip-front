@@ -29,7 +29,7 @@ export function FormationCard({ formation, to }: { formation: Formation; to: str
           Il reste {formation.seatsRemaining} place{formation.seatsRemaining > 1 ? 's' : ''}
         </span>
       ) : null}
-      {formation.requiresDocuments && !full && (
+      {(formation.documentRequirements?.length ?? 0) > 0 && !full && (
         <span className="squircle rounded-full bg-[oklch(0.95_0.02_265)] px-[11px] py-[6px] text-[11.5px] font-semibold text-[oklch(0.42_0.08_265)]">
           Justificatif requis
         </span>

@@ -51,7 +51,7 @@ export function PublicInscriptionFormationPage() {
   const [lastName, setLastName] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [values, setValues] = useState<Record<string, FieldValue>>({})
-  const [documentFile, setDocumentFile] = useState<File | null>(null)
+  const [documentFiles, setDocumentFiles] = useState<Record<string, File | null>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -86,11 +86,12 @@ export function PublicInscriptionFormationPage() {
     [],
   )
   const allFields = [...(event?.formSchema ?? []), consentField]
+  const documentRequirements = event?.documentRequirements ?? []
   const formValid =
     firstName.trim() !== '' &&
     lastName.trim() !== '' &&
     allFields.every((f) => isFieldFilled(f, values[f.key])) &&
-    (!event?.requiresDocuments || documentFile !== null)
+    documentRequirements.every((r) => !r.required || documentFiles[r.key])
 
   async function handleSubmit() {
     if (!formValid || !event || !service || !slug) return
@@ -100,10 +101,14 @@ export function PublicInscriptionFormationPage() {
     const formResponses = Object.fromEntries(Object.entries(values).filter(([k]) => k !== '__consent'))
     const frontRedirectUrl = `${window.location.origin}/inscription/${slug}/retour`
 
-    const result = event.requiresDocuments
+    const filesToSend = Object.fromEntries(
+      Object.entries(documentFiles).filter((entry): entry is [string, File] => entry[1] !== null),
+    )
+
+    const result = documentRequirements.length > 0
       ? await apiUploadWithFields<CreateRegistrationResponse>(
           `/inscription/registrations/with-documents`,
-          documentFile ? [documentFile] : [],
+          filesToSend,
           {
             orgId: String(service.orgId),
             eventId: String(event.id),
@@ -234,7 +239,14 @@ export function PublicInscriptionFormationPage() {
                   onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
                 />
               ))}
-              {event.requiresDocuments && <FileUploadField onFileChange={setDocumentFile} />}
+              {documentRequirements.map((requirement) => (
+                <FileUploadField
+                  key={requirement.key}
+                  label={requirement.label}
+                  instructions={requirement.instructions}
+                  onFileChange={(file) => setDocumentFiles((prev) => ({ ...prev, [requirement.key]: file }))}
+                />
+              ))}
               <RegistrationFieldInput
                 field={consentField}
                 value={values[consentField.key]}
@@ -294,7 +306,7 @@ export function PublicInscriptionFormationPage() {
                 <div className="h-px bg-hairline" />
                 <div className="flex items-center justify-between bg-date-tint px-6 py-[18px]">
                   <span className="text-[13px] leading-none font-semibold text-[oklch(0.42_0.015_260)]">
-                    {event.requiresDocuments ? 'Montant après validation' : 'À régler'}
+                    {documentRequirements.length > 0 ? 'Montant après validation' : 'À régler'}
                   </span>
                   <span className="text-[22px] leading-none font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
                     {totalCents === 0 ? 'Gratuit' : euros(totalCents)}
@@ -304,7 +316,7 @@ export function PublicInscriptionFormationPage() {
                   <PublicButton type="button" onClick={handleSubmit} disabled={!formValid || submitting} className="w-full">
                     {ctaLabel}
                   </PublicButton>
-                  {event.requiresDocuments && (
+                  {documentRequirements.length > 0 && (
                     <p className="text-center text-[11.5px] leading-[1.5] font-medium text-ink-soft">
                       Vous ne payez pas maintenant : le paiement vient après validation du justificatif.
                     </p>
@@ -313,7 +325,7 @@ export function PublicInscriptionFormationPage() {
                 </div>
               </div>
 
-              {event.requiresDocuments && (
+              {documentRequirements.length > 0 && (
                 <div className="squircle rounded-[18px] bg-[oklch(0.96_0.02_265)] p-4">
                   <p className="text-[11.5px] leading-none font-bold tracking-[0.03em] text-[oklch(0.35_0.09_265)]">
                     APRÈS L'ENVOI
@@ -420,14 +432,23 @@ export function PublicInscriptionFormationPage() {
             </div>
           ) : null}
 
-          {event.requiresDocuments && (
+          {documentRequirements.length > 0 && (
             <div className="squircle rounded-[16px] bg-[oklch(0.96_0.02_265)] px-4 py-[14px]">
               <p className="text-[12.5px] leading-none font-bold tracking-[0.02em] text-[oklch(0.35_0.09_265)]">
-                JUSTIFICATIF DEMANDÉ
+                {documentRequirements.length > 1 ? 'JUSTIFICATIFS DEMANDÉS' : 'JUSTIFICATIF DEMANDÉ'}
               </p>
+              <ul className="pt-[7px] text-[12.5px] leading-[1.6] text-[oklch(0.42_0.05_265)]">
+                {documentRequirements.map((requirement) => (
+                  <li key={requirement.key}>
+                    · {requirement.label}
+                    {!requirement.required && ' (facultatif)'}
+                    {requirement.instructions && ` — ${requirement.instructions}`}
+                  </li>
+                ))}
+              </ul>
               <p className="pt-[7px] text-[12.5px] leading-[1.6] text-[oklch(0.42_0.05_265)]">
-                {event.documentInstructions ??
-                  "Vous le déposerez à l'étape suivante ; un agent le vérifie sous 48 h, puis vous recevrez un email pour payer."}
+                Vous les déposerez à l'étape suivante ; un agent les vérifie sous 48 h, puis vous recevrez un email
+                pour payer.
               </p>
             </div>
           )}

@@ -6,9 +6,11 @@ import { useRef, useState } from 'react'
 // back-end n'a pas encore de route de dépôt de justificatif.
 export function FileUploadField({
   label = 'Justificatif de domicile',
+  instructions,
   onFileChange,
 }: {
   label?: string
+  instructions?: string
   onFileChange?: (file: File | null) => void
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -24,6 +26,7 @@ export function FileUploadField({
       <div className="mb-[7px] text-[10.5px] leading-none font-semibold tracking-[0.05em] text-ink-soft uppercase">
         {label}
       </div>
+      {instructions && <p className="mb-[7px] text-[11.5px] leading-[1.4] text-ink-faint">{instructions}</p>}
       <input
         ref={inputRef}
         type="file"

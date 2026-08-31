@@ -91,19 +91,19 @@ export async function apiUpload<T = unknown>(
 
 /**
  * Upload multipart citoyen (pas de session/JWT client, contrairement à
- * apiUpload) — plusieurs fichiers sous une même clé + des champs texte à
- * côté (ex. dépôt de justificatifs d'inscription : eventId/email/nom/
- * prénom + 1 à N fichiers). Pas de Content-Type manuel, FormData génère
- * lui-même le boundary.
+ * apiUpload) — un fichier par slot nommé (clé = exigence de document, voir
+ * DocumentRequirement) + des champs texte à côté (ex. dépôt de
+ * justificatifs d'inscription : eventId/email/nom/prénom + 1 à N pièces
+ * nommées). Pas de Content-Type manuel, FormData génère lui-même le
+ * boundary.
  */
 export async function apiUploadWithFields<T = unknown>(
   path: string,
-  files: File[],
-  fields: Record<string, string>,
-  fieldName = 'documents'
+  files: Record<string, File>,
+  fields: Record<string, string>
 ): Promise<ApiResult<T>> {
   const formData = new FormData()
-  for (const file of files) formData.append(fieldName, file)
+  for (const [key, file] of Object.entries(files)) formData.append(key, file)
   for (const [key, value] of Object.entries(fields)) formData.append(key, value)
 
   const res = await fetch(`${GATEWAY_URL}${path}`, {

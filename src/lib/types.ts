@@ -94,6 +94,17 @@ export interface RegistrationFormField {
   options?: string[]
 }
 
+// Une pièce nommée à déposer par le citoyen (ex. "Pièce d'identité",
+// "Certificat médical") — jamais un unique champ générique qui forcerait à
+// fusionner plusieurs documents en un seul fichier. `key` identifie aussi
+// le champ multipart envoyé au dépôt et registration_documents.documentKey.
+export interface DocumentRequirement {
+  key: string
+  label: string
+  instructions?: string
+  required: boolean
+}
+
 // Forme réelle renvoyée par GET /inscription/events (résumé),
 // GET /inscription/events/:id et GET /inscription/events/by-slug/:slug
 // (même forme) — pas de dateLabel/timeLabel précalculés (eventDate +
@@ -115,8 +126,7 @@ export interface Formation {
   category: string | null
   registrationDeadline: string | null
   priceCents: number
-  requiresDocuments: boolean
-  documentInstructions: string | null
+  documentRequirements: DocumentRequirement[] | null
   capacity: number | null
   maxParticipantsPerRegistration: number
   formSchema: RegistrationFormField[] | null
@@ -143,6 +153,7 @@ export interface RegistrationCitizen {
   reviewedAt: string | null
   documentDeadlineAt: string | null
   keepExistingDocuments: boolean
+  documentRequirements: DocumentRequirement[] | null
   waitlistPosition: number | null
   waitlistNotifiedAt: string | null
   waitlistResponseDeadline: string | null
@@ -174,8 +185,7 @@ export interface EventAgent {
   category: string | null
   registrationDeadline: string | null
   priceCents: number
-  requiresDocuments: boolean
-  documentInstructions: string | null
+  documentRequirements: DocumentRequirement[] | null
   capacity: number | null
   maxParticipantsPerRegistration: number
   formSchema: RegistrationFormField[] | null
@@ -185,6 +195,7 @@ export interface EventAgent {
 
 export interface RegistrationDocumentSummary {
   id: number
+  documentKey: string
   filename: string
   mimeType: string
   sizeBytes: number
