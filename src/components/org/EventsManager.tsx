@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { CalendarDays, MoreHorizontal, Plus, Search, Trash2 } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { Card, DangerButton, EmptyState, LoadError, Modal, PrimaryButton, SecondaryButton, StatusBadge, TextInput } from '@/components/ui'
@@ -90,6 +91,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
   const [cancelling, setCancelling] = useState(false)
 
   const [viewingRegistrationsFor, setViewingRegistrationsFor] = useState<EventAgent | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
 
   async function loadEvents() {
     setLoadFailed(false)
@@ -106,6 +108,22 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
     loadEvents()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [service.id])
+
+  // Ouverture directe depuis le menu de la cloche de notification
+  // (NotificationBell.tsx, ?openEvent=<id>) — une fois la liste chargée,
+  // ouvre le panneau d'inscrits de l'évènement visé puis nettoie l'URL.
+  useEffect(() => {
+    const openEventId = searchParams.get('openEvent')
+    if (!openEventId || !events) return
+    const target = events.find((e) => e.id === Number(openEventId))
+    if (target) setViewingRegistrationsFor(target)
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('openEvent')
+      return next
+    }, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events, searchParams])
 
   function openCreate() {
     setEditingEvent(null)
