@@ -1,6 +1,13 @@
 import { clearStoredAuth, clearStoredStaffToken } from './storage'
+import { resolveDemoApi } from '@/demoStatic/router'
 
 export const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL as string) ?? 'http://localhost:3000'
+
+// Build "démo statique" (demofip.aregie.com) : aucun backend, aucun réseau —
+// tout appel passe par src/demoStatic/router.ts à la place de fetch(). Seul
+// ce module (jamais utile en build normal) grossit un peu le bundle du
+// build démo — non gênant, cette build n'est jamais celle servie en prod.
+const STATIC_DEMO = import.meta.env.VITE_STATIC_DEMO === 'true'
 
 /**
  * Session expirée (401 avec un token présent) : on repart proprement sur
@@ -35,6 +42,8 @@ export async function apiCall<T = unknown>(
   path: string,
   options: { body?: unknown; token?: string; staffToken?: string } = {}
 ): Promise<ApiResult<T>> {
+  if (STATIC_DEMO) return resolveDemoApi(method, path, options) as ApiResult<T>
+
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (options.token) headers.Authorization = `Bearer ${options.token}`
   else if (options.staffToken) headers.Authorization = `Bearer ${options.staffToken}`
@@ -102,6 +111,8 @@ export async function apiUploadWithFields<T = unknown>(
   files: Record<string, File>,
   fields: Record<string, string>
 ): Promise<ApiResult<T>> {
+  if (STATIC_DEMO) return resolveDemoApi('POST', path, { body: fields }) as ApiResult<T>
+
   const formData = new FormData()
   for (const [key, file] of Object.entries(files)) formData.append(key, file)
   for (const [key, value] of Object.entries(fields)) formData.append(key, value)
