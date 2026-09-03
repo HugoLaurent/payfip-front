@@ -73,7 +73,7 @@ export function EventRegistrationsPanel({
     fetcher: () =>
       apiCall<{ data: RegistrationAgent[]; meta: PageMeta }>(
         'GET',
-        `/inscription/events/${event.id}/registrations?page=${page}${status ? `&status=${status}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`,
+        `/inscription/events/${event.id}/registrations?page=${page}&serviceId=${event.serviceId}${status ? `&status=${status}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`,
         { token: auth.token },
       ),
     deps: [event.id, status, q, page],
@@ -99,7 +99,7 @@ export function EventRegistrationsPanel({
     if ((decision === 'reject' || decision === 'request_more_documents') && !rejectionReason.trim()) return
 
     setSubmittingReview(true)
-    const result = await apiCall('POST', `/inscription/registrations/${reviewing.id}/review`, {
+    const result = await apiCall('POST', `/inscription/registrations/${reviewing.id}/review?serviceId=${event.serviceId}`, {
       token: auth.token,
       body: decision === 'approve' || decision === 'revert' ? { decision } : { decision, rejectionReason: rejectionReason.trim() },
     })
@@ -129,7 +129,7 @@ export function EventRegistrationsPanel({
   // serveur applique un délai anti-spam entre deux relances (429).
   async function handleResendReminder(r: RegistrationAgent) {
     setResendingId(r.id)
-    const result = await apiCall('POST', `/inscription/registrations/${r.id}/resend-reminder`, { token: auth.token })
+    const result = await apiCall('POST', `/inscription/registrations/${r.id}/resend-reminder?serviceId=${event.serviceId}`, { token: auth.token })
     setResendingId(null)
 
     if (result.ok) {
@@ -147,7 +147,7 @@ export function EventRegistrationsPanel({
   async function openPreview(registrationId: number, doc: RegistrationDocumentSummary, label: string) {
     setPreviewLoadingId(doc.id)
     try {
-      const res = await fetch(`${GATEWAY_URL}/inscription/registrations/${registrationId}/documents/${doc.id}`, {
+      const res = await fetch(`${GATEWAY_URL}/inscription/registrations/${registrationId}/documents/${doc.id}?serviceId=${event.serviceId}`, {
         headers: { Authorization: `Bearer ${auth.token}` },
       })
       if (!res.ok) throw new Error('preview_failed')

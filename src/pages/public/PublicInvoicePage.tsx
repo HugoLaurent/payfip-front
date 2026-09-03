@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FileSearch } from "lucide-react";
 import { apiCall, GATEWAY_URL } from "@/lib/api";
@@ -27,7 +27,7 @@ interface InvoiceProof {
 }
 
 interface InvoiceSummary {
-  id: number;
+  code: string;
   status: string;
   amountCents: number;
   objectLabel: string;
@@ -54,6 +54,8 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 export function PublicInvoicePage() {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const demoEmail = searchParams.get("demoEmail") ?? undefined;
 
   // Comme la billetterie : on vérifie l'email en premier, avant de laisser
   // l'usager retrouver sa facture.
@@ -64,9 +66,11 @@ export function PublicInvoicePage() {
   const [logoFailed, setLogoFailed] = useState(false);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
 
-  const [hospitalReference, setHospitalReference] = useState("");
-  const [fiscalYear, setFiscalYear] = useState(String(CURRENT_YEAR));
-  const [amountInput, setAmountInput] = useState("");
+  // Préremplissage démo (widget) — mêmes clés que la facture seedée par
+  // svc-factures/database/seeders/demo_seeder.ts, jamais devinées.
+  const [hospitalReference, setHospitalReference] = useState(searchParams.get("demoRef") ?? "");
+  const [fiscalYear, setFiscalYear] = useState(searchParams.get("demoYear") ?? String(CURRENT_YEAR));
+  const [amountInput, setAmountInput] = useState(searchParams.get("demoAmount") ?? "");
   const [verifyingInvoice, setVerifyingInvoice] = useState(false);
   const [invoiceError, setInvoiceError] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<InvoiceSummary | null>(null);
@@ -76,6 +80,7 @@ export function PublicInvoicePage() {
     orgId: service?.orgId ?? null,
     requestPath: "/factures/otp/request",
     verifyPath: "/factures/otp/verify",
+    initialEmail: demoEmail,
   });
   const { email, emailVerified, setEmailVerified } = otp;
 
@@ -164,7 +169,7 @@ export function PublicInvoicePage() {
 
     const result = await apiCall<{ data: { paymentUrl: string } }>(
       "POST",
-      `/factures/${invoice.id}/pay`,
+      `/factures/${invoice.code}/pay`,
       {
         body: {
           orgId: service.orgId,

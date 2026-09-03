@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Calendar, ShoppingCart } from "lucide-react";
 import { apiCall, GATEWAY_URL } from "@/lib/api";
@@ -152,6 +152,8 @@ function TariffRow({
 export function PublicPurchasePage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const demoEmail = searchParams.get("demoEmail") ?? undefined;
 
   const [step, setStep] = useState<StepKey>("email");
 
@@ -175,6 +177,7 @@ export function PublicPurchasePage() {
     orgId: service?.orgId ?? null,
     requestPath: "/billetterie/otp/request",
     verifyPath: "/billetterie/otp/verify",
+    initialEmail: demoEmail,
   });
   const { email, emailVerified, setEmailVerified } = otp;
 

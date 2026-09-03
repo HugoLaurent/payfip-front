@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Mail, Search } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { motion } from 'framer-motion'
+import { Mail, Search, X } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
@@ -20,10 +22,21 @@ interface StaffEmail {
   sentAt: string | null
 }
 
+interface StaffEmailDetail {
+  id: number
+  template: string
+  toEmail: string
+  status: string
+  subject: string
+  html: string
+}
+
 export function StaffEmailsPage() {
   const { staffToken } = useStaffAuth()
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
+  const [previewing, setPreviewing] = useState<StaffEmailDetail | null>(null)
+  const [previewLoadingId, setPreviewLoadingId] = useState<number | null>(null)
 
   const {
     data: emails,
@@ -38,6 +51,16 @@ export function StaffEmailsPage() {
       }),
     deps: [staffToken, q, page],
   })
+
+  // Rendu à la demande (voir StaffController#show côté svc-mail, appelé
+  // seulement au clic) — les lignes 'fake' (mode démo) n'ont jamais été
+  // vraiment envoyées, c'est le seul moyen de voir leur contenu.
+  async function openPreview(id: number) {
+    setPreviewLoadingId(id)
+    const result = await apiCall<{ data: StaffEmailDetail }>('GET', `/staff/emails/${id}`, { staffToken })
+    setPreviewLoadingId(null)
+    if (result.ok) setPreviewing(result.data.data)
+  }
 
   return (
     <div>
@@ -64,7 +87,7 @@ export function StaffEmailsPage() {
         <>
           <StaffTable headers={['Destinataire', 'Modèle', 'Tentatives', 'Statut', 'Date']}>
             {emails.map((e) => (
-              <StaffRow key={e.id}>
+              <StaffRow key={e.id} onClick={() => openPreview(e.id)}>
                 <Td className="font-medium text-gray-900">{e.toEmail}</Td>
                 <Td>{e.template}</Td>
                 <Td>{e.attempts}</Td>
@@ -72,7 +95,10 @@ export function StaffEmailsPage() {
                   <StatusBadge label={e.status} className={genericStatusTint(e.status)} />
                   {e.error && <p className="mt-1 text-xs text-red-500">{e.error}</p>}
                 </Td>
-                <Td className="text-gray-400">{new Date(e.createdAt).toLocaleDateString('fr-FR')}</Td>
+                <Td className="text-gray-400">
+                  {new Date(e.createdAt).toLocaleDateString('fr-FR')}
+                  {previewLoadingId === e.id && <span className="ml-1.5 text-gray-400">…</span>}
+                </Td>
               </StaffRow>
             ))}
           </StaffTable>
@@ -83,6 +109,46 @@ export function StaffEmailsPage() {
           )}
         </>
       )}
+
+      {previewing &&
+        createPortal(
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4"
+            onClick={() => setPreviewing(null)}
+          >
+            <div
+              className="squircle flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_30px_60px_-20px_rgba(20,25,60,0.5)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3.5">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-gray-900">{previewing.subject}</p>
+                  <p className="truncate text-xs text-gray-400">
+                    À {previewing.toEmail} · {previewing.template}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPreviewing(null)}
+                  className="squircle shrink-0 rounded-lg bg-gray-100 p-1.5 text-gray-500 transition hover:bg-gray-200 hover:text-gray-700"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto bg-gray-50 p-4">
+                <iframe
+                  srcDoc={previewing.html}
+                  title={previewing.subject}
+                  sandbox=""
+                  className="h-[70vh] w-full rounded-lg border-0 bg-white"
+                />
+              </div>
+            </div>
+          </motion.div>,
+          document.body,
+        )}
     </div>
   )
 }

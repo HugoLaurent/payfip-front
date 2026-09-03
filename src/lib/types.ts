@@ -173,6 +173,7 @@ export type EventStatus = 'draft' | 'published' | 'closed' | 'archived' | 'cance
 // statuts (pas seulement published) contrairement à Formation.
 export interface EventAgent {
   id: number
+  serviceId: number
   slug: string
   type: 'formation' | 'evenement'
   title: string

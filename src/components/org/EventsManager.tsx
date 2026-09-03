@@ -149,7 +149,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
 
     const payload = eventFormToPayload(form)
     const result = editingEvent
-      ? await apiCall('PATCH', `/inscription/events/${editingEvent.id}`, { token: auth.token, body: payload })
+      ? await apiCall('PATCH', `/inscription/events/${editingEvent.id}?serviceId=${service.id}`, { token: auth.token, body: payload })
       : await apiCall('POST', `/inscription/services/${service.id}/events`, { token: auth.token, body: payload })
 
     setSaving(false)
@@ -168,7 +168,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
 
   async function handlePublish(event: EventAgent) {
     setOpenMenuId(null)
-    const result = await apiCall('PATCH', `/inscription/events/${event.id}`, {
+    const result = await apiCall('PATCH', `/inscription/events/${event.id}?serviceId=${service.id}`, {
       token: auth.token,
       body: { status: 'published' },
     })
@@ -179,7 +179,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
 
   async function handleArchive(event: EventAgent) {
     setOpenMenuId(null)
-    const result = await apiCall('PATCH', `/inscription/events/${event.id}`, {
+    const result = await apiCall('PATCH', `/inscription/events/${event.id}?serviceId=${service.id}`, {
       token: auth.token,
       body: { status: 'archived' },
     })
@@ -191,7 +191,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
   async function handleDelete() {
     if (!deletingEvent) return
     setDeleting(true)
-    const result = await apiCall('DELETE', `/inscription/events/${deletingEvent.id}`, { token: auth.token })
+    const result = await apiCall('DELETE', `/inscription/events/${deletingEvent.id}?serviceId=${service.id}`, { token: auth.token })
     setDeleting(false)
     setDeletingEvent(null)
     if (result.ok) {
@@ -210,7 +210,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
   async function handleCancelEvent() {
     if (!cancellingEvent) return
     setCancelling(true)
-    const result = await apiCall('POST', `/inscription/events/${cancellingEvent.id}/cancel`, { token: auth.token })
+    const result = await apiCall('POST', `/inscription/events/${cancellingEvent.id}/cancel?serviceId=${service.id}`, { token: auth.token })
     setCancelling(false)
     setCancellingEvent(null)
     if (result.ok) {

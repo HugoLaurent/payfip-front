@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText, Search } from 'lucide-react'
+import { Search, UserCheck } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
@@ -23,16 +23,19 @@ function euros(cents: number): string {
   return `${(cents / 100).toFixed(2)} €`
 }
 
-interface StaffInvoice {
+interface StaffRegistration {
   id: number
   createdAt: string
   orgId: number
-  serviceId: number | null
-  hospitalReference: string
-  paymentReference: string | null
+  serviceId: number
+  eventId: number
+  firstName: string
+  lastName: string
+  email: string
   status: string
   amountCents: number
-  objectLabel: string
+  paymentMethod: string
+  registrationReference: string
 }
 
 interface PaymentAttempt {
@@ -43,46 +46,41 @@ interface PaymentAttempt {
   isRetry: boolean
 }
 
-export function StaffInvoicesPage() {
+export function StaffRegistrationsPage() {
   const { staffToken } = useStaffAuth()
   const orgs = useStaffOrgOptions()
   const [orgId, setOrgId] = useState('')
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
-  const [selected, setSelected] = useState<StaffInvoice | null>(null)
+  const [selected, setSelected] = useState<StaffRegistration | null>(null)
   const [attempts, setAttempts] = useState<PaymentAttempt[] | null>(null)
   const [attemptsFailed, setAttemptsFailed] = useState(false)
 
   const {
-    data: invoices,
+    data: registrations,
     meta,
     loadFailed,
     showLoading,
     reload,
-  } = usePaginatedResource<StaffInvoice, PageMeta>({
+  } = usePaginatedResource<StaffRegistration, PageMeta>({
     fetcher: () =>
       apiCall(
         'GET',
-        `/staff/invoices?orgId=${orgId}${q ? `&q=${encodeURIComponent(q)}` : ''}&page=${page}&perPage=${PER_PAGE}`,
+        `/staff/registrations?orgId=${orgId}${q ? `&q=${encodeURIComponent(q)}` : ''}&page=${page}&perPage=${PER_PAGE}`,
         { staffToken }
       ),
     deps: [staffToken, orgId, q, page],
     enabled: orgId !== '',
   })
 
-  async function openAttempts(invoice: StaffInvoice) {
-    setSelected(invoice)
+  async function openAttempts(registration: StaffRegistration) {
+    setSelected(registration)
     setAttempts(null)
     setAttemptsFailed(false)
 
-    if (!invoice.serviceId) {
-      setAttempts([])
-      return
-    }
-
     const result = await apiCall<{ data: PaymentAttempt[] }>(
       'GET',
-      `/staff/invoices/${invoice.id}/payment-attempts?serviceId=${invoice.serviceId}`,
+      `/staff/registrations/${registration.id}/payment-attempts?serviceId=${registration.serviceId}`,
       { staffToken }
     )
     if (result.ok) setAttempts(result.data.data)
@@ -91,7 +89,7 @@ export function StaffInvoicesPage() {
 
   return (
     <div>
-      <PageHeader icon={<FileText size={20} />} title="Factures" subtitle="Par organisme" />
+      <PageHeader icon={<UserCheck size={20} />} title="Inscriptions" subtitle="Par organisme" />
 
       <div className="mb-4 flex gap-2.5">
         <SelectInput
@@ -112,7 +110,7 @@ export function StaffInvoicesPage() {
         <div className="relative flex-1">
           <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
           <TextInput
-            placeholder="Référence hospitalière ou de paiement…"
+            placeholder="Nom, email ou référence…"
             value={q}
             onChange={(e) => {
               setQ(e.target.value)
@@ -123,25 +121,30 @@ export function StaffInvoicesPage() {
         </div>
       </div>
 
-      {orgId === '' && <EmptyState icon={<FileText size={28} />} label="Choisissez un organisme pour voir ses factures." />}
+      {orgId === '' && (
+        <EmptyState icon={<UserCheck size={28} />} label="Choisissez un organisme pour voir ses inscriptions." />
+      )}
       {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
       {orgId !== '' && !loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
-      {orgId !== '' && !loadFailed && invoices?.length === 0 && <EmptyState icon={<FileText size={28} />} label="Aucune facture." />}
+      {orgId !== '' && !loadFailed && registrations?.length === 0 && (
+        <EmptyState icon={<UserCheck size={28} />} label="Aucune inscription." />
+      )}
 
-      {orgId !== '' && !loadFailed && invoices && invoices.length > 0 && (
+      {orgId !== '' && !loadFailed && registrations && registrations.length > 0 && (
         <>
-          <StaffTable headers={['Référence', 'Objet', 'Montant', 'Statut', 'Date']}>
-            {invoices.map((inv) => (
-              <StaffRow key={inv.id} onClick={() => openAttempts(inv)}>
-                <Td className="font-mono text-xs font-medium text-gray-900">
-                  {inv.paymentReference ?? inv.hospitalReference}
-                </Td>
-                <Td>{inv.objectLabel}</Td>
-                <Td>{euros(inv.amountCents)}</Td>
+          <StaffTable headers={['Référence', 'Nom', 'Montant', 'Statut', 'Date']}>
+            {registrations.map((r) => (
+              <StaffRow key={r.id} onClick={() => openAttempts(r)}>
+                <Td className="font-mono text-xs font-medium text-gray-900">{r.registrationReference}</Td>
                 <Td>
-                  <StatusBadge label={inv.status} className={genericStatusTint(inv.status)} />
+                  {r.firstName} {r.lastName}
+                  <span className="ml-1.5 text-gray-400">{r.email}</span>
                 </Td>
-                <Td className="text-gray-400">{new Date(inv.createdAt).toLocaleDateString('fr-FR')}</Td>
+                <Td>{euros(r.amountCents)}</Td>
+                <Td>
+                  <StatusBadge label={r.status} className={genericStatusTint(r.status)} />
+                </Td>
+                <Td className="text-gray-400">{new Date(r.createdAt).toLocaleDateString('fr-FR')}</Td>
               </StaffRow>
             ))}
           </StaffTable>
@@ -155,9 +158,7 @@ export function StaffInvoicesPage() {
 
       {selected && (
         <Modal title="Tentatives de paiement" onClose={() => setSelected(null)}>
-          <p className="mb-3 font-mono text-xs text-gray-500">
-            {selected.paymentReference ?? selected.hospitalReference}
-          </p>
+          <p className="mb-3 font-mono text-xs text-gray-500">{selected.registrationReference}</p>
           {attemptsFailed && <LoadError onRetry={() => openAttempts(selected)} />}
           {!attemptsFailed && attempts === null && <p className="text-sm text-gray-500">Chargement…</p>}
           {!attemptsFailed && attempts?.length === 0 && (
@@ -177,4 +178,4 @@ export function StaffInvoicesPage() {
   )
 }
 
-export default StaffInvoicesPage
+export default StaffRegistrationsPage

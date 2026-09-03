@@ -14,6 +14,7 @@ const StaffServicesPage = lazy(() => import('@/pages/staff/StaffServicesPage'))
 const StaffUsersPage = lazy(() => import('@/pages/staff/StaffUsersPage'))
 const StaffOrdersPage = lazy(() => import('@/pages/staff/StaffOrdersPage'))
 const StaffInvoicesPage = lazy(() => import('@/pages/staff/StaffInvoicesPage'))
+const StaffRegistrationsPage = lazy(() => import('@/pages/staff/StaffRegistrationsPage'))
 const StaffPaymentRequestsPage = lazy(() => import('@/pages/staff/StaffPaymentRequestsPage'))
 const StaffEmailsPage = lazy(() => import('@/pages/staff/StaffEmailsPage'))
 
@@ -86,6 +87,7 @@ export function StaffGate() {
           <Route path="utilisateurs" element={<StaffUsersPage />} />
           <Route path="commandes" element={<StaffOrdersPage />} />
           <Route path="factures" element={<StaffInvoicesPage />} />
+          <Route path="inscriptions" element={<StaffRegistrationsPage />} />
           <Route path="paiements" element={<StaffPaymentRequestsPage />} />
           <Route path="emails" element={<StaffEmailsPage />} />
           <Route path="*" element={<Navigate to="organismes" replace />} />

@@ -3,7 +3,8 @@ import { Search, ShoppingCart } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
-import { EmptyState, LoadError, PageHeader, Pagination, StatusBadge, TextInput } from '@/components/ui'
+import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
+import { EmptyState, LoadError, PageHeader, Pagination, SelectInput, StatusBadge, TextInput } from '@/components/ui'
 import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
 import type { PageMeta } from '@/lib/types'
 
@@ -27,6 +28,8 @@ interface StaffOrder {
 
 export function StaffOrdersPage() {
   const { staffToken } = useStaffAuth()
+  const orgs = useStaffOrgOptions()
+  const [orgId, setOrgId] = useState('')
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
 
@@ -38,34 +41,57 @@ export function StaffOrdersPage() {
     reload,
   } = usePaginatedResource<StaffOrder, PageMeta>({
     fetcher: () =>
-      apiCall('GET', `/staff/orders?${q ? `q=${encodeURIComponent(q)}&` : ''}page=${page}&perPage=${PER_PAGE}`, {
-        staffToken,
-      }),
-    deps: [staffToken, q, page],
+      apiCall(
+        'GET',
+        `/staff/orders?orgId=${orgId}${q ? `&q=${encodeURIComponent(q)}` : ''}&page=${page}&perPage=${PER_PAGE}`,
+        { staffToken }
+      ),
+    deps: [staffToken, orgId, q, page],
+    enabled: orgId !== '',
   })
 
   return (
     <div>
-      <PageHeader icon={<ShoppingCart size={20} />} title="Commandes" subtitle="Billetterie, tous organismes confondus" />
+      <PageHeader icon={<ShoppingCart size={20} />} title="Commandes" subtitle="Billetterie, par organisme" />
 
-      <div className="relative mb-4">
-        <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-        <TextInput
-          placeholder="Référence ou email…"
-          value={q}
+      <div className="mb-4 flex gap-2.5">
+        <SelectInput
+          value={orgId}
           onChange={(e) => {
-            setQ(e.target.value)
+            setOrgId(e.target.value)
             setPage(1)
           }}
-          className="pl-9"
-        />
+          className="max-w-xs"
+        >
+          <option value="">Choisir un organisme…</option>
+          {orgs?.map((org) => (
+            <option key={org.id} value={org.id}>
+              {org.name}
+            </option>
+          ))}
+        </SelectInput>
+        <div className="relative flex-1">
+          <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+          <TextInput
+            placeholder="Référence ou email…"
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value)
+              setPage(1)
+            }}
+            className="pl-9"
+          />
+        </div>
       </div>
 
-      {loadFailed && <LoadError onRetry={reload} />}
-      {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
-      {!loadFailed && orders?.length === 0 && <EmptyState icon={<ShoppingCart size={28} />} label="Aucune commande." />}
+      {orgId === '' && <EmptyState icon={<ShoppingCart size={28} />} label="Choisissez un organisme pour voir ses commandes." />}
+      {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
+      {orgId !== '' && !loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
+      {orgId !== '' && !loadFailed && orders?.length === 0 && (
+        <EmptyState icon={<ShoppingCart size={28} />} label="Aucune commande." />
+      )}
 
-      {!loadFailed && orders && orders.length > 0 && (
+      {orgId !== '' && !loadFailed && orders && orders.length > 0 && (
         <>
           <StaffTable headers={['Référence', 'Email', 'Billets', 'Montant', 'Statut', 'Date']}>
             {orders.map((o) => (

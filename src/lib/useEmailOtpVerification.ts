@@ -10,12 +10,17 @@ export function useEmailOtpVerification({
   orgId,
   requestPath,
   verifyPath,
+  initialEmail,
 }: {
   orgId: number | null
   requestPath: string
   verifyPath: string
+  // Préremplissage démo (widget bas-droit, ?demoEmail=... sur le lien de
+  // parcours) — évite de taper une adresse en direct devant un client.
+  // Jamais deviné : seulement la valeur exacte passée par l'appelant.
+  initialEmail?: string
 }) {
-  const [email, setEmailValue] = useState('')
+  const [email, setEmailValue] = useState(initialEmail ?? '')
   const [otpSent, setOtpSent] = useState(false)
   const [otpRequesting, setOtpRequesting] = useState(false)
   const [otpError, setOtpError] = useState<string | null>(null)

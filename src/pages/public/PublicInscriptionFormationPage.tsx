@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { PublicShell } from '@/layouts/PublicShell'
 import { euros, formatDateLabel } from '@/lib/format'
@@ -39,6 +39,12 @@ function formatDeadline(iso: string): string {
 export function PublicInscriptionFormationPage() {
   const { slug, eventSlug } = useParams<{ slug: string; eventSlug: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // Préremplissage démo (widget bas-droit) — jamais deviné, seulement ce
+  // que ?demoEmail=/demoFirstName=/demoLastName= porte explicitement.
+  const demoEmail = searchParams.get('demoEmail') ?? undefined
+  const demoFirstName = searchParams.get('demoFirstName') ?? ''
+  const demoLastName = searchParams.get('demoLastName') ?? ''
 
   const [service, setService] = useState<ServiceLookup | null>(null)
   const [serviceError, setServiceError] = useState(false)
@@ -47,8 +53,8 @@ export function PublicInscriptionFormationPage() {
 
   const [step, setStep] = useState<Step>('fiche')
   const [logoFailed, setLogoFailed] = useState(false)
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
+  const [firstName, setFirstName] = useState(demoFirstName)
+  const [lastName, setLastName] = useState(demoLastName)
   const [quantity, setQuantity] = useState(1)
   const [values, setValues] = useState<Record<string, FieldValue>>({})
   const [documentFiles, setDocumentFiles] = useState<Record<string, File | null>>({})
@@ -59,6 +65,7 @@ export function PublicInscriptionFormationPage() {
     orgId: service?.orgId ?? null,
     requestPath: '/inscription/otp/request',
     verifyPath: '/inscription/otp/verify',
+    initialEmail: demoEmail,
   })
   const { email } = otp
 
@@ -111,6 +118,7 @@ export function PublicInscriptionFormationPage() {
           filesToSend,
           {
             orgId: String(service.orgId),
+            serviceId: String(service.serviceId),
             eventId: String(event.id),
             email: email.trim(),
             firstName: firstName.trim(),
@@ -123,6 +131,7 @@ export function PublicInscriptionFormationPage() {
       : await apiCall<CreateRegistrationResponse>('POST', '/inscription/registrations', {
           body: {
             orgId: service.orgId,
+            serviceId: service.serviceId,
             eventId: event.id,
             email: email.trim(),
             firstName: firstName.trim(),

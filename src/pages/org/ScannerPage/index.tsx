@@ -142,8 +142,35 @@ function useIsDesktop() {
   return isDesktop
 }
 
+// Deux résultats factices pour présenter les écrans valide/refusé sans
+// caméra ni vrai billet — jamais un appel réseau, juste le même état local
+// qu'un scan réel affiche. Visible seulement si DEMO_MODE est actif côté
+// gateway (voir DemoWidget.tsx, même vérification).
+function demoValidResult(): ScreenResult {
+  return {
+    kind: 'valid',
+    tariffType: 'Adulte',
+    visitLabel: `Aujourd'hui · ${formatDayMonth(new Date().toISOString().slice(0, 10))}`,
+    ticketRef: 'DEMO00000100000001 · 1/1',
+  }
+}
+
+function demoRefusedResult(): ScreenResult {
+  return { kind: 'refused', title: 'Entrée refusée', subtitle: 'Billet non valide (démo).' }
+}
+
 export function ScannerPage() {
   const { auth } = useAuth()
+  const [demoEnabled, setDemoEnabled] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    apiCall<{ data: { enabled: boolean } }>('GET', '/demo/status').then((result) => {
+      if (!cancelled && result.ok && result.data.data.enabled) setDemoEnabled(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
   const scannableServices = auth.services.filter(
     (s) => s.serviceType === 'billetterie' && (auth.role === 'admin' || s.permissions?.canScan)
   )
@@ -348,6 +375,15 @@ export function ScannerPage() {
     }
   }
 
+  // Même état qu'un scan réel (voir submitCode) mais sans appel réseau ni
+  // billet réel — jamais d'historique mis à jour, ce n'est pas un vrai scan.
+  function triggerDemoResult(result: ScreenResult) {
+    setOrderResult(null)
+    setJustScannedTicketId(null)
+    setPendingGroup(null)
+    setLastResult(result)
+  }
+
   function dismissResults() {
     setLastResult(null)
     setOrderResult(null)
@@ -416,6 +452,9 @@ export function ScannerPage() {
     historyFailed,
     showHistoryLoading,
     setReloadKey,
+    demoEnabled,
+    onDemoValid: () => triggerDemoResult(demoValidResult()),
+    onDemoRefused: () => triggerDemoResult(demoRefusedResult()),
   }
 
   return isDesktop ? <DesktopScanner {...shared} /> : <MobileScanner {...shared} />
@@ -462,6 +501,9 @@ interface SharedProps {
   historyFailed: boolean
   showHistoryLoading: boolean
   setReloadKey: (fn: (k: number) => number) => void
+  demoEnabled: boolean
+  onDemoValid: () => void
+  onDemoRefused: () => void
 }
 
 function ResultIcon({ kind }: { kind: ScreenResult['kind'] }) {
@@ -511,6 +553,9 @@ function MobileScanner(p: SharedProps) {
     historyFailed,
     showHistoryLoading,
     setReloadKey,
+    demoEnabled,
+    onDemoValid,
+    onDemoRefused,
   } = p
 
   return (
@@ -606,6 +651,26 @@ function MobileScanner(p: SharedProps) {
 
       {!lastResult && mode === 'camera' && (
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
+          {demoEnabled && (
+            <div className="flex gap-2 rounded-[16px] border border-amber-400/40 bg-amber-500/12 p-2 backdrop-blur-md">
+              <button
+                type="button"
+                onClick={onDemoValid}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[12px] bg-[#0e9f52] text-[13px] font-bold text-white"
+              >
+                <CheckCircle2 size={14} />
+                Démo : valider
+              </button>
+              <button
+                type="button"
+                onClick={onDemoRefused}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[12px] bg-[#c22a22] text-[13px] font-bold text-white"
+              >
+                <XCircle size={14} />
+                Démo : refuser
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-between px-1.5 text-[12.5px] font-semibold text-white/60">
             <span>
               <span className="font-extrabold text-[#3ddc84]">{validToday}</span> validés aujourd'hui
@@ -856,6 +921,9 @@ function DesktopScanner(p: SharedProps) {
     historyFailed,
     showHistoryLoading,
     setReloadKey,
+    demoEnabled,
+    onDemoValid,
+    onDemoRefused,
   } = p
 
   return (
@@ -1029,6 +1097,30 @@ function DesktopScanner(p: SharedProps) {
           ) : (
             <div className="squircle flex items-center gap-2 rounded-[22px] bg-gray-100 p-6 text-sm text-gray-400">
               En attente d'un scan…
+            </div>
+          )}
+
+          {demoEnabled && (
+            <div className="squircle flex flex-col gap-2.5 rounded-[18px] border-[1.5px] border-amber-300 bg-amber-50 p-[18px]">
+              <p className="text-[13.5px] font-bold text-amber-700">Mode démo — simuler un scan</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={onDemoValid}
+                  className="flex h-10 flex-1 items-center justify-center gap-1.5 squircle rounded-[12px] bg-[#03713d] text-[13px] font-bold text-white"
+                >
+                  <CheckCircle2 size={14} />
+                  Billet valide
+                </button>
+                <button
+                  type="button"
+                  onClick={onDemoRefused}
+                  className="flex h-10 flex-1 items-center justify-center gap-1.5 squircle rounded-[12px] bg-[#9b1c17] text-[13px] font-bold text-white"
+                >
+                  <XCircle size={14} />
+                  Billet refusé
+                </button>
+              </div>
             </div>
           )}
 

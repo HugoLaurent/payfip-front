@@ -185,7 +185,7 @@ export function InscriptionReturnPage() {
 
   return (
     <PublicShell>
-      <div className="mx-auto max-w-md pt-4">
+      <div className="pt-4">
         {registration.status === 'confirmed' && accessToken && orgId && (
           <RegistrationConfirmation
             formation={{

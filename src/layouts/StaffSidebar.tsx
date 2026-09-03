@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Building2, CreditCard, FileText, LogOut, Mail, ShoppingCart, Store, Users } from 'lucide-react'
+import { Building2, CreditCard, FileText, LogOut, Mail, ShoppingCart, Store, UserCheck, Users } from 'lucide-react'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 
 function SidebarLink({
@@ -95,6 +95,9 @@ export function StaffSidebar({
           </SidebarLink>
           <SidebarLink to="/staff/factures" icon={FileText} onNavigate={onCloseMobile}>
             Factures
+          </SidebarLink>
+          <SidebarLink to="/staff/inscriptions" icon={UserCheck} onNavigate={onCloseMobile}>
+            Inscriptions
           </SidebarLink>
           <SidebarLink to="/staff/paiements" icon={CreditCard} onNavigate={onCloseMobile}>
             Demandes de paiement

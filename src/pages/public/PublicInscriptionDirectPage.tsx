@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Mail, ShieldCheck } from 'lucide-react'
 import { PublicShell } from '@/layouts/PublicShell'
@@ -33,14 +33,20 @@ interface CreateRegistrationResponse {
 export function PublicInscriptionDirectPage() {
   const { slug, eventSlug } = useParams<{ slug: string; eventSlug: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // Préremplissage démo (widget bas-droit) — jamais deviné, seulement ce
+  // que ?demoEmail=/demoFirstName=/demoLastName= porte explicitement.
+  const demoEmail = searchParams.get('demoEmail') ?? undefined
+  const demoFirstName = searchParams.get('demoFirstName') ?? ''
+  const demoLastName = searchParams.get('demoLastName') ?? ''
 
   const [service, setService] = useState<ServiceLookup | null>(null)
   const [event, setEvent] = useState<Formation | null>(null)
   const [loadError, setLoadError] = useState(false)
 
   const [step, setStep] = useState<Step>('email')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
+  const [firstName, setFirstName] = useState(demoFirstName)
+  const [lastName, setLastName] = useState(demoLastName)
   const [quantity, setQuantity] = useState(1)
   const [values, setValues] = useState<Record<string, FieldValue>>({})
   const [documentFiles, setDocumentFiles] = useState<Record<string, File | null>>({})
@@ -51,6 +57,7 @@ export function PublicInscriptionDirectPage() {
     orgId: service?.orgId ?? null,
     requestPath: '/inscription/otp/request',
     verifyPath: '/inscription/otp/verify',
+    initialEmail: demoEmail,
   })
   const { email, onEmailChange, otpSent, otpRequesting, otpError, devCode, codeDigits, setCodeDigits, verifying, verifyError, emailVerified, resendCooldown, handleRequestOtp, handleVerifyOtp, otpLength } = otp
 
@@ -103,6 +110,7 @@ export function PublicInscriptionDirectPage() {
           filesToSend,
           {
             orgId: String(service.orgId),
+            serviceId: String(service.serviceId),
             eventId: String(event.id),
             email: email.trim(),
             firstName: firstName.trim(),
@@ -115,6 +123,7 @@ export function PublicInscriptionDirectPage() {
       : await apiCall<CreateRegistrationResponse>('POST', '/inscription/registrations', {
           body: {
             orgId: service.orgId,
+            serviceId: service.serviceId,
             eventId: event.id,
             email: email.trim(),
             firstName: firstName.trim(),

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { apiCall } from '@/lib/api'
 import { LoadError } from '@/components/ui'
@@ -13,6 +13,10 @@ import { FormationCard, PublicServiceHeader } from '@/components/public'
 // Inscription").
 export function PublicInscriptionCataloguePage() {
   const { slug } = useParams<{ slug: string }>()
+  // Reporté tel quel sur chaque fiche formation (ex. ?demoEmail=... posé
+  // par le widget de démo) — cette page ne les lit pas elle-même, elle ne
+  // fait que les transmettre.
+  const location = useLocation()
   const [logoFailed, setLogoFailed] = useState(false)
   const [category, setCategory] = useState<string>('Tout')
 
@@ -105,7 +109,7 @@ export function PublicInscriptionCataloguePage() {
           className="flex flex-col gap-3 md:grid md:grid-cols-3 md:gap-[18px]"
         >
           {formations.map((f) => (
-            <FormationCard key={f.id} formation={f} to={`/inscription/${slug}/f/${f.slug}`} />
+            <FormationCard key={f.id} formation={f} to={`/inscription/${slug}/f/${f.slug}${location.search}`} />
           ))}
           {!eventsFailed && !showEventsLoading && formations.length === 0 && (
             <p className="pt-6 text-center text-sm text-ink-soft">Aucune formation dans cette catégorie.</p>

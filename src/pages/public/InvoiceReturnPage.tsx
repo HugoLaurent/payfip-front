@@ -13,7 +13,7 @@ import { FadeIn, PaymentFailedState, PaymentPendingState } from '@/components/pu
 type PaymentStatus = 'draft' | 'awaiting_payment' | 'paid' | 'failed' | 'cancelled' | 'expired'
 
 interface InvoiceSummary {
-  id: number
+  code: string
   status: string
   amountCents: number
   objectLabel: string
