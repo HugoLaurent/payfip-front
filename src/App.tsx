@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { AuthGate } from '@/layouts/AuthGate'
 import { StaffGate } from '@/layouts/StaffGate'
-import { DemoWidget } from '@/components/DemoWidget'
 
 // Parcours citoyen public — chargé à la demande : jamais utile pour un
 // agent connecté, et inversement (voir AuthGate pour le lazy de
@@ -16,7 +15,6 @@ const PublicInscriptionFormationPage = lazy(() => import('@/pages/public/PublicI
 const PublicInscriptionDirectPage = lazy(() => import('@/pages/public/PublicInscriptionDirectPage'))
 const InscriptionReturnPage = lazy(() => import('@/pages/public/InscriptionReturnPage'))
 const LegalNoticePage = lazy(() => import('@/pages/public/LegalNoticePage'))
-const DemoEmailsPage = lazy(() => import('@/pages/demo/DemoEmailsPage'))
 
 function App() {
   return (
@@ -32,12 +30,10 @@ function App() {
           <Route path="/inscription/:slug/f/:eventSlug" element={<PublicInscriptionFormationPage />} />
           <Route path="/inscription/:slug/f/:eventSlug/direct" element={<PublicInscriptionDirectPage />} />
           <Route path="/mentions-legales" element={<LegalNoticePage />} />
-          <Route path="/demo/emails" element={<DemoEmailsPage />} />
           <Route path="/staff/*" element={<StaffGate />} />
           <Route path="/*" element={<AuthGate />} />
         </Routes>
       </Suspense>
-      <DemoWidget />
     </>
   )
 }
