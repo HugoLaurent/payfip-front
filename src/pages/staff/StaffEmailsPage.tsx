@@ -1,11 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { Mail, Search, X } from 'lucide-react'
+import { KeyRound, Mail, Search, X } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
+import { useToast } from '@/lib/useToast'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
-import { EmptyState, LoadError, PageHeader, Pagination, StatusBadge, TextInput } from '@/components/ui'
+import {
+  Card,
+  EmptyState,
+  LoadError,
+  PageHeader,
+  Pagination,
+  PrimaryButton,
+  SecondaryButton,
+  StatusBadge,
+  TextInput,
+} from '@/components/ui'
 import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
 import type { PageMeta } from '@/lib/types'
 
@@ -29,6 +40,117 @@ interface StaffEmailDetail {
   status: string
   subject: string
   html: string
+}
+
+interface AregieMailApiKeyStatus {
+  configured: boolean
+  last4: string | null
+  updatedAt: string | null
+}
+
+/**
+ * Clé API AREGIE Mail (voir svc-mail/settings_controller.ts) — plus de Vault,
+ * la clé est saisie ici, chiffrée en base côté svc-mail. On ne l'affiche
+ * jamais en clair après coup, seulement ses 4 derniers caractères.
+ */
+function AregieMailSettingsCard() {
+  const { staffToken } = useStaffAuth()
+  const { showToast } = useToast()
+  const [status, setStatus] = useState<AregieMailApiKeyStatus | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [apiKey, setApiKey] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function loadStatus() {
+    const result = await apiCall<{ data: AregieMailApiKeyStatus }>('GET', '/staff/settings/aregie-mail', {
+      staffToken,
+    })
+    if (result.ok) setStatus(result.data.data)
+  }
+
+  useEffect(() => {
+    loadStatus()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staffToken])
+
+  async function saveApiKey() {
+    if (!apiKey.trim()) return
+    setSaving(true)
+    const result = await apiCall('PUT', '/staff/settings/aregie-mail', {
+      staffToken,
+      body: { apiKey: apiKey.trim() },
+    })
+    setSaving(false)
+    if (!result.ok) {
+      showToast('error', 'Échec', "Impossible d'enregistrer la clé API.")
+      return
+    }
+    showToast('success', 'Clé API enregistrée', 'Les prochains envois utiliseront cette clé.')
+    setApiKey('')
+    setEditing(false)
+    await loadStatus()
+  }
+
+  return (
+    <Card className="mb-4">
+      <div className="flex items-start gap-3">
+        <div className="squircle flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-aregie-tint/15 text-aregie-deep">
+          <KeyRound size={16} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-gray-900">Clé API AREGIE Mail</p>
+          <p className="mt-0.5 text-xs text-gray-500">
+            Utilisée pour tous les envois (https://mail.aregie.com/api/send). Boîte d'envoi et nom
+            d'expéditeur se configurent côté AREGIE Mail, pas ici.
+          </p>
+
+          {!editing && (
+            <div className="mt-3 flex items-center gap-3">
+              {status?.configured ? (
+                <StatusBadge label={`Configurée · se termine par ${status.last4}`} className="bg-emerald-50 text-emerald-700" />
+              ) : (
+                <StatusBadge label="Non configurée" className="bg-amber-50 text-amber-700" />
+              )}
+              <SecondaryButton type="button" onClick={() => setEditing(true)} className="px-3.5 py-1.5 text-xs">
+                {status?.configured ? 'Changer la clé' : 'Saisir la clé'}
+              </SecondaryButton>
+            </div>
+          )}
+
+          {editing && (
+            <div className="mt-3 flex items-center gap-2">
+              <TextInput
+                type="text"
+                placeholder="sk_..."
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="max-w-xs"
+                autoFocus
+              />
+              <PrimaryButton
+                type="button"
+                onClick={saveApiKey}
+                disabled={saving || !apiKey.trim()}
+                className="px-4 py-1.5 text-xs"
+              >
+                {saving ? 'Enregistrement…' : 'Enregistrer'}
+              </PrimaryButton>
+              <SecondaryButton
+                type="button"
+                onClick={() => {
+                  setEditing(false)
+                  setApiKey('')
+                }}
+                className="px-3.5 py-1.5 text-xs"
+              >
+                Annuler
+              </SecondaryButton>
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
+  )
 }
 
 export function StaffEmailsPage() {
@@ -65,6 +187,8 @@ export function StaffEmailsPage() {
   return (
     <div>
       <PageHeader icon={<Mail size={20} />} title="Emails" subtitle="Envois, tous organismes confondus" />
+
+      <AregieMailSettingsCard />
 
       <div className="relative mb-4">
         <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
