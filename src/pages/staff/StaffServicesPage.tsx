@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Search, Store } from 'lucide-react'
+import { KeyRound, Plus, Search, Store } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { useToast } from '@/lib/useToast'
@@ -11,10 +11,12 @@ import {
   PageHeader,
   Pagination,
   PrimaryButton,
+  SecondaryButton,
   SelectInput,
   StatusBadge,
   TextInput,
 } from '@/components/ui'
+import { AregieMailKeyControl } from '@/components/staff/AregieMailKeyControl'
 import { StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
 import { SERVICE_STATUS_LABELS, SERVICE_STATUS_TINTS, SERVICE_TYPE_LABELS } from '@/lib/serviceLabels'
 import type { PageMeta, ServiceRow, StaffOrganization } from '@/lib/types'
@@ -46,6 +48,8 @@ export function StaffServicesPage() {
     })
   }, [staffToken])
   const orgNameById = new Map(orgs.map((o) => [o.id, o.name]))
+
+  const [mailKeyService, setMailKeyService] = useState<ServiceRow | null>(null)
 
   const [showCreate, setShowCreate] = useState(false)
   const [orgId, setOrgId] = useState('')
@@ -120,7 +124,7 @@ export function StaffServicesPage() {
 
       {!loadFailed && services && services.length > 0 && (
         <>
-          <StaffTable headers={['Service', 'Organisme', 'Type', 'Numcli', 'Statut']}>
+          <StaffTable headers={['Service', 'Organisme', 'Type', 'Numcli', 'Statut', 'Envoi']}>
             {services.map((s) => (
               <StaffRow key={s.id}>
                 <Td className="font-medium text-gray-900">{s.name}</Td>
@@ -132,6 +136,16 @@ export function StaffServicesPage() {
                     label={SERVICE_STATUS_LABELS[s.status] ?? s.status}
                     className={SERVICE_STATUS_TINTS[s.status] ?? 'bg-gray-100 text-gray-600'}
                   />
+                </Td>
+                <Td>
+                  <SecondaryButton
+                    type="button"
+                    onClick={() => setMailKeyService(s)}
+                    className="px-3 py-1.5 text-xs"
+                  >
+                    <KeyRound size={13} />
+                    Clé API
+                  </SecondaryButton>
                 </Td>
               </StaffRow>
             ))}
@@ -185,6 +199,18 @@ export function StaffServicesPage() {
               {creating ? 'Création…' : 'Créer'}
             </PrimaryButton>
           </form>
+        </Modal>
+      )}
+
+      {mailKeyService && (
+        <Modal title={`Clé API AREGIE Mail — ${mailKeyService.name}`} onClose={() => setMailKeyService(null)}>
+          <p className="mb-4 text-xs text-gray-500">
+            Utilisée pour les confirmations envoyées au nom de ce service (billets, factures,
+            inscriptions selon son type). Sans clé propre, ce service n'a pas d'envoi possible tant
+            qu'elle n'est pas configurée ici — voir CLIENT_GUIDE.md du dépôt AREGIE_MAIL pour créer
+            un client et connecter sa boîte d'envoi.
+          </p>
+          <AregieMailKeyControl serviceId={mailKeyService.id} />
         </Modal>
       )}
     </div>
