@@ -202,6 +202,7 @@ export function InscriptionReturnPage() {
             amountCents={registration.amountCents}
             accessToken={accessToken}
             orgId={Number(orgId)}
+            onCancelled={() => setRefreshKey((k) => k + 1)}
           />
         )}
 

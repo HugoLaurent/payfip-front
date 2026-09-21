@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import type { Formation } from '@/lib/types'
 import { euros, formatDateLabel } from '@/lib/format'
-import { GATEWAY_URL } from '@/lib/api'
+import { GATEWAY_URL, apiCall } from '@/lib/api'
 import { downloadEventIcs } from '@/lib/ics'
 import { PublicButton, PublicGhostButton } from './PublicButtons'
 
@@ -19,6 +19,7 @@ export function RegistrationConfirmation({
   amountCents,
   accessToken,
   orgId,
+  onCancelled,
 }: {
   formation: Pick<Formation, 'title' | 'eventDate' | 'startTime' | 'endTime' | 'timeLabel' | 'location'>
   participantName: string
@@ -27,9 +28,28 @@ export function RegistrationConfirmation({
   amountCents: number
   accessToken: string
   orgId: number
+  onCancelled?: () => void
 }) {
   const [downloading, setDownloading] = useState(false)
   const [downloadError, setDownloadError] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState<string | null>(null)
+
+  async function handleCancel() {
+    if (!window.confirm('Annuler définitivement votre inscription ? Cette action est irréversible.')) {
+      return
+    }
+    setCancelling(true)
+    setCancelError(null)
+    const result = await apiCall(
+      'POST',
+      `/inscription/registrations/by-token/${accessToken}/cancel?orgId=${orgId}`,
+      { body: {} },
+    )
+    setCancelling(false)
+    if (result.ok) onCancelled?.()
+    else setCancelError('Échec — réessayez.')
+  }
 
   function handleAddToCalendar() {
     if (!formation.eventDate) return
@@ -137,6 +157,10 @@ export function RegistrationConfirmation({
             {downloading ? 'Préparation…' : "Télécharger l'attestation"}
           </PublicGhostButton>
           {downloadError && <p className="text-center text-sm text-red-600">Échec du téléchargement — réessayez.</p>}
+          <PublicGhostButton type="button" onClick={handleCancel} disabled={cancelling} className="w-full">
+            {cancelling ? 'Annulation…' : 'Annuler mon inscription'}
+          </PublicGhostButton>
+          {cancelError && <p className="text-center text-sm text-red-600">{cancelError}</p>}
         </div>
       </div>
     </motion.div>
