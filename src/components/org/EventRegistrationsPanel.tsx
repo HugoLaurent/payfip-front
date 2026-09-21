@@ -68,6 +68,7 @@ export function EventRegistrationsPanel({
   const [previewing, setPreviewing] = useState<{ url: string; mimeType: string; filename: string; label: string } | null>(null)
   const [previewLoadingId, setPreviewLoadingId] = useState<number | null>(null)
   const [resendingId, setResendingId] = useState<number | null>(null)
+  const [cancellingId, setCancellingId] = useState<number | null>(null)
 
   const { data, meta, loadFailed, showLoading, reload } = usePaginatedResource<RegistrationAgent, PageMeta>({
     fetcher: () =>
@@ -138,6 +139,25 @@ export function EventRegistrationsPanel({
       showToast('error', 'Trop tôt', 'Une relance a déjà été envoyée récemment pour cette inscription.')
     } else {
       showToast('error', 'Échec', "Impossible d'envoyer la relance.")
+    }
+  }
+
+  // Annulation côté agent (l'inscrit a demandé par un autre canal, ou
+  // no-show à retirer) — même endpoint que l'auto-annulation citoyen, pas
+  // de vérification de délai côté agent. Aucun email envoyé au citoyen.
+  async function handleCancelRegistration(r: RegistrationAgent) {
+    if (!window.confirm(`Annuler l'inscription de ${r.firstName} ${r.lastName} ? Cette action est irréversible.`)) {
+      return
+    }
+    setCancellingId(r.id)
+    const result = await apiCall('POST', `/inscription/registrations/${r.id}/cancel?serviceId=${event.serviceId}`, { token: auth.token })
+    setCancellingId(null)
+
+    if (result.ok) {
+      showToast('success', 'Inscription annulée', `${r.firstName} ${r.lastName}`)
+      await reload()
+    } else {
+      showToast('error', 'Échec', "Impossible d'annuler l'inscription.")
     }
   }
 
@@ -281,6 +301,16 @@ export function EventRegistrationsPanel({
                   >
                     {resendingId === r.id ? '…' : 'Relancer'}
                   </SecondaryButton>
+                )}
+                {r.status !== 'cancelled' && r.status !== 'expired' && (
+                  <DangerButton
+                    type="button"
+                    onClick={() => handleCancelRegistration(r)}
+                    disabled={cancellingId === r.id}
+                    className="shrink-0 px-3 py-1.5 text-xs"
+                  >
+                    {cancellingId === r.id ? '…' : 'Annuler'}
+                  </DangerButton>
                 )}
               </Card>
             ))}
