@@ -97,6 +97,8 @@ export function resolveDemoApi(
   if (m === 'POST' && path === '/auth/refresh') return ok({ data: DEMO_ADMIN_AUTH })
   if (m === 'GET' && path === '/billetterie/orders/stats') return ok({ data: DEMO_MONTH_STATS })
   if (m === 'GET' && path === '/inscription/pending-review-count') return ok({ data: { count: 0, events: [] } })
+  if (m === 'GET' && path === '/inscription/notifications') return ok({ data: { count: 0, notifications: [] } })
+  if (m === 'POST' && path === '/inscription/notifications/mark-read') return ok({ data: { success: true } })
   if (m === 'GET' && path === '/billetterie/scans') return ok({ data: [] })
 
   // --- Billetterie citoyen ---------------------------------------------
