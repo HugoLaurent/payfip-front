@@ -223,7 +223,12 @@ export function StaffOrganizationDetailPage() {
 
     setShowCreateService(false)
     setReloadKey((k) => k + 1)
-    showToast('success', 'Service créé', serviceName)
+    const createdLinkCode = (result.data as { linkCode?: string } | undefined)?.linkCode
+    showToast(
+      'success',
+      'Service créé',
+      createdLinkCode ? `Code de liaison AREGIE à transmettre : ${createdLinkCode}` : serviceName
+    )
   }
 
   if (loadFailed) {
@@ -365,6 +370,12 @@ export function StaffOrganizationDetailPage() {
                     <p className="text-xs text-gray-400">
                       {SERVICE_TYPE_LABELS[s.serviceType] ?? s.serviceType}
                       {s.numcli && ` · Client PayFiP n° ${s.numcli}`}
+                      {s.linkCode && (
+                        <>
+                          {' · Code de liaison AREGIE '}
+                          <span className="select-all font-mono text-gray-500">{s.linkCode}</span>
+                        </>
+                      )}
                     </p>
                   </div>
                   {suspended ? (

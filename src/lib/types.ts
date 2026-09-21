@@ -28,6 +28,7 @@ export interface ServiceRow {
   serviceType: string
   status: string
   numcli: string | null
+  linkCode: string
   slug: string | null
   hasLogo: boolean
   hasCoverImage: boolean
