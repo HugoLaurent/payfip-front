@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { useToast } from '@/lib/useToast'
-import { PrimaryButton, SecondaryButton, StatusBadge, TextInput } from '@/components/ui'
+import { DangerButton, PrimaryButton, SecondaryButton, StatusBadge, TextInput } from '@/components/ui'
 
 interface AregieMailApiKeyStatus {
   configured: boolean
@@ -24,6 +24,7 @@ export function AregieMailKeyControl({ serviceId }: { serviceId?: number }) {
   const [editing, setEditing] = useState(false)
   const [apiKey, setApiKey] = useState('')
   const [saving, setSaving] = useState(false)
+  const [removing, setRemoving] = useState(false)
 
   const path = serviceId ? `/staff/services/${serviceId}/aregie-mail-key` : '/staff/settings/aregie-mail'
 
@@ -52,6 +53,21 @@ export function AregieMailKeyControl({ serviceId }: { serviceId?: number }) {
     await loadStatus()
   }
 
+  async function removeApiKey() {
+    if (!window.confirm("Retirer la clé API propre à ce service ? Les envois retomberont sur la clé par défaut.")) {
+      return
+    }
+    setRemoving(true)
+    const result = await apiCall('DELETE', path, { staffToken })
+    setRemoving(false)
+    if (!result.ok) {
+      showToast('error', 'Échec', "Impossible de retirer la clé API.")
+      return
+    }
+    showToast('success', 'Clé API retirée', 'Ce service utilise maintenant la clé par défaut.')
+    await loadStatus()
+  }
+
   return (
     <div>
       {!editing && (
@@ -64,6 +80,19 @@ export function AregieMailKeyControl({ serviceId }: { serviceId?: number }) {
           <SecondaryButton type="button" onClick={() => setEditing(true)} className="px-3.5 py-1.5 text-xs">
             {status?.configured ? 'Changer la clé' : 'Saisir la clé'}
           </SecondaryButton>
+          {/* Retirer n'a de sens que pour une clé de service : la clé par
+              défaut (pas de serviceId) est le filet de sécurité de tous les
+              services sans clé propre, elle ne doit jamais être vidée ici. */}
+          {serviceId !== undefined && status?.configured && (
+            <DangerButton
+              type="button"
+              onClick={removeApiKey}
+              disabled={removing}
+              className="px-3.5 py-1.5 text-xs"
+            >
+              {removing ? 'Retrait…' : 'Retirer'}
+            </DangerButton>
+          )}
         </div>
       )}
 
