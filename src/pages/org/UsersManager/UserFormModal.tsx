@@ -4,7 +4,7 @@ import { apiCall } from '@/lib/api'
 import { Modal, PrimaryButton, TextInput } from '@/components/ui'
 import { useAuth } from '@/lib/useAuth'
 import { useToast } from '@/lib/useToast'
-import { DEFAULT_PERMISSIONS, PERMISSION_LABELS } from './permissions'
+import { DEFAULT_PERMISSIONS, getPermissionLabels } from './permissions'
 import type { AgentPermissions } from '@/lib/types'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -35,6 +35,17 @@ export function UserFormModal({
   const [error, setError] = useState<string | null>(null)
 
   const emailInvalid = email !== '' && !EMAIL_PATTERN.test(email)
+
+  // Les permissions sont un seul jeu de cases, appliqué tel quel à tous
+  // les services cochés (côté backend aussi, voir users_controller.ts#store
+  // — création uniquement, pas par service comme l'écran de gestion d'un
+  // agent existant). On n'affiche donc que l'union des libellés pertinents
+  // pour les services actuellement cochés, dédupliqués — jamais les 5
+  // mêmes cases pour tout le monde (voir permissions.ts).
+  const selectedTypes = auth.services.filter((s) => serviceIds.includes(s.id)).map((s) => s.serviceType)
+  const relevantLabels = Array.from(new Set(selectedTypes))
+    .flatMap((type) => getPermissionLabels(type))
+    .filter((entry, index, all) => all.findIndex((e) => e.key === entry.key) === index)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -138,23 +149,25 @@ export function UserFormModal({
               </div>
             </div>
 
-            <div>
-              <p className="mb-1.5 text-sm font-medium text-gray-700">Permissions</p>
-              <div className="grid grid-cols-2 gap-2">
-                {PERMISSION_LABELS.map(({ key, label }) => (
-                  <label key={key} className="flex items-center gap-2 text-sm text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={permissions[key]}
-                      onChange={(e) =>
-                        setPermissions((prev) => ({ ...prev, [key]: e.target.checked }))
-                      }
-                    />
-                    {label}
-                  </label>
-                ))}
+            {relevantLabels.length > 0 && (
+              <div>
+                <p className="mb-1.5 text-sm font-medium text-gray-700">Permissions</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {relevantLabels.map(({ key, label }) => (
+                    <label key={key} className="flex items-center gap-2 text-sm text-gray-600">
+                      <input
+                        type="checkbox"
+                        checked={permissions[key]}
+                        onChange={(e) =>
+                          setPermissions((prev) => ({ ...prev, [key]: e.target.checked }))
+                        }
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </>
         ) : (
           <p className="text-xs text-gray-400">

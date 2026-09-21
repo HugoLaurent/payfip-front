@@ -18,7 +18,7 @@ import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useAuth } from '@/lib/useAuth'
 import { useToast } from '@/lib/useToast'
 import { UserFormModal } from './UserFormModal'
-import { PERMISSION_LABELS } from './permissions'
+import { getPermissionLabels } from './permissions'
 import type { AgentPermissions, PageMeta } from '@/lib/types'
 
 const PER_PAGE = 10
@@ -26,6 +26,7 @@ const PER_PAGE = 10
 interface AgentServiceLink {
   id: number
   name: string
+  serviceType: string
   permissions: AgentPermissions
 }
 
@@ -350,28 +351,37 @@ export function UsersManager() {
           </Card>
         ) : (
         <Card className="space-y-4">
-          {manageAgent.services.map((s) => (
-            <div key={s.id} className="border-t border-gray-100 pt-4 first:border-t-0 first:pt-0">
-              <p className="mb-2 text-sm font-medium text-gray-700">{s.name}</p>
-              <div className="grid grid-cols-2 gap-2">
-                {PERMISSION_LABELS.map(({ key, label }) => (
-                  <label key={key} className="flex items-center gap-2 text-sm text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={editPermissions[s.id]?.[key] ?? false}
-                      onChange={(e) =>
-                        setEditPermissions((prev) => ({
-                          ...prev,
-                          [s.id]: { ...prev![s.id], [key]: e.target.checked },
-                        }))
-                      }
-                    />
-                    {label}
-                  </label>
-                ))}
+          {manageAgent.services.map((s) => {
+            const labels = getPermissionLabels(s.serviceType)
+            return (
+              <div key={s.id} className="border-t border-gray-100 pt-4 first:border-t-0 first:pt-0">
+                <p className="mb-2 text-sm font-medium text-gray-700">{s.name}</p>
+                {labels.length === 0 ? (
+                  <p className="text-sm text-gray-400 italic">
+                    Ce service n'a pas de permission spécifique pour l'instant.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {labels.map(({ key, label }) => (
+                      <label key={key} className="flex items-center gap-2 text-sm text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={editPermissions[s.id]?.[key] ?? false}
+                          onChange={(e) =>
+                            setEditPermissions((prev) => ({
+                              ...prev,
+                              [s.id]: { ...prev![s.id], [key]: e.target.checked },
+                            }))
+                          }
+                        />
+                        {label}
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            )
+          })}
 
           <div className="flex gap-2 pt-2">
             <PrimaryButton onClick={saveAgentPermissions} disabled={savingPermissions}>
