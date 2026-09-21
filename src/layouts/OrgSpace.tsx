@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Menu } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { NotificationBell } from './NotificationBell'
@@ -76,7 +77,26 @@ export function OrgSpace() {
           }
         >
           <div className={isScanner ? 'h-full md:mx-auto md:h-auto md:max-w-5xl' : `mx-auto ${isWide ? 'max-w-5xl' : 'max-w-2xl'}`}>
-            <Outlet />
+            {isScanner ? (
+              <Outlet />
+            ) : (
+              // Transition très discrète au changement de page — un simple
+              // fondu + léger glissement, jamais de mode="wait" (attendrait
+              // la sortie avant de monter la page suivante, ce qui se
+              // ressentirait comme un temps mort). Jamais sur le scanner :
+              // outil de terrain en plein écran, une animation d'entrée y
+              // serait juste un temps de latence perçu avant de pouvoir viser.
+              <AnimatePresence initial={false}>
+                <motion.div
+                  key={location.pathname}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.16, ease: 'easeOut' }}
+                >
+                  <Outlet />
+                </motion.div>
+              </AnimatePresence>
+            )}
           </div>
         </main>
       </div>
