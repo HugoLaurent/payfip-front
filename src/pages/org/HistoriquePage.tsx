@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, Globe, History, Printer, Search, User } from 'lucide-react'
 import { apiCall, GATEWAY_URL } from '@/lib/api'
-import { Card, EmptyState, LoadError, PageHeader, Pagination, SelectInput, StatusBadge, TextInput } from '@/components/ui'
+import { Card, EmptyState, LoadError, PageHeader, Pagination, SecondaryButton, SelectInput, StatusBadge, TextInput } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useAuth } from '@/lib/useAuth'
+import { useToast } from '@/lib/useToast'
 import { euros } from '@/lib/format'
 import type { PageMeta } from '@/lib/types'
 
@@ -15,6 +16,9 @@ interface OrderTicket {
   status: string
   consumedAt: string | null
   consumedByLabel: string | null
+  refundedAt: string | null
+  refundedByLabel: string | null
+  refundReason: string | null
 }
 
 interface Order {
@@ -97,6 +101,7 @@ function todayISO(): string {
 
 export function HistoriquePage() {
   const { auth } = useAuth()
+  const { showToast } = useToast()
   const visibleServices = auth.services.filter(
     (s) => s.serviceType === 'billetterie' && (auth.role === 'admin' || s.permissions?.canViewHistory)
   )
@@ -165,6 +170,32 @@ export function HistoriquePage() {
 
   const currentService = auth.services.find((s) => s.id === serviceId)
   const canSell = auth.role === 'admin' || currentService?.permissions?.canSell === true
+  const canScan = auth.role === 'admin' || currentService?.permissions?.canScan === true
+
+  const [refundingId, setRefundingId] = useState<number | null>(null)
+
+  // Remboursement déclaratif : l'argent est rendu hors plateforme (par
+  // l'organisme, directement au citoyen) — voir tickets_controller.ts#refund
+  // côté svc-billetterie. Pas d'appel PayFiP ici, juste une trace de
+  // qui/quand/pourquoi.
+  async function handleRefund(ticketId: number) {
+    const reason = window.prompt('Motif du remboursement (obligatoire, pour la traçabilité) :')
+    if (!reason || !reason.trim()) return
+
+    setRefundingId(ticketId)
+    const result = await apiCall('POST', `/billetterie/tickets/${ticketId}/refund`, {
+      token: auth.token,
+      body: { reason: reason.trim() },
+    })
+    setRefundingId(null)
+
+    if (result.ok) {
+      showToast('success', 'Billet remboursé', 'Marqué comme remboursé.')
+      await reloadOrders()
+    } else {
+      showToast('error', 'Échec', "Impossible de marquer ce billet comme remboursé.")
+    }
+  }
 
   const isDefaultRange = dateFrom === todayISO() && dateTo === todayISO()
 
@@ -480,12 +511,26 @@ export function HistoriquePage() {
                           Billets
                         </p>
                         {order.tickets.map((t) => (
-                          <div key={t.id} className="flex items-center justify-between py-1 text-sm">
+                          <div key={t.id} className="flex items-center justify-between gap-2 py-1 text-sm">
                             <span className="text-gray-600">{t.tariffType}</span>
-                            <span className="text-gray-400">
-                              {t.status === 'consumed'
-                                ? `Scanné par ${t.consumedByLabel ?? 'un agent'}`
-                                : TICKET_STATUS_LABELS[t.status] ?? t.status}
+                            <span className="flex items-center gap-2">
+                              <span className="text-gray-400">
+                                {t.status === 'consumed'
+                                  ? `Scanné par ${t.consumedByLabel ?? 'un agent'}`
+                                  : t.status === 'refunded'
+                                    ? `Remboursé par ${t.refundedByLabel ?? 'un agent'}`
+                                    : TICKET_STATUS_LABELS[t.status] ?? t.status}
+                              </span>
+                              {canScan && (t.status === 'issued' || t.status === 'consumed') && (
+                                <SecondaryButton
+                                  type="button"
+                                  onClick={() => handleRefund(t.id)}
+                                  disabled={refundingId === t.id}
+                                  className="px-2.5 py-1 text-xs"
+                                >
+                                  {refundingId === t.id ? '…' : 'Rembourser'}
+                                </SecondaryButton>
+                              )}
                             </span>
                           </div>
                         ))}
