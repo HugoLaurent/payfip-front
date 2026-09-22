@@ -132,6 +132,28 @@ export function StaffOrganizationDetailPage() {
     }
   }
 
+  // Suppression logique (status: 'deleted') — jamais de retour arrière
+  // possible via l'API une fois fait (voir organizations_controller.ts
+  // côté svc-auth), donc une friction volontaire en plus de la
+  // confirmation de la modale : il faut retaper le nom exact de
+  // l'organisme pour activer le bouton.
+  const [showDelete, setShowDelete] = useState(false)
+  const [deleteConfirmName, setDeleteConfirmName] = useState('')
+  const [deleting, setDeleting] = useState(false)
+
+  async function handleDelete() {
+    if (!org) return
+    setDeleting(true)
+    const result = await apiCall('DELETE', `/staff/organizations/${org.id}`, { staffToken })
+    setDeleting(false)
+    if (result.ok) {
+      showToast('success', 'Organisme supprimé', org.name)
+      navigate('/staff/organismes')
+    } else {
+      showToast('error', 'Échec', "Impossible de supprimer l'organisme.")
+    }
+  }
+
   const [togglingServiceId, setTogglingServiceId] = useState<number | null>(null)
 
   async function toggleService(service: ServiceRow) {
@@ -306,9 +328,21 @@ export function StaffOrganizationDetailPage() {
             className={ORG_STATUS_TINTS[org.status] ?? 'bg-gray-100 text-gray-600'}
           />
           {suspended ? (
-            <SecondaryButton type="button" onClick={handleReactivate} disabled={suspending} className="px-3 py-1.5">
-              {suspending ? 'Réactivation…' : "Réactiver l'organisme"}
-            </SecondaryButton>
+            <>
+              <SecondaryButton type="button" onClick={handleReactivate} disabled={suspending} className="px-3 py-1.5">
+                {suspending ? 'Réactivation…' : "Réactiver l'organisme"}
+              </SecondaryButton>
+              <DangerButton
+                type="button"
+                onClick={() => {
+                  setDeleteConfirmName('')
+                  setShowDelete(true)
+                }}
+                className="px-3 py-1.5"
+              >
+                Supprimer l'organisme
+              </DangerButton>
+            </>
           ) : (
             <DangerButton type="button" onClick={() => setShowSuspend(true)} className="px-3 py-1.5">
               Suspendre l'organisme
@@ -478,6 +512,36 @@ export function StaffOrganizationDetailPage() {
               {suspending ? 'Suspension…' : 'Suspendre'}
             </DangerButton>
             <SecondaryButton type="button" onClick={() => setShowSuspend(false)} className="flex-1 justify-center">
+              Annuler
+            </SecondaryButton>
+          </div>
+        </Modal>
+      )}
+
+      {showDelete && (
+        <Modal title="Supprimer l'organisme" onClose={() => setShowDelete(false)}>
+          <p className="mb-4 text-sm text-gray-600">
+            <strong>{org.name}</strong> et tous ses services deviendront définitivement
+            inaccessibles (public, admins, agents). Aucune base de données n'est supprimée
+            automatiquement — c'est une suppression logique, mais irréversible depuis cette
+            interface. Tapez le nom exact de l'organisme pour confirmer.
+          </p>
+          <TextInput
+            value={deleteConfirmName}
+            onChange={(e) => setDeleteConfirmName(e.target.value)}
+            placeholder={org.name}
+            className="mb-4"
+          />
+          <div className="flex gap-2">
+            <DangerButton
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting || deleteConfirmName !== org.name}
+              className="flex-1 justify-center py-2"
+            >
+              {deleting ? 'Suppression…' : "Supprimer définitivement"}
+            </DangerButton>
+            <SecondaryButton type="button" onClick={() => setShowDelete(false)} className="flex-1 justify-center">
               Annuler
             </SecondaryButton>
           </div>
