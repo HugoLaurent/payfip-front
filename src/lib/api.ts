@@ -75,7 +75,8 @@ export async function apiUpload<T = unknown>(
   path: string,
   file: File,
   token: string,
-  fieldName = 'logo'
+  fieldName = 'logo',
+  isStaff = false
 ): Promise<ApiResult<T>> {
   const formData = new FormData()
   formData.append(fieldName, file)
@@ -86,7 +87,8 @@ export async function apiUpload<T = unknown>(
     body: formData,
   })
 
-  handleUnauthorized(res.status, true)
+  if (isStaff) handleStaffUnauthorized(res.status, true)
+  else handleUnauthorized(res.status, true)
 
   let json: unknown = null
   try {
