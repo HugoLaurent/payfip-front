@@ -1,9 +1,21 @@
 import { useEffect, useState } from 'react'
-import { Search, Users } from 'lucide-react'
+import { KeyRound, Search, Users } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
-import { EmptyState, LoadError, PageHeader, Pagination, SelectInput, StatusBadge, TextInput } from '@/components/ui'
+import { useToast } from '@/lib/useToast'
+import {
+  DangerButton,
+  EmptyState,
+  LoadError,
+  Modal,
+  PageHeader,
+  Pagination,
+  SecondaryButton,
+  SelectInput,
+  StatusBadge,
+  TextInput,
+} from '@/components/ui'
 import { StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
 import type { PageMeta, StaffOrganization } from '@/lib/types'
 
@@ -29,9 +41,19 @@ interface StaffUser {
 
 export function StaffUsersPage() {
   const { staffToken } = useStaffAuth()
+  const { showToast } = useToast()
   const [q, setQ] = useState('')
   const [orgId, setOrgId] = useState('')
   const [page, setPage] = useState(1)
+
+  const [togglingId, setTogglingId] = useState<number | null>(null)
+  const [resetTarget, setResetTarget] = useState<StaffUser | null>(null)
+  const [resetPasswordValue, setResetPasswordValue] = useState('')
+  const [resettingPassword, setResettingPassword] = useState(false)
+  const [resetPasswordError, setResetPasswordError] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<StaffUser | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const [orgs, setOrgs] = useState<StaffOrganization[]>([])
   useEffect(() => {
@@ -56,6 +78,62 @@ export function StaffUsersPage() {
       ),
     deps: [staffToken, q, orgId, page],
   })
+
+  async function toggleStatus(u: StaffUser) {
+    const nextStatus = u.status === 'active' ? 'inactive' : 'active'
+    setTogglingId(u.id)
+    const result = await apiCall('PATCH', `/staff/users/${u.id}`, {
+      staffToken,
+      body: { status: nextStatus },
+    })
+    setTogglingId(null)
+    if (result.ok) {
+      showToast('success', nextStatus === 'active' ? 'Utilisateur réactivé' : 'Utilisateur désactivé', u.email)
+      reload()
+    } else if (result.status === 409) {
+      showToast('error', 'Échec', "C'est le dernier administrateur actif de cet organisme.")
+    } else {
+      showToast('error', 'Échec', 'Impossible de mettre à jour le statut.')
+    }
+  }
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault()
+    if (!resetTarget) return
+    setResettingPassword(true)
+    setResetPasswordError(null)
+    const result = await apiCall('PATCH', `/staff/users/${resetTarget.id}/password`, {
+      staffToken,
+      body: { newPassword: resetPasswordValue },
+    })
+    setResettingPassword(false)
+    if (result.ok) {
+      showToast('success', 'Mot de passe réinitialisé', resetTarget.email)
+      setResetTarget(null)
+      setResetPasswordValue('')
+    } else if (result.status === 422) {
+      setResetPasswordError('Ce mot de passe a déjà été utilisé récemment par cet utilisateur.')
+    } else {
+      setResetPasswordError('Échec de la réinitialisation.')
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return
+    setDeleting(true)
+    setDeleteError(null)
+    const result = await apiCall('DELETE', `/staff/users/${deleteTarget.id}`, { staffToken })
+    setDeleting(false)
+    if (result.ok) {
+      showToast('success', 'Utilisateur supprimé', deleteTarget.email)
+      setDeleteTarget(null)
+      reload()
+    } else if (result.status === 409) {
+      setDeleteError("L'utilisateur doit d'abord être désactivé.")
+    } else {
+      setDeleteError("Échec de la suppression.")
+    }
+  }
 
   return (
     <div>
@@ -97,7 +175,7 @@ export function StaffUsersPage() {
 
       {!loadFailed && users && users.length > 0 && (
         <>
-          <StaffTable headers={['Email', 'Nom', 'Organisme', 'Rôle', 'Statut', 'Dernière connexion']}>
+          <StaffTable headers={['Email', 'Nom', 'Organisme', 'Rôle', 'Statut', 'Dernière connexion', '']}>
             {users.map((u) => (
               <StaffRow key={u.id}>
                 <Td className="font-medium text-gray-900">{u.email}</Td>
@@ -110,6 +188,53 @@ export function StaffUsersPage() {
                 <Td className="text-gray-400">
                   {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('fr-FR') : '—'}
                 </Td>
+                <Td>
+                  <div className="flex justify-end gap-1.5">
+                    <SecondaryButton
+                      type="button"
+                      onClick={() => {
+                        setResetTarget(u)
+                        setResetPasswordValue('')
+                        setResetPasswordError(null)
+                      }}
+                      className="px-2.5 py-1 text-xs"
+                    >
+                      <KeyRound size={12} />
+                      Mot de passe
+                    </SecondaryButton>
+                    {u.status === 'active' ? (
+                      <DangerButton
+                        type="button"
+                        onClick={() => toggleStatus(u)}
+                        disabled={togglingId === u.id}
+                        className="px-2.5 py-1 text-xs"
+                      >
+                        {togglingId === u.id ? '…' : 'Désactiver'}
+                      </DangerButton>
+                    ) : (
+                      <>
+                        <SecondaryButton
+                          type="button"
+                          onClick={() => toggleStatus(u)}
+                          disabled={togglingId === u.id}
+                          className="px-2.5 py-1 text-xs"
+                        >
+                          {togglingId === u.id ? '…' : 'Réactiver'}
+                        </SecondaryButton>
+                        <DangerButton
+                          type="button"
+                          onClick={() => {
+                            setDeleteTarget(u)
+                            setDeleteError(null)
+                          }}
+                          className="px-2.5 py-1 text-xs"
+                        >
+                          Supprimer
+                        </DangerButton>
+                      </>
+                    )}
+                  </div>
+                </Td>
               </StaffRow>
             ))}
           </StaffTable>
@@ -119,6 +244,69 @@ export function StaffUsersPage() {
             </div>
           )}
         </>
+      )}
+
+      {resetTarget && (
+        <Modal title="Réinitialiser le mot de passe" onClose={() => setResetTarget(null)}>
+          <p className="mb-3 text-sm text-gray-500">
+            <strong>{resetTarget.email}</strong> devra choisir un nouveau mot de passe à sa
+            prochaine connexion.
+          </p>
+          <form onSubmit={handleResetPassword} className="space-y-3">
+            <TextInput
+              type="password"
+              placeholder="Nouveau mot de passe"
+              value={resetPasswordValue}
+              onChange={(e) => setResetPasswordValue(e.target.value)}
+              required
+              minLength={6}
+            />
+            {resetPasswordError && <p className="text-sm text-red-600">{resetPasswordError}</p>}
+            <div className="flex gap-2">
+              <SecondaryButton
+                type="button"
+                onClick={() => setResetTarget(null)}
+                className="flex-1 justify-center"
+              >
+                Annuler
+              </SecondaryButton>
+              <DangerButton
+                type="submit"
+                disabled={resettingPassword}
+                className="flex-1 justify-center py-2"
+              >
+                {resettingPassword ? 'Réinitialisation…' : 'Réinitialiser'}
+              </DangerButton>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {deleteTarget && (
+        <Modal title="Supprimer l'utilisateur" onClose={() => setDeleteTarget(null)}>
+          <p className="mb-4 text-sm text-gray-600">
+            <strong>{deleteTarget.email}</strong> sera supprimé définitivement. Cette action est
+            irréversible.
+          </p>
+          {deleteError && <p className="mb-3 text-sm text-red-600">{deleteError}</p>}
+          <div className="flex gap-2">
+            <DangerButton
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex-1 justify-center py-2"
+            >
+              {deleting ? 'Suppression…' : 'Supprimer'}
+            </DangerButton>
+            <SecondaryButton
+              type="button"
+              onClick={() => setDeleteTarget(null)}
+              className="flex-1 justify-center"
+            >
+              Annuler
+            </SecondaryButton>
+          </div>
+        </Modal>
       )}
     </div>
   )
