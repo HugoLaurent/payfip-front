@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { KeyRound, Search, Users } from 'lucide-react'
+import { KeyRound, Plus, Search, Users } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
@@ -11,13 +11,15 @@ import {
   Modal,
   PageHeader,
   Pagination,
+  PrimaryButton,
   SecondaryButton,
   SelectInput,
   StatusBadge,
   TextInput,
 } from '@/components/ui'
 import { StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
-import type { PageMeta, StaffOrganization } from '@/lib/types'
+import { DEFAULT_PERMISSIONS, getPermissionLabels } from '@/pages/org/UsersManager/permissions'
+import type { AgentPermissions, PageMeta, ServiceRow, StaffOrganization } from '@/lib/types'
 
 const PER_PAGE = 25
 
@@ -54,6 +56,97 @@ export function StaffUsersPage() {
   const [deleteTarget, setDeleteTarget] = useState<StaffUser | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  const [showCreate, setShowCreate] = useState(false)
+  const [createOrgId, setCreateOrgId] = useState('')
+  const [createRole, setCreateRole] = useState<'agent' | 'admin'>('agent')
+  const [createFirstName, setCreateFirstName] = useState('')
+  const [createLastName, setCreateLastName] = useState('')
+  const [createEmail, setCreateEmail] = useState('')
+  const [createPassword, setCreatePassword] = useState('')
+  const [createServiceIds, setCreateServiceIds] = useState<number[]>([])
+  const [createPermissions, setCreatePermissions] = useState<AgentPermissions>(DEFAULT_PERMISSIONS)
+  const [createOrgServices, setCreateOrgServices] = useState<ServiceRow[] | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [createError, setCreateError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!showCreate || !createOrgId) {
+      setCreateOrgServices(null)
+      return
+    }
+    apiCall<{ data: ServiceRow[] }>('GET', `/staff/services?orgId=${createOrgId}&perPage=100`, {
+      staffToken,
+    }).then((result) => {
+      if (result.ok) setCreateOrgServices(result.data.data)
+    })
+  }, [showCreate, createOrgId, staffToken])
+
+  function openCreate() {
+    setCreateOrgId('')
+    setCreateRole('agent')
+    setCreateFirstName('')
+    setCreateLastName('')
+    setCreateEmail('')
+    setCreatePassword('')
+    setCreateServiceIds([])
+    setCreatePermissions(DEFAULT_PERMISSIONS)
+    setCreateError(null)
+    setShowCreate(true)
+  }
+
+  const relevantCreateLabels = Array.from(
+    new Set(
+      (createOrgServices ?? [])
+        .filter((s) => createServiceIds.includes(s.id))
+        .map((s) => s.serviceType)
+    )
+  )
+    .flatMap((type) => getPermissionLabels(type))
+    .filter((entry, index, all) => all.findIndex((e) => e.key === entry.key) === index)
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault()
+    if (!createOrgId) return
+    if (createRole === 'agent' && createServiceIds.length === 0) {
+      setCreateError('Choisissez au moins un service.')
+      return
+    }
+    setCreating(true)
+    setCreateError(null)
+    const result = await apiCall('POST', '/staff/users', {
+      staffToken,
+      body:
+        createRole === 'admin'
+          ? {
+              orgId: Number(createOrgId),
+              firstName: createFirstName,
+              lastName: createLastName,
+              email: createEmail,
+              password: createPassword,
+              role: 'admin',
+            }
+          : {
+              orgId: Number(createOrgId),
+              firstName: createFirstName,
+              lastName: createLastName,
+              email: createEmail,
+              password: createPassword,
+              serviceIds: createServiceIds,
+              ...createPermissions,
+            },
+    })
+    setCreating(false)
+    if (result.ok) {
+      showToast('success', 'Utilisateur créé', createEmail)
+      setShowCreate(false)
+      reload()
+    } else if (result.status === 409) {
+      setCreateError('Cet email est déjà utilisé.')
+    } else {
+      setCreateError('Échec de la création.')
+    }
+  }
 
   const [orgs, setOrgs] = useState<StaffOrganization[]>([])
   useEffect(() => {
@@ -137,7 +230,17 @@ export function StaffUsersPage() {
 
   return (
     <div>
-      <PageHeader icon={<Users size={20} />} title="Utilisateurs" subtitle="Identifiants, tous organismes confondus" />
+      <PageHeader
+        icon={<Users size={20} />}
+        title="Utilisateurs"
+        subtitle="Identifiants, tous organismes confondus"
+        action={
+          <PrimaryButton type="button" onClick={openCreate} className="px-3.5 py-2">
+            <Plus size={15} />
+            Nouvel utilisateur
+          </PrimaryButton>
+        }
+      />
 
       <div className="mb-4 flex flex-wrap gap-2.5">
         <div className="relative flex-1 min-w-[200px]">
@@ -244,6 +347,122 @@ export function StaffUsersPage() {
             </div>
           )}
         </>
+      )}
+
+      {showCreate && (
+        <Modal title="Nouvel utilisateur" onClose={() => setShowCreate(false)}>
+          <form onSubmit={handleCreate} className="space-y-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Organisme</label>
+              <SelectInput
+                value={createOrgId}
+                onChange={(e) => {
+                  setCreateOrgId(e.target.value)
+                  setCreateServiceIds([])
+                }}
+                required
+              >
+                <option value="">Choisir…</option>
+                {orgs.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </SelectInput>
+            </div>
+
+            <div className="flex gap-3">
+              <TextInput
+                placeholder="Prénom"
+                value={createFirstName}
+                onChange={(e) => setCreateFirstName(e.target.value)}
+                required
+              />
+              <TextInput
+                placeholder="Nom"
+                value={createLastName}
+                onChange={(e) => setCreateLastName(e.target.value)}
+                required
+              />
+            </div>
+            <TextInput
+              type="email"
+              placeholder="Email"
+              value={createEmail}
+              onChange={(e) => setCreateEmail(e.target.value)}
+              required
+            />
+            <TextInput
+              type="password"
+              placeholder="Mot de passe"
+              value={createPassword}
+              onChange={(e) => setCreatePassword(e.target.value)}
+              required
+              minLength={6}
+            />
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Rôle</label>
+              <SelectInput value={createRole} onChange={(e) => setCreateRole(e.target.value as 'agent' | 'admin')}>
+                <option value="agent">Agent</option>
+                <option value="admin">Administrateur</option>
+              </SelectInput>
+            </div>
+
+            {createRole === 'agent' && createOrgId && (
+              <>
+                <div>
+                  <p className="mb-1.5 text-sm font-medium text-gray-700">Services</p>
+                  {createOrgServices === null ? (
+                    <p className="text-sm text-gray-400">Chargement…</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-3">
+                      {createOrgServices.map((s) => (
+                        <label key={s.id} className="flex items-center gap-2 text-sm text-gray-600">
+                          <input
+                            type="checkbox"
+                            checked={createServiceIds.includes(s.id)}
+                            onChange={(e) =>
+                              setCreateServiceIds((prev) =>
+                                e.target.checked ? [...prev, s.id] : prev.filter((id) => id !== s.id)
+                              )
+                            }
+                          />
+                          {s.name}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {relevantCreateLabels.length > 0 && (
+                  <div>
+                    <p className="mb-1.5 text-sm font-medium text-gray-700">Permissions</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {relevantCreateLabels.map(({ key, label }) => (
+                        <label key={key} className="flex items-center gap-2 text-sm text-gray-600">
+                          <input
+                            type="checkbox"
+                            checked={createPermissions[key]}
+                            onChange={(e) =>
+                              setCreatePermissions((prev) => ({ ...prev, [key]: e.target.checked }))
+                            }
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {createError && <p className="text-sm text-red-600">{createError}</p>}
+            <PrimaryButton type="submit" disabled={creating} className="w-full">
+              {creating ? 'Création…' : 'Créer'}
+            </PrimaryButton>
+          </form>
+        </Modal>
       )}
 
       {resetTarget && (
