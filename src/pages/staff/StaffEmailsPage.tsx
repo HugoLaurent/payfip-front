@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { KeyRound, Mail, Search, X } from 'lucide-react'
+import { Download, KeyRound, Mail, Search, X } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
-import { Card, EmptyState, LoadError, PageHeader, Pagination, StatusBadge, TextInput } from '@/components/ui'
+import { downloadCsv } from '@/lib/exportCsv'
+import { Card, EmptyState, HeroGhostButton, LoadError, Pagination, StatusBadge, TextInput } from '@/components/ui'
 import { AregieMailKeyControl } from '@/components/staff/AregieMailKeyControl'
+import { StaffHero } from '@/components/staff/StaffHero'
 import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
 import type { PageMeta } from '@/lib/types'
 
@@ -93,54 +95,82 @@ export function StaffEmailsPage() {
     if (result.ok) setPreviewing(result.data.data)
   }
 
+  function exportCsv() {
+    downloadCsv(
+      'emails.csv',
+      ['Destinataire', 'Modèle', 'Tentatives', 'Statut', 'Date'],
+      (emails ?? []).map((e) => [
+        e.toEmail,
+        e.template,
+        e.attempts,
+        e.status,
+        new Date(e.createdAt).toLocaleDateString('fr-FR'),
+      ])
+    )
+  }
+
   return (
     <div>
-      <PageHeader icon={<Mail size={20} />} title="Emails" subtitle="Envois, tous organismes confondus" />
+      <StaffHero
+        icon={<Mail size={13} />}
+        eyebrow="Envois, tous organismes confondus"
+        title="Emails"
+        actions={
+          <HeroGhostButton type="button" onClick={exportCsv} disabled={!emails || emails.length === 0}>
+            <Download size={14} />
+            Exporter
+          </HeroGhostButton>
+        }
+        stats={meta ? [{ label: 'Emails', value: String(meta.total), icon: <Mail size={14} />, tone: 'blue' }] : undefined}
+      />
 
       <AregieMailSettingsCard />
-
-      <div className="relative mb-4">
-        <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-        <TextInput
-          placeholder="Destinataire…"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value)
-            setPage(1)
-          }}
-          className="pl-9"
-        />
-      </div>
 
       {loadFailed && <LoadError onRetry={reload} />}
       {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
       {!loadFailed && emails?.length === 0 && <EmptyState icon={<Mail size={28} />} label="Aucun email." />}
 
       {!loadFailed && emails && emails.length > 0 && (
-        <>
-          <StaffTable headers={['Destinataire', 'Modèle', 'Tentatives', 'Statut', 'Date']}>
-            {emails.map((e) => (
-              <StaffRow key={e.id} onClick={() => openPreview(e.id)}>
-                <Td className="font-medium text-gray-900">{e.toEmail}</Td>
-                <Td>{e.template}</Td>
-                <Td>{e.attempts}</Td>
-                <Td>
-                  <StatusBadge label={e.status} className={genericStatusTint(e.status)} />
-                  {e.error && <p className="mt-1 text-xs text-red-500">{e.error}</p>}
-                </Td>
-                <Td className="text-gray-400">
-                  {new Date(e.createdAt).toLocaleDateString('fr-FR')}
-                  {previewLoadingId === e.id && <span className="ml-1.5 text-gray-400">…</span>}
-                </Td>
-              </StaffRow>
-            ))}
-          </StaffTable>
-          {meta && meta.lastPage > 1 && (
-            <div className="mt-4 squircle rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(20,25,60,0.06)]">
-              <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />
+        <StaffTable
+          headers={['Destinataire', 'Modèle', 'Tentatives', 'Statut', 'Date']}
+          toolbar={
+            <div className="relative min-w-[200px] max-w-xs flex-1">
+              <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+              <TextInput
+                placeholder="Destinataire…"
+                value={q}
+                onChange={(e) => {
+                  setQ(e.target.value)
+                  setPage(1)
+                }}
+                className="pl-9"
+              />
             </div>
-          )}
-        </>
+          }
+          footer={
+            meta && meta.lastPage > 1 ? (
+              <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />
+            ) : (
+              <p className="text-xs text-gray-400">{meta?.total ?? emails.length} email{(meta?.total ?? emails.length) > 1 ? 's' : ''}</p>
+            )
+          }
+        >
+          {emails.map((e) => (
+            <StaffRow key={e.id} onClick={() => openPreview(e.id)}>
+              <Td className="font-medium text-gray-900">{e.toEmail}</Td>
+              <Td>{e.template}</Td>
+              <Td>{e.attempts}</Td>
+              <Td>
+                <StatusBadge label={e.status} className={genericStatusTint(e.status)} />
+                {e.error && <p className="mt-1 text-xs text-red-500">{e.error}</p>}
+              </Td>
+              <Td className="text-gray-400">
+                {new Date(e.createdAt).toLocaleDateString('fr-FR')}
+                {previewLoadingId === e.id && <span className="ml-1.5 text-gray-400">…</span>}
+              </Td>
+            </StaffRow>
+          ))}
+        </StaffTable>
       )}
 
       {previewing &&

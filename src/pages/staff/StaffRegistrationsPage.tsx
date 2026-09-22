@@ -1,22 +1,24 @@
 import { useState } from 'react'
-import { Search, UserCheck } from 'lucide-react'
+import { Download, Search, UserCheck } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
 import { useToast } from '@/lib/useToast'
+import { downloadCsv } from '@/lib/exportCsv'
 import {
   DangerButton,
   EmptyState,
+  HeroGhostButton,
   LoadError,
   Modal,
-  PageHeader,
   Pagination,
   SecondaryButton,
   SelectInput,
   StatusBadge,
   TextInput,
 } from '@/components/ui'
+import { StaffHero } from '@/components/staff/StaffHero'
 import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
 import type { PageMeta } from '@/lib/types'
 
@@ -146,39 +148,39 @@ export function StaffRegistrationsPage() {
     }
   }
 
+  function exportCsv() {
+    downloadCsv(
+      'inscriptions.csv',
+      ['Référence', 'Nom', 'Email', 'Montant', 'Statut', 'Date'],
+      (registrations ?? []).map((r) => [
+        r.registrationReference,
+        `${r.firstName} ${r.lastName}`,
+        r.email,
+        euros(r.amountCents),
+        r.status,
+        new Date(r.createdAt).toLocaleDateString('fr-FR'),
+      ])
+    )
+  }
+
   return (
     <div>
-      <PageHeader icon={<UserCheck size={20} />} title="Inscriptions" subtitle="Par organisme" />
-
-      <div className="mb-4 flex gap-2.5">
-        <SelectInput
-          value={orgId}
-          onChange={(e) => {
-            setOrgId(e.target.value)
-            setPage(1)
-          }}
-          className="max-w-xs"
-        >
-          <option value="">Choisir un organisme…</option>
-          {orgs?.map((org) => (
-            <option key={org.id} value={org.id}>
-              {org.name}
-            </option>
-          ))}
-        </SelectInput>
-        <div className="relative flex-1">
-          <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-          <TextInput
-            placeholder="Nom, email ou référence…"
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value)
-              setPage(1)
-            }}
-            className="pl-9"
-          />
-        </div>
-      </div>
+      <StaffHero
+        icon={<UserCheck size={13} />}
+        eyebrow="Par organisme"
+        title="Inscriptions"
+        actions={
+          <HeroGhostButton type="button" onClick={exportCsv} disabled={!registrations || registrations.length === 0}>
+            <Download size={14} />
+            Exporter
+          </HeroGhostButton>
+        }
+        stats={
+          orgId !== '' && meta
+            ? [{ label: 'Inscriptions', value: String(meta.total), icon: <UserCheck size={14} />, tone: 'blue' }]
+            : undefined
+        }
+      />
 
       {orgId === '' && (
         <EmptyState icon={<UserCheck size={28} />} label="Choisissez un organisme pour voir ses inscriptions." />
@@ -190,29 +192,62 @@ export function StaffRegistrationsPage() {
       )}
 
       {orgId !== '' && !loadFailed && registrations && registrations.length > 0 && (
-        <>
-          <StaffTable headers={['Référence', 'Nom', 'Montant', 'Statut', 'Date']}>
-            {registrations.map((r) => (
-              <StaffRow key={r.id} onClick={() => openAttempts(r)}>
-                <Td className="font-mono text-xs font-medium text-gray-900">{r.registrationReference}</Td>
-                <Td>
-                  {r.firstName} {r.lastName}
-                  <span className="ml-1.5 text-gray-400">{r.email}</span>
-                </Td>
-                <Td>{euros(r.amountCents)}</Td>
-                <Td>
-                  <StatusBadge label={r.status} className={genericStatusTint(r.status)} />
-                </Td>
-                <Td className="text-gray-400">{new Date(r.createdAt).toLocaleDateString('fr-FR')}</Td>
-              </StaffRow>
-            ))}
-          </StaffTable>
-          {meta && meta.lastPage > 1 && (
-            <div className="mt-4 squircle rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(20,25,60,0.06)]">
+        <StaffTable
+          headers={['Référence', 'Nom', 'Montant', 'Statut', 'Date']}
+          toolbar={
+            <>
+              <SelectInput
+                value={orgId}
+                onChange={(e) => {
+                  setOrgId(e.target.value)
+                  setPage(1)
+                }}
+                className="max-w-xs"
+              >
+                <option value="">Choisir un organisme…</option>
+                {orgs?.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name}
+                  </option>
+                ))}
+              </SelectInput>
+              <div className="relative min-w-[200px] flex-1">
+                <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+                <TextInput
+                  placeholder="Nom, email ou référence…"
+                  value={q}
+                  onChange={(e) => {
+                    setQ(e.target.value)
+                    setPage(1)
+                  }}
+                  className="pl-9"
+                />
+              </div>
+            </>
+          }
+          footer={
+            meta && meta.lastPage > 1 ? (
               <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />
-            </div>
-          )}
-        </>
+            ) : (
+              <p className="text-xs text-gray-400">{meta?.total ?? registrations.length} inscription{(meta?.total ?? registrations.length) > 1 ? 's' : ''}</p>
+            )
+          }
+        >
+          {registrations.map((r) => (
+            <StaffRow key={r.id} onClick={() => openAttempts(r)}>
+              <Td className="font-mono text-xs font-medium text-gray-900">{r.registrationReference}</Td>
+              <Td>
+                {r.firstName} {r.lastName}
+                <span className="ml-1.5 text-gray-400">{r.email}</span>
+              </Td>
+              <Td>{euros(r.amountCents)}</Td>
+              <Td>
+                <StatusBadge label={r.status} className={genericStatusTint(r.status)} />
+              </Td>
+              <Td className="text-gray-400">{new Date(r.createdAt).toLocaleDateString('fr-FR')}</Td>
+            </StaffRow>
+          ))}
+        </StaffTable>
       )}
 
       {selected && !showCancelConfirm && (

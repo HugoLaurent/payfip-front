@@ -1,24 +1,43 @@
 import type { ReactNode } from 'react'
 import { Card } from '@/components/ui'
 
-// Coquille commune aux 7 vues du panel staff (organismes, services,
-// utilisateurs, commandes, factures, demandes de paiement, emails) — même
-// lecture seule tabulaire partout, seules les colonnes/lignes changent.
-export function StaffTable({ headers, children }: { headers: string[]; children: ReactNode }) {
+// Coquille commune aux 8 vues du panel staff (organismes, services,
+// utilisateurs, commandes, factures, inscriptions, demandes de paiement,
+// emails) — même lecture seule tabulaire partout, seules les colonnes/
+// lignes changent. `toolbar` (recherche/filtres) et `footer` (pagination)
+// vivent dans la même carte que le tableau, plutôt que dans des blocs
+// séparés, pour suivre la refonte "1d" (une seule surface par page).
+export function StaffTable({
+  headers,
+  children,
+  toolbar,
+  footer,
+}: {
+  headers: string[]
+  children: ReactNode
+  toolbar?: ReactNode
+  footer?: ReactNode
+}) {
   return (
-    <Card className="overflow-x-auto p-0">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-gray-100">
-            {headers.map((h) => (
-              <th key={h} className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{children}</tbody>
-      </table>
+    <Card className="overflow-hidden p-0">
+      {toolbar && (
+        <div className="flex flex-wrap items-center gap-2.5 border-b border-gray-100 px-4 py-3">{toolbar}</div>
+      )}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-gray-100">
+              {headers.map((h) => (
+                <th key={h} className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>{children}</tbody>
+        </table>
+      </div>
+      {footer && <div className="border-t border-gray-100 px-4 py-3">{footer}</div>}
     </Card>
   )
 }
