@@ -18,6 +18,8 @@ import {
   TextInput,
 } from '@/components/ui'
 import { SERVICE_STATUS_LABELS, SERVICE_STATUS_TINTS, SERVICE_TYPE_LABELS } from '@/lib/serviceLabels'
+import { StaffServiceTariffs } from '@/components/staff/StaffServiceTariffs'
+import { StaffServiceFormations } from '@/components/staff/StaffServiceFormations'
 import type { ServiceClosure, ServiceRow, StaffOrganization } from '@/lib/types'
 
 const ORG_STATUS_LABELS: Record<string, string> = { active: 'Actif', suspended: 'Suspendu' }
@@ -755,6 +757,18 @@ export function StaffOrganizationDetailPage() {
                 )}
               </div>
             </div>
+
+            {manageService.serviceType === 'billetterie' && (
+              <div className="border-t border-gray-100 pt-4">
+                <StaffServiceTariffs staffToken={staffToken} service={manageService} />
+              </div>
+            )}
+
+            {manageService.serviceType === 'inscription' && (
+              <div className="border-t border-gray-100 pt-4">
+                <StaffServiceFormations staffToken={staffToken} service={manageService} />
+              </div>
+            )}
 
             <div>
               <div className="mb-1.5 flex items-center justify-between">
