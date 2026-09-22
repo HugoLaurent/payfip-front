@@ -1,12 +1,25 @@
-import { useState } from 'react'
-import { Search, ShoppingCart } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Search, Settings, ShoppingCart } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
-import { EmptyState, LoadError, PageHeader, Pagination, SelectInput, StatusBadge, TextInput } from '@/components/ui'
+import { useToast } from '@/lib/useToast'
+import {
+  EmptyState,
+  LoadError,
+  Modal,
+  PageHeader,
+  Pagination,
+  PrimaryButton,
+  SecondaryButton,
+  SelectInput,
+  StatusBadge,
+  Textarea,
+  TextInput,
+} from '@/components/ui'
 import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
-import type { PageMeta } from '@/lib/types'
+import type { PageMeta, ServiceRow } from '@/lib/types'
 
 const PER_PAGE = 25
 
@@ -28,6 +41,7 @@ interface StaffOrder {
 
 export function StaffOrdersPage() {
   const { staffToken } = useStaffAuth()
+  const { showToast } = useToast()
   const orgs = useStaffOrgOptions()
   const [orgId, setOrgId] = useState('')
   const [q, setQ] = useState('')
@@ -50,9 +64,94 @@ export function StaffOrdersPage() {
     enabled: orgId !== '',
   })
 
+  // Outil "Gérer un billet" : un citoyen appelle avec son id de billet
+  // (visible sur son PDF) — pas de recherche par liste ici, un lookup
+  // direct suffit (resetScan/refund renvoient déjà le billet concerné).
+  const [showTicketTool, setShowTicketTool] = useState(false)
+  const [ticketServices, setTicketServices] = useState<ServiceRow[] | null>(null)
+  const [ticketServiceId, setTicketServiceId] = useState('')
+  const [ticketId, setTicketId] = useState('')
+  const [refundReason, setRefundReason] = useState('')
+  const [ticketActing, setTicketActing] = useState(false)
+  const [ticketError, setTicketError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!showTicketTool || !orgId) {
+      setTicketServices(null)
+      return
+    }
+    apiCall<{ data: ServiceRow[] }>('GET', `/staff/services?orgId=${orgId}&perPage=100`, { staffToken }).then(
+      (result) => {
+        if (result.ok) setTicketServices(result.data.data.filter((s) => s.serviceType === 'billetterie'))
+      }
+    )
+  }, [showTicketTool, orgId, staffToken])
+
+  function openTicketTool() {
+    setTicketServiceId('')
+    setTicketId('')
+    setRefundReason('')
+    setTicketError(null)
+    setShowTicketTool(true)
+  }
+
+  async function handleResetScan() {
+    if (!ticketServiceId || !ticketId) return
+    setTicketActing(true)
+    setTicketError(null)
+    const result = await apiCall(
+      'POST',
+      `/staff/tickets/${ticketId}/reset-scan?serviceId=${ticketServiceId}`,
+      { staffToken }
+    )
+    setTicketActing(false)
+    if (result.ok) {
+      showToast('success', 'Scan réinitialisé', `Billet #${ticketId}`)
+      setShowTicketTool(false)
+    } else if (result.status === 404) {
+      setTicketError('Billet introuvable pour ce service.')
+    } else if (result.status === 409) {
+      setTicketError("Ce billet n'a pas encore été scanné.")
+    } else {
+      setTicketError('Échec de la réinitialisation.')
+    }
+  }
+
+  async function handleRefundTicket() {
+    if (!ticketServiceId || !ticketId || !refundReason.trim()) return
+    setTicketActing(true)
+    setTicketError(null)
+    const result = await apiCall(
+      'POST',
+      `/staff/tickets/${ticketId}/refund?serviceId=${ticketServiceId}`,
+      { staffToken, body: { reason: refundReason.trim() } }
+    )
+    setTicketActing(false)
+    if (result.ok) {
+      showToast('success', 'Billet marqué remboursé', `Billet #${ticketId}`)
+      setShowTicketTool(false)
+    } else if (result.status === 404) {
+      setTicketError('Billet introuvable pour ce service.')
+    } else if (result.status === 409) {
+      setTicketError('Ce billet ne peut plus être remboursé (déjà remboursé ou statut invalide).')
+    } else {
+      setTicketError('Échec du remboursement.')
+    }
+  }
+
   return (
     <div>
-      <PageHeader icon={<ShoppingCart size={20} />} title="Commandes" subtitle="Billetterie, par organisme" />
+      <PageHeader
+        icon={<ShoppingCart size={20} />}
+        title="Commandes"
+        subtitle="Billetterie, par organisme"
+        action={
+          <SecondaryButton type="button" onClick={openTicketTool} className="px-3.5 py-2">
+            <Settings size={15} />
+            Gérer un billet
+          </SecondaryButton>
+        }
+      />
 
       <div className="mb-4 flex gap-2.5">
         <SelectInput
@@ -113,6 +212,64 @@ export function StaffOrdersPage() {
             </div>
           )}
         </>
+      )}
+
+      {showTicketTool && (
+        <Modal title="Gérer un billet" onClose={() => setShowTicketTool(false)}>
+          <div className="space-y-3">
+            {orgId === '' ? (
+              <p className="text-sm text-gray-500">
+                Choisissez d'abord un organisme dans le filtre au-dessus de la liste des commandes.
+              </p>
+            ) : (
+              <>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Service (billetterie)</label>
+                  <SelectInput value={ticketServiceId} onChange={(e) => setTicketServiceId(e.target.value)} required>
+                    <option value="">Choisir…</option>
+                    {ticketServices?.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </div>
+                <TextInput
+                  type="number"
+                  placeholder="Id du billet (visible sur le PDF)"
+                  value={ticketId}
+                  onChange={(e) => setTicketId(e.target.value)}
+                  required
+                />
+                <Textarea
+                  placeholder="Motif du remboursement (requis pour rembourser)"
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  rows={2}
+                />
+                {ticketError && <p className="text-sm text-red-600">{ticketError}</p>}
+                <div className="flex gap-2">
+                  <SecondaryButton
+                    type="button"
+                    onClick={handleResetScan}
+                    disabled={ticketActing || !ticketServiceId || !ticketId}
+                    className="flex-1 justify-center py-2"
+                  >
+                    {ticketActing ? '…' : 'Réinitialiser le scan'}
+                  </SecondaryButton>
+                  <PrimaryButton
+                    type="button"
+                    onClick={handleRefundTicket}
+                    disabled={ticketActing || !ticketServiceId || !ticketId || !refundReason.trim()}
+                    className="flex-1 justify-center py-2"
+                  >
+                    {ticketActing ? '…' : 'Marquer remboursé'}
+                  </PrimaryButton>
+                </div>
+              </>
+            )}
+          </div>
+        </Modal>
       )}
     </div>
   )
