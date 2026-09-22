@@ -4,12 +4,15 @@ import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
+import { useToast } from '@/lib/useToast'
 import {
+  DangerButton,
   EmptyState,
   LoadError,
   Modal,
   PageHeader,
   Pagination,
+  SecondaryButton,
   SelectInput,
   StatusBadge,
   TextInput,
@@ -48,6 +51,7 @@ interface PaymentAttempt {
 
 export function StaffRegistrationsPage() {
   const { staffToken } = useStaffAuth()
+  const { showToast } = useToast()
   const orgs = useStaffOrgOptions()
   const [orgId, setOrgId] = useState('')
   const [q, setQ] = useState('')
@@ -55,6 +59,8 @@ export function StaffRegistrationsPage() {
   const [selected, setSelected] = useState<StaffRegistration | null>(null)
   const [attempts, setAttempts] = useState<PaymentAttempt[] | null>(null)
   const [attemptsFailed, setAttemptsFailed] = useState(false)
+  const [acting, setActing] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   const {
     data: registrations,
@@ -85,6 +91,59 @@ export function StaffRegistrationsPage() {
     )
     if (result.ok) setAttempts(result.data.data)
     else setAttemptsFailed(true)
+  }
+
+  async function review(decision: 'approve' | 'reject') {
+    if (!selected) return
+    setActing(true)
+    const result = await apiCall(
+      'POST',
+      `/staff/registrations/${selected.id}/review?serviceId=${selected.serviceId}`,
+      { staffToken, body: { decision } }
+    )
+    setActing(false)
+    if (result.ok) {
+      showToast('success', decision === 'approve' ? 'Inscription validée' : 'Inscription rejetée', selected.registrationReference)
+      setSelected(null)
+      reload()
+    } else {
+      showToast('error', 'Échec', "Impossible de traiter l'inscription.")
+    }
+  }
+
+  async function resendReminder() {
+    if (!selected) return
+    setActing(true)
+    const result = await apiCall(
+      'POST',
+      `/staff/registrations/${selected.id}/resend-reminder?serviceId=${selected.serviceId}`,
+      { staffToken }
+    )
+    setActing(false)
+    if (result.ok) {
+      showToast('success', 'Relance envoyée', selected.registrationReference)
+    } else {
+      showToast('error', 'Échec', 'Impossible de relancer.')
+    }
+  }
+
+  async function cancelRegistration() {
+    if (!selected) return
+    setActing(true)
+    const result = await apiCall(
+      'POST',
+      `/staff/registrations/${selected.id}/cancel?serviceId=${selected.serviceId}`,
+      { staffToken }
+    )
+    setActing(false)
+    setShowCancelConfirm(false)
+    if (result.ok) {
+      showToast('success', 'Inscription annulée', selected.registrationReference)
+      setSelected(null)
+      reload()
+    } else {
+      showToast('error', 'Échec', "Impossible d'annuler l'inscription.")
+    }
   }
 
   return (
@@ -156,9 +215,37 @@ export function StaffRegistrationsPage() {
         </>
       )}
 
-      {selected && (
-        <Modal title="Tentatives de paiement" onClose={() => setSelected(null)}>
-          <p className="mb-3 font-mono text-xs text-gray-500">{selected.registrationReference}</p>
+      {selected && !showCancelConfirm && (
+        <Modal title="Inscription" onClose={() => setSelected(null)}>
+          <p className="mb-1 font-mono text-xs text-gray-500">{selected.registrationReference}</p>
+          <p className="mb-3 text-sm text-gray-600">
+            {selected.firstName} {selected.lastName} — {selected.email}
+          </p>
+
+          <div className="mb-4 flex flex-wrap gap-2">
+            {selected.status === 'awaiting_review' && (
+              <>
+                <SecondaryButton type="button" onClick={() => review('approve')} disabled={acting}>
+                  {acting ? '…' : 'Valider'}
+                </SecondaryButton>
+                <DangerButton type="button" onClick={() => review('reject')} disabled={acting}>
+                  {acting ? '…' : 'Rejeter'}
+                </DangerButton>
+              </>
+            )}
+            {(selected.status === 'awaiting_payment' || selected.status === 'rejected') && (
+              <SecondaryButton type="button" onClick={resendReminder} disabled={acting}>
+                {acting ? '…' : 'Relancer par email'}
+              </SecondaryButton>
+            )}
+            {!['cancelled', 'expired'].includes(selected.status) && (
+              <DangerButton type="button" onClick={() => setShowCancelConfirm(true)} disabled={acting}>
+                Annuler l'inscription
+              </DangerButton>
+            )}
+          </div>
+
+          <p className="mb-2 text-xs font-medium text-gray-500">Tentatives de paiement</p>
           {attemptsFailed && <LoadError onRetry={() => openAttempts(selected)} />}
           {!attemptsFailed && attempts === null && <p className="text-sm text-gray-500">Chargement…</p>}
           {!attemptsFailed && attempts?.length === 0 && (
@@ -172,6 +259,23 @@ export function StaffRegistrationsPage() {
               </span>
             </div>
           ))}
+        </Modal>
+      )}
+
+      {selected && showCancelConfirm && (
+        <Modal title="Annuler l'inscription" onClose={() => setShowCancelConfirm(false)}>
+          <p className="mb-4 text-sm text-gray-600">
+            <strong>{selected.registrationReference}</strong> ({selected.firstName} {selected.lastName})
+            sera annulée. Aucun email n'est envoyé au citoyen (comme une annulation par l'agent).
+          </p>
+          <div className="flex gap-2">
+            <DangerButton type="button" onClick={cancelRegistration} disabled={acting} className="flex-1 justify-center py-2">
+              {acting ? 'Annulation…' : 'Confirmer'}
+            </DangerButton>
+            <SecondaryButton type="button" onClick={() => setShowCancelConfirm(false)} className="flex-1 justify-center">
+              Retour
+            </SecondaryButton>
+          </div>
         </Modal>
       )}
     </div>
