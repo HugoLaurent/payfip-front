@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
-import { KeyRound, Plus, Search, Users } from 'lucide-react'
+import { Download, KeyRound, Plus, Search, Users } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useToast } from '@/lib/useToast'
+import { downloadCsv } from '@/lib/exportCsv'
 import {
   DangerButton,
   EmptyState,
+  HeroButton,
+  HeroGhostButton,
   LoadError,
   Modal,
-  PageHeader,
   Pagination,
   PrimaryButton,
   SecondaryButton,
@@ -17,6 +19,7 @@ import {
   StatusBadge,
   TextInput,
 } from '@/components/ui'
+import { StaffHero } from '@/components/staff/StaffHero'
 import { StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
 import { DEFAULT_PERMISSIONS, getPermissionLabels } from '@/pages/org/UsersManager/permissions'
 import type { AgentPermissions, PageMeta, ServiceRow, StaffOrganization } from '@/lib/types'
@@ -228,49 +231,40 @@ export function StaffUsersPage() {
     }
   }
 
+  function exportCsv() {
+    downloadCsv(
+      'utilisateurs.csv',
+      ['Email', 'Nom', 'Organisme', 'Rôle', 'Statut'],
+      (users ?? []).map((u) => [
+        u.email,
+        [u.firstName, u.lastName].filter(Boolean).join(' '),
+        orgNameById.get(u.orgId) ?? String(u.orgId),
+        ROLE_LABELS[u.role] ?? u.role,
+        u.status,
+      ])
+    )
+  }
+
   return (
     <div>
-      <PageHeader
-        icon={<Users size={20} />}
+      <StaffHero
+        icon={<Users size={13} />}
+        eyebrow="Identifiants, tous organismes confondus"
         title="Utilisateurs"
-        subtitle="Identifiants, tous organismes confondus"
-        action={
-          <PrimaryButton type="button" onClick={openCreate} className="px-3.5 py-2">
-            <Plus size={15} />
-            Nouvel utilisateur
-          </PrimaryButton>
+        actions={
+          <>
+            <HeroGhostButton type="button" onClick={exportCsv} disabled={!users || users.length === 0}>
+              <Download size={14} />
+              Exporter
+            </HeroGhostButton>
+            <HeroButton type="button" onClick={openCreate}>
+              <Plus size={14} />
+              Nouvel utilisateur
+            </HeroButton>
+          </>
         }
+        stats={meta ? [{ label: 'Utilisateurs', value: String(meta.total), icon: <Users size={14} />, tone: 'blue' }] : undefined}
       />
-
-      <div className="mb-4 flex flex-wrap gap-2.5">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-          <TextInput
-            placeholder="Rechercher un email…"
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value)
-              setPage(1)
-            }}
-            className="pl-9"
-          />
-        </div>
-        <SelectInput
-          value={orgId}
-          onChange={(e) => {
-            setOrgId(e.target.value)
-            setPage(1)
-          }}
-          className="w-auto"
-        >
-          <option value="">Tous les organismes</option>
-          {orgs.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.name}
-            </option>
-          ))}
-        </SelectInput>
-      </div>
 
       {loadFailed && <LoadError onRetry={reload} />}
       {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
@@ -278,7 +272,47 @@ export function StaffUsersPage() {
 
       {!loadFailed && users && users.length > 0 && (
         <>
-          <StaffTable headers={['Email', 'Nom', 'Organisme', 'Rôle', 'Statut', 'Dernière connexion', '']}>
+          <StaffTable
+            headers={['Email', 'Nom', 'Organisme', 'Rôle', 'Statut', 'Dernière connexion', '']}
+            toolbar={
+              <>
+                <div className="relative min-w-[200px] max-w-xs flex-1">
+                  <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+                  <TextInput
+                    placeholder="Rechercher un email…"
+                    value={q}
+                    onChange={(e) => {
+                      setQ(e.target.value)
+                      setPage(1)
+                    }}
+                    className="pl-9"
+                  />
+                </div>
+                <SelectInput
+                  value={orgId}
+                  onChange={(e) => {
+                    setOrgId(e.target.value)
+                    setPage(1)
+                  }}
+                  className="w-auto"
+                >
+                  <option value="">Tous les organismes</option>
+                  {orgs.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.name}
+                    </option>
+                  ))}
+                </SelectInput>
+              </>
+            }
+            footer={
+              meta && meta.lastPage > 1 ? (
+                <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />
+              ) : (
+                <p className="text-xs text-gray-400">{meta?.total ?? users.length} utilisateur{(meta?.total ?? users.length) > 1 ? 's' : ''}</p>
+              )
+            }
+          >
             {users.map((u) => (
               <StaffRow key={u.id}>
                 <Td className="font-medium text-gray-900">{u.email}</Td>
@@ -341,11 +375,6 @@ export function StaffUsersPage() {
               </StaffRow>
             ))}
           </StaffTable>
-          {meta && meta.lastPage > 1 && (
-            <div className="mt-4 squircle rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(20,25,60,0.06)]">
-              <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />
-            </div>
-          )}
         </>
       )}
 

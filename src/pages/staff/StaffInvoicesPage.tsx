@@ -1,19 +1,21 @@
 import { useState } from 'react'
-import { FileText, Search } from 'lucide-react'
+import { Download, FileText, Search } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
+import { downloadCsv } from '@/lib/exportCsv'
 import {
   EmptyState,
+  HeroGhostButton,
   LoadError,
   Modal,
-  PageHeader,
   Pagination,
   SelectInput,
   StatusBadge,
   TextInput,
 } from '@/components/ui'
+import { StaffHero } from '@/components/staff/StaffHero'
 import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
 import type { PageMeta } from '@/lib/types'
 
@@ -89,39 +91,38 @@ export function StaffInvoicesPage() {
     else setAttemptsFailed(true)
   }
 
+  function exportCsv() {
+    downloadCsv(
+      'factures.csv',
+      ['Référence', 'Objet', 'Montant', 'Statut', 'Date'],
+      (invoices ?? []).map((inv) => [
+        inv.paymentReference ?? inv.hospitalReference,
+        inv.objectLabel,
+        euros(inv.amountCents),
+        inv.status,
+        new Date(inv.createdAt).toLocaleDateString('fr-FR'),
+      ])
+    )
+  }
+
   return (
     <div>
-      <PageHeader icon={<FileText size={20} />} title="Factures" subtitle="Par organisme" />
-
-      <div className="mb-4 flex gap-2.5">
-        <SelectInput
-          value={orgId}
-          onChange={(e) => {
-            setOrgId(e.target.value)
-            setPage(1)
-          }}
-          className="max-w-xs"
-        >
-          <option value="">Choisir un organisme…</option>
-          {orgs?.map((org) => (
-            <option key={org.id} value={org.id}>
-              {org.name}
-            </option>
-          ))}
-        </SelectInput>
-        <div className="relative flex-1">
-          <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-          <TextInput
-            placeholder="Référence hospitalière ou de paiement…"
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value)
-              setPage(1)
-            }}
-            className="pl-9"
-          />
-        </div>
-      </div>
+      <StaffHero
+        icon={<FileText size={13} />}
+        eyebrow="Par organisme"
+        title="Factures"
+        actions={
+          <HeroGhostButton type="button" onClick={exportCsv} disabled={!invoices || invoices.length === 0}>
+            <Download size={14} />
+            Exporter
+          </HeroGhostButton>
+        }
+        stats={
+          orgId !== '' && meta
+            ? [{ label: 'Factures', value: String(meta.total), icon: <FileText size={14} />, tone: 'blue' }]
+            : undefined
+        }
+      />
 
       {orgId === '' && <EmptyState icon={<FileText size={28} />} label="Choisissez un organisme pour voir ses factures." />}
       {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
@@ -129,28 +130,61 @@ export function StaffInvoicesPage() {
       {orgId !== '' && !loadFailed && invoices?.length === 0 && <EmptyState icon={<FileText size={28} />} label="Aucune facture." />}
 
       {orgId !== '' && !loadFailed && invoices && invoices.length > 0 && (
-        <>
-          <StaffTable headers={['Référence', 'Objet', 'Montant', 'Statut', 'Date']}>
-            {invoices.map((inv) => (
-              <StaffRow key={inv.id} onClick={() => openAttempts(inv)}>
-                <Td className="font-mono text-xs font-medium text-gray-900">
-                  {inv.paymentReference ?? inv.hospitalReference}
-                </Td>
-                <Td>{inv.objectLabel}</Td>
-                <Td>{euros(inv.amountCents)}</Td>
-                <Td>
-                  <StatusBadge label={inv.status} className={genericStatusTint(inv.status)} />
-                </Td>
-                <Td className="text-gray-400">{new Date(inv.createdAt).toLocaleDateString('fr-FR')}</Td>
-              </StaffRow>
-            ))}
-          </StaffTable>
-          {meta && meta.lastPage > 1 && (
-            <div className="mt-4 squircle rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(20,25,60,0.06)]">
+        <StaffTable
+          headers={['Référence', 'Objet', 'Montant', 'Statut', 'Date']}
+          toolbar={
+            <>
+              <SelectInput
+                value={orgId}
+                onChange={(e) => {
+                  setOrgId(e.target.value)
+                  setPage(1)
+                }}
+                className="max-w-xs"
+              >
+                <option value="">Choisir un organisme…</option>
+                {orgs?.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name}
+                  </option>
+                ))}
+              </SelectInput>
+              <div className="relative min-w-[200px] flex-1">
+                <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+                <TextInput
+                  placeholder="Référence hospitalière ou de paiement…"
+                  value={q}
+                  onChange={(e) => {
+                    setQ(e.target.value)
+                    setPage(1)
+                  }}
+                  className="pl-9"
+                />
+              </div>
+            </>
+          }
+          footer={
+            meta && meta.lastPage > 1 ? (
               <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />
-            </div>
-          )}
-        </>
+            ) : (
+              <p className="text-xs text-gray-400">{meta?.total ?? invoices.length} facture{(meta?.total ?? invoices.length) > 1 ? 's' : ''}</p>
+            )
+          }
+        >
+          {invoices.map((inv) => (
+            <StaffRow key={inv.id} onClick={() => openAttempts(inv)}>
+              <Td className="font-mono text-xs font-medium text-gray-900">
+                {inv.paymentReference ?? inv.hospitalReference}
+              </Td>
+              <Td>{inv.objectLabel}</Td>
+              <Td>{euros(inv.amountCents)}</Td>
+              <Td>
+                <StatusBadge label={inv.status} className={genericStatusTint(inv.status)} />
+              </Td>
+              <Td className="text-gray-400">{new Date(inv.createdAt).toLocaleDateString('fr-FR')}</Td>
+            </StaffRow>
+          ))}
+        </StaffTable>
       )}
 
       {selected && (

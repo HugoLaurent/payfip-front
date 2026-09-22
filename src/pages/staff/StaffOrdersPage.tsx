@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
-import { Search, Settings, ShoppingCart } from 'lucide-react'
+import { Download, Search, Settings, ShoppingCart } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
 import { useToast } from '@/lib/useToast'
+import { downloadCsv } from '@/lib/exportCsv'
 import {
   EmptyState,
+  HeroButton,
+  HeroGhostButton,
   LoadError,
   Modal,
-  PageHeader,
   Pagination,
   PrimaryButton,
   SecondaryButton,
@@ -18,6 +20,7 @@ import {
   Textarea,
   TextInput,
 } from '@/components/ui'
+import { StaffHero } from '@/components/staff/StaffHero'
 import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
 import type { PageMeta, ServiceRow } from '@/lib/types'
 
@@ -139,49 +142,45 @@ export function StaffOrdersPage() {
     }
   }
 
+  function exportCsv() {
+    downloadCsv(
+      'commandes.csv',
+      ['Référence', 'Email', 'Billets', 'Montant', 'Statut', 'Date'],
+      (orders ?? []).map((o) => [
+        o.paymentReference,
+        o.email,
+        o.qtyTickets,
+        euros(o.totalAmountCents),
+        o.status,
+        new Date(o.createdAt).toLocaleDateString('fr-FR'),
+      ])
+    )
+  }
+
   return (
     <div>
-      <PageHeader
-        icon={<ShoppingCart size={20} />}
+      <StaffHero
+        icon={<ShoppingCart size={13} />}
+        eyebrow="Billetterie, par organisme"
         title="Commandes"
-        subtitle="Billetterie, par organisme"
-        action={
-          <SecondaryButton type="button" onClick={openTicketTool} className="px-3.5 py-2">
-            <Settings size={15} />
-            Gérer un billet
-          </SecondaryButton>
+        actions={
+          <>
+            <HeroGhostButton type="button" onClick={exportCsv} disabled={!orders || orders.length === 0}>
+              <Download size={14} />
+              Exporter
+            </HeroGhostButton>
+            <HeroButton type="button" onClick={openTicketTool}>
+              <Settings size={14} />
+              Gérer un billet
+            </HeroButton>
+          </>
+        }
+        stats={
+          orgId !== '' && meta
+            ? [{ label: 'Commandes', value: String(meta.total), icon: <ShoppingCart size={14} />, tone: 'blue' }]
+            : undefined
         }
       />
-
-      <div className="mb-4 flex gap-2.5">
-        <SelectInput
-          value={orgId}
-          onChange={(e) => {
-            setOrgId(e.target.value)
-            setPage(1)
-          }}
-          className="max-w-xs"
-        >
-          <option value="">Choisir un organisme…</option>
-          {orgs?.map((org) => (
-            <option key={org.id} value={org.id}>
-              {org.name}
-            </option>
-          ))}
-        </SelectInput>
-        <div className="relative flex-1">
-          <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-          <TextInput
-            placeholder="Référence ou email…"
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value)
-              setPage(1)
-            }}
-            className="pl-9"
-          />
-        </div>
-      </div>
 
       {orgId === '' && <EmptyState icon={<ShoppingCart size={28} />} label="Choisissez un organisme pour voir ses commandes." />}
       {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
@@ -191,27 +190,60 @@ export function StaffOrdersPage() {
       )}
 
       {orgId !== '' && !loadFailed && orders && orders.length > 0 && (
-        <>
-          <StaffTable headers={['Référence', 'Email', 'Billets', 'Montant', 'Statut', 'Date']}>
-            {orders.map((o) => (
-              <StaffRow key={o.id}>
-                <Td className="font-mono text-xs font-medium text-gray-900">{o.paymentReference}</Td>
-                <Td>{o.email}</Td>
-                <Td>{o.qtyTickets}</Td>
-                <Td>{euros(o.totalAmountCents)}</Td>
-                <Td>
-                  <StatusBadge label={o.status} className={genericStatusTint(o.status)} />
-                </Td>
-                <Td className="text-gray-400">{new Date(o.createdAt).toLocaleDateString('fr-FR')}</Td>
-              </StaffRow>
-            ))}
-          </StaffTable>
-          {meta && meta.lastPage > 1 && (
-            <div className="mt-4 squircle rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(20,25,60,0.06)]">
+        <StaffTable
+          headers={['Référence', 'Email', 'Billets', 'Montant', 'Statut', 'Date']}
+          toolbar={
+            <>
+              <SelectInput
+                value={orgId}
+                onChange={(e) => {
+                  setOrgId(e.target.value)
+                  setPage(1)
+                }}
+                className="max-w-xs"
+              >
+                <option value="">Choisir un organisme…</option>
+                {orgs?.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name}
+                  </option>
+                ))}
+              </SelectInput>
+              <div className="relative min-w-[200px] flex-1">
+                <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+                <TextInput
+                  placeholder="Référence ou email…"
+                  value={q}
+                  onChange={(e) => {
+                    setQ(e.target.value)
+                    setPage(1)
+                  }}
+                  className="pl-9"
+                />
+              </div>
+            </>
+          }
+          footer={
+            meta && meta.lastPage > 1 ? (
               <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />
-            </div>
-          )}
-        </>
+            ) : (
+              <p className="text-xs text-gray-400">{meta?.total ?? orders.length} commande{(meta?.total ?? orders.length) > 1 ? 's' : ''}</p>
+            )
+          }
+        >
+          {orders.map((o) => (
+            <StaffRow key={o.id}>
+              <Td className="font-mono text-xs font-medium text-gray-900">{o.paymentReference}</Td>
+              <Td>{o.email}</Td>
+              <Td>{o.qtyTickets}</Td>
+              <Td>{euros(o.totalAmountCents)}</Td>
+              <Td>
+                <StatusBadge label={o.status} className={genericStatusTint(o.status)} />
+              </Td>
+              <Td className="text-gray-400">{new Date(o.createdAt).toLocaleDateString('fr-FR')}</Td>
+            </StaffRow>
+          ))}
+        </StaffTable>
       )}
 
       {showTicketTool && (

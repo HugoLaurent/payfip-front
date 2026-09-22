@@ -1,11 +1,22 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Building2, ChevronRight, Plus } from 'lucide-react'
+import { Building2, ChevronRight, Download, Pause, Plus, Search } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { useToast } from '@/lib/useToast'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
-import { EmptyState, LoadError, Modal, PageHeader, PrimaryButton, StatusBadge, TextInput } from '@/components/ui'
+import { downloadCsv } from '@/lib/exportCsv'
+import {
+  EmptyState,
+  HeroButton,
+  HeroGhostButton,
+  LoadError,
+  Modal,
+  PrimaryButton,
+  StatusBadge,
+  TextInput,
+} from '@/components/ui'
+import { StaffHero } from '@/components/staff/StaffHero'
 import { StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
 import type { StaffOrganization } from '@/lib/types'
 
@@ -23,6 +34,7 @@ export function StaffOrganizationsPage() {
   const [loadFailed, setLoadFailed] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const showLoading = useDelayedLoading(orgs === null && !loadFailed)
+  const [q, setQ] = useState('')
 
   const [showCreate, setShowCreate] = useState(false)
   const [name, setName] = useState('')
@@ -68,17 +80,47 @@ export function StaffOrganizationsPage() {
     showToast('success', 'Organisme créé', name)
   }
 
+  const filtered = (orgs ?? []).filter((org) => {
+    const needle = q.trim().toLowerCase()
+    if (!needle) return true
+    return org.name.toLowerCase().includes(needle) || org.domain.toLowerCase().includes(needle)
+  })
+  const activeCount = (orgs ?? []).filter((o) => o.status === 'active').length
+  const suspendedCount = (orgs ?? []).filter((o) => o.status === 'suspended').length
+
+  function exportCsv() {
+    downloadCsv(
+      'organismes.csv',
+      ['Nom', 'Domaine', 'Statut'],
+      filtered.map((org) => [org.name, org.domain, ORG_STATUS_LABELS[org.status] ?? org.status])
+    )
+  }
+
   return (
     <div>
-      <PageHeader
-        icon={<Building2 size={20} />}
+      <StaffHero
+        icon={<Building2 size={13} />}
+        eyebrow="Tous les clients AREGIE"
         title="Organismes"
-        subtitle="Tous les clients AREGIE"
-        action={
-          <PrimaryButton type="button" onClick={() => setShowCreate(true)} className="px-3.5 py-2">
-            <Plus size={15} />
-            Nouvel organisme
-          </PrimaryButton>
+        actions={
+          <>
+            <HeroGhostButton type="button" onClick={exportCsv} disabled={!orgs || orgs.length === 0}>
+              <Download size={14} />
+              Exporter
+            </HeroGhostButton>
+            <HeroButton type="button" onClick={() => setShowCreate(true)}>
+              <Plus size={14} />
+              Nouvel organisme
+            </HeroButton>
+          </>
+        }
+        stats={
+          orgs
+            ? [
+                { label: 'Organismes actifs', value: String(activeCount), note: `sur ${orgs.length} au total`, icon: <Building2 size={14} />, tone: 'blue' },
+                { label: 'Suspendus', value: String(suspendedCount), icon: <Pause size={14} />, tone: suspendedCount > 0 ? 'red' : 'gray' },
+              ]
+            : undefined
         }
       />
 
@@ -87,22 +129,44 @@ export function StaffOrganizationsPage() {
       {!loadFailed && orgs?.length === 0 && <EmptyState icon={<Building2 size={28} />} label="Aucun organisme." />}
 
       {!loadFailed && orgs && orgs.length > 0 && (
-        <StaffTable headers={['Nom', 'Domaine', 'Statut', '']}>
-          {orgs.map((org) => (
-            <StaffRow key={org.id} onClick={() => navigate(`/staff/organismes/${org.id}`)}>
-              <Td className="font-medium text-gray-900">{org.name}</Td>
-              <Td>{org.domain}</Td>
-              <Td>
-                <StatusBadge
-                  label={ORG_STATUS_LABELS[org.status] ?? org.status}
-                  className={ORG_STATUS_TINTS[org.status] ?? 'bg-gray-100 text-gray-600'}
-                />
-              </Td>
-              <Td>
-                <ChevronRight size={16} className="text-gray-300" />
-              </Td>
-            </StaffRow>
-          ))}
+        <StaffTable
+          headers={['Nom', 'Domaine', 'Statut', '']}
+          toolbar={
+            <div className="relative min-w-[200px] max-w-xs flex-1">
+              <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+              <TextInput
+                placeholder="Nom ou domaine…"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          }
+          footer={<p className="text-xs text-gray-400">{filtered.length} organisme{filtered.length > 1 ? 's' : ''}</p>}
+        >
+          {filtered.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-400">
+                Aucun organisme ne correspond à « {q} ».
+              </td>
+            </tr>
+          ) : (
+            filtered.map((org) => (
+              <StaffRow key={org.id} onClick={() => navigate(`/staff/organismes/${org.id}`)}>
+                <Td className="font-medium text-gray-900">{org.name}</Td>
+                <Td>{org.domain}</Td>
+                <Td>
+                  <StatusBadge
+                    label={ORG_STATUS_LABELS[org.status] ?? org.status}
+                    className={ORG_STATUS_TINTS[org.status] ?? 'bg-gray-100 text-gray-600'}
+                  />
+                </Td>
+                <Td>
+                  <ChevronRight size={16} className="text-gray-300" />
+                </Td>
+              </StaffRow>
+            ))
+          )}
         </StaffTable>
       )}
 

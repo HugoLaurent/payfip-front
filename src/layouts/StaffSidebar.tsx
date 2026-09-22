@@ -30,11 +30,11 @@ function SidebarLink({
           {isActive && (
             <motion.div
               layoutId="staff-sidebar-active-pill"
-              className="squircle absolute inset-0 rounded-lg bg-aregie-deep shadow-sm"
+              className="squircle absolute inset-0 rounded-lg bg-aregie-deep/10"
               transition={{ type: 'spring', stiffness: 500, damping: 40 }}
             />
           )}
-          <span className={`relative z-10 flex items-center gap-2.5 ${isActive ? 'text-white' : ''}`}>
+          <span className={`relative z-10 flex items-center gap-2.5 ${isActive ? 'font-semibold text-aregie-deep' : ''}`}>
             <Icon size={17} />
             <span className="truncate">{children}</span>
           </span>
