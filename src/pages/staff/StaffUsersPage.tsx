@@ -20,7 +20,7 @@ import {
   TextInput,
 } from '@/components/ui'
 import { StaffHero } from '@/components/staff/StaffHero'
-import { StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
+import { StaffRow, StaffTable, StaffTableSkeleton, Td } from '@/components/staff/StaffTable'
 import { DEFAULT_PERMISSIONS, getPermissionLabels } from '@/pages/org/UsersManager/permissions'
 import type { AgentPermissions, PageMeta, ServiceRow, StaffOrganization } from '@/lib/types'
 
@@ -163,7 +163,6 @@ export function StaffUsersPage() {
     data: users,
     meta,
     loadFailed,
-    showLoading,
     reload,
   } = usePaginatedResource<StaffUser, PageMeta>({
     fetcher: () =>
@@ -267,7 +266,7 @@ export function StaffUsersPage() {
       />
 
       {loadFailed && <LoadError onRetry={reload} />}
-      {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
+      {!loadFailed && users === null && <StaffTableSkeleton columns={7} />}
       {!loadFailed && users?.length === 0 && <EmptyState icon={<Users size={28} />} label="Aucun utilisateur." />}
 
       {!loadFailed && users && users.length > 0 && (

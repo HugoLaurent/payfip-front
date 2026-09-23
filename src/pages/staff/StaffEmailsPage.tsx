@@ -9,7 +9,7 @@ import { downloadCsv } from '@/lib/exportCsv'
 import { Card, EmptyState, HeroGhostButton, LoadError, Pagination, StatusBadge, TextInput } from '@/components/ui'
 import { AregieMailKeyControl } from '@/components/staff/AregieMailKeyControl'
 import { StaffHero } from '@/components/staff/StaffHero'
-import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
+import { genericStatusTint, StaffRow, StaffTable, StaffTableSkeleton, Td } from '@/components/staff/StaffTable'
 import type { PageMeta } from '@/lib/types'
 
 const PER_PAGE = 25
@@ -75,7 +75,6 @@ export function StaffEmailsPage() {
     data: emails,
     meta,
     loadFailed,
-    showLoading,
     reload,
   } = usePaginatedResource<StaffEmail, PageMeta>({
     fetcher: () =>
@@ -127,7 +126,7 @@ export function StaffEmailsPage() {
       <AregieMailSettingsCard />
 
       {loadFailed && <LoadError onRetry={reload} />}
-      {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
+      {!loadFailed && emails === null && <StaffTableSkeleton columns={5} />}
       {!loadFailed && emails?.length === 0 && <EmptyState icon={<Mail size={28} />} label="Aucun email." />}
 
       {!loadFailed && emails && emails.length > 0 && (

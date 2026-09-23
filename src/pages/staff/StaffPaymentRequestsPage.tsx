@@ -6,7 +6,7 @@ import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { downloadCsv } from '@/lib/exportCsv'
 import { EmptyState, HeroGhostButton, LoadError, Pagination, StatusBadge, TextInput } from '@/components/ui'
 import { StaffHero } from '@/components/staff/StaffHero'
-import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
+import { genericStatusTint, StaffRow, StaffTable, StaffTableSkeleton, Td } from '@/components/staff/StaffTable'
 import type { PageMeta } from '@/lib/types'
 
 const PER_PAGE = 25
@@ -37,7 +37,6 @@ export function StaffPaymentRequestsPage() {
     data: paymentRequests,
     meta,
     loadFailed,
-    showLoading,
     reload,
   } = usePaginatedResource<StaffPaymentRequest, PageMeta>({
     fetcher: () =>
@@ -79,7 +78,7 @@ export function StaffPaymentRequestsPage() {
       />
 
       {loadFailed && <LoadError onRetry={reload} />}
-      {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
+      {!loadFailed && paymentRequests === null && <StaffTableSkeleton columns={5} />}
       {!loadFailed && paymentRequests?.length === 0 && (
         <EmptyState icon={<CreditCard size={28} />} label="Aucune demande de paiement." />
       )}

@@ -21,7 +21,7 @@ import {
   TextInput,
 } from '@/components/ui'
 import { StaffHero } from '@/components/staff/StaffHero'
-import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
+import { genericStatusTint, StaffRow, StaffTable, StaffTableSkeleton, Td } from '@/components/staff/StaffTable'
 import type { PageMeta, ServiceRow } from '@/lib/types'
 
 const PER_PAGE = 25
@@ -54,7 +54,6 @@ export function StaffOrdersPage() {
     data: orders,
     meta,
     loadFailed,
-    showLoading,
     reload,
   } = usePaginatedResource<StaffOrder, PageMeta>({
     fetcher: () =>
@@ -184,7 +183,7 @@ export function StaffOrdersPage() {
 
       {orgId === '' && <EmptyState icon={<ShoppingCart size={28} />} label="Choisissez un organisme pour voir ses commandes." />}
       {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
-      {orgId !== '' && !loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
+      {orgId !== '' && !loadFailed && orders === null && <StaffTableSkeleton columns={6} />}
       {orgId !== '' && !loadFailed && orders?.length === 0 && (
         <EmptyState icon={<ShoppingCart size={28} />} label="Aucune commande." />
       )}

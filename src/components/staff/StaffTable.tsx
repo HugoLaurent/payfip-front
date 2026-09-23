@@ -42,6 +42,42 @@ export function StaffTable({
   )
 }
 
+// Occupe la même carte/hauteur que le vrai StaffTable pendant le premier
+// chargement, affiché immédiatement (pas de délai type useDelayedLoading)
+// — sinon la zone de contenu reste vide pendant tout le fetch (la plupart
+// reviennent en quelques centaines de ms, sous le délai d'1s au-delà
+// duquel "Chargement…" s'affichait) puis le tableau entier surgit d'un
+// coup. `columns` doit correspondre au nombre d'en-têtes de la page pour
+// que la largeur ne saute pas non plus au moment du remplacement.
+export function StaffTableSkeleton({
+  columns,
+  rows = 5,
+  toolbar = true,
+}: {
+  columns: number
+  rows?: number
+  toolbar?: boolean
+}) {
+  return (
+    <Card className="overflow-hidden p-0">
+      {toolbar && (
+        <div className="flex items-center gap-2.5 border-b border-gray-100 px-4 py-3">
+          <div className="h-8 w-52 animate-pulse rounded-full bg-gray-100" />
+        </div>
+      )}
+      <div className="divide-y divide-gray-50">
+        {Array.from({ length: rows }).map((_, row) => (
+          <div key={row} className="flex items-center gap-4 px-4 py-3.5">
+            {Array.from({ length: columns }).map((_, col) => (
+              <div key={col} className="h-3.5 flex-1 animate-pulse rounded bg-gray-100" />
+            ))}
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+}
+
 export function Td({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <td className={`px-4 py-3 text-gray-700 ${className}`}>{children}</td>
 }

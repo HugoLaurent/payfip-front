@@ -16,7 +16,7 @@ import {
   TextInput,
 } from '@/components/ui'
 import { StaffHero } from '@/components/staff/StaffHero'
-import { genericStatusTint, StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
+import { genericStatusTint, StaffRow, StaffTable, StaffTableSkeleton, Td } from '@/components/staff/StaffTable'
 import type { PageMeta } from '@/lib/types'
 
 const PER_PAGE = 25
@@ -59,7 +59,6 @@ export function StaffInvoicesPage() {
     data: invoices,
     meta,
     loadFailed,
-    showLoading,
     reload,
   } = usePaginatedResource<StaffInvoice, PageMeta>({
     fetcher: () =>
@@ -126,7 +125,7 @@ export function StaffInvoicesPage() {
 
       {orgId === '' && <EmptyState icon={<FileText size={28} />} label="Choisissez un organisme pour voir ses factures." />}
       {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
-      {orgId !== '' && !loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
+      {orgId !== '' && !loadFailed && invoices === null && <StaffTableSkeleton columns={5} />}
       {orgId !== '' && !loadFailed && invoices?.length === 0 && <EmptyState icon={<FileText size={28} />} label="Aucune facture." />}
 
       {orgId !== '' && !loadFailed && invoices && invoices.length > 0 && (

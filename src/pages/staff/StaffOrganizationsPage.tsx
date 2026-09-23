@@ -4,7 +4,6 @@ import { Building2, ChevronRight, Download, Pause, Plus, Search } from 'lucide-r
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { useToast } from '@/lib/useToast'
-import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { downloadCsv } from '@/lib/exportCsv'
 import {
   EmptyState,
@@ -17,7 +16,7 @@ import {
   TextInput,
 } from '@/components/ui'
 import { StaffHero } from '@/components/staff/StaffHero'
-import { StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
+import { StaffRow, StaffTable, StaffTableSkeleton, Td } from '@/components/staff/StaffTable'
 import type { StaffOrganization } from '@/lib/types'
 
 const ORG_STATUS_LABELS: Record<string, string> = { active: 'Actif', suspended: 'Suspendu' }
@@ -33,7 +32,6 @@ export function StaffOrganizationsPage() {
   const [orgs, setOrgs] = useState<StaffOrganization[] | null>(null)
   const [loadFailed, setLoadFailed] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
-  const showLoading = useDelayedLoading(orgs === null && !loadFailed)
   const [q, setQ] = useState('')
 
   const [showCreate, setShowCreate] = useState(false)
@@ -132,7 +130,7 @@ export function StaffOrganizationsPage() {
       />
 
       {loadFailed && <LoadError onRetry={() => setReloadKey((k) => k + 1)} />}
-      {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
+      {!loadFailed && orgs === null && <StaffTableSkeleton columns={4} />}
       {!loadFailed && orgs?.length === 0 && <EmptyState icon={<Building2 size={28} />} label="Aucun organisme." />}
 
       {!loadFailed && orgs && orgs.length > 0 && (

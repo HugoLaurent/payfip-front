@@ -20,7 +20,7 @@ import {
 } from '@/components/ui'
 import { AregieMailKeyControl } from '@/components/staff/AregieMailKeyControl'
 import { StaffHero } from '@/components/staff/StaffHero'
-import { StaffRow, StaffTable, Td } from '@/components/staff/StaffTable'
+import { StaffRow, StaffTable, StaffTableSkeleton, Td } from '@/components/staff/StaffTable'
 import { SERVICE_STATUS_LABELS, SERVICE_STATUS_TINTS, SERVICE_TYPE_LABELS } from '@/lib/serviceLabels'
 import type { PageMeta, ServiceRow, StaffOrganization } from '@/lib/types'
 
@@ -36,7 +36,6 @@ export function StaffServicesPage() {
     data: services,
     meta,
     loadFailed,
-    showLoading,
     reload,
   } = usePaginatedResource<ServiceRow, PageMeta>({
     fetcher: () =>
@@ -130,7 +129,7 @@ export function StaffServicesPage() {
       />
 
       {loadFailed && <LoadError onRetry={reload} />}
-      {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
+      {!loadFailed && services === null && <StaffTableSkeleton columns={6} />}
       {!loadFailed && services?.length === 0 && <EmptyState icon={<Store size={28} />} label="Aucun service." />}
 
       {!loadFailed && services && services.length > 0 && (
