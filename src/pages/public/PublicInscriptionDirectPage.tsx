@@ -320,7 +320,7 @@ export function PublicInscriptionDirectPage() {
           <div className="flex items-center gap-[11px]">
             <div
               className="squircle flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-[13px] font-bold text-white"
-              style={{ background: 'linear-gradient(135deg,#223499,#6f80e4)', fontFamily: 'var(--font-display)' }}
+              style={{ background: 'linear-gradient(135deg,#0066a3,#6f80e4)', fontFamily: 'var(--font-display)' }}
             >
               {service.name.slice(0, 2).toUpperCase()}
             </div>
