@@ -163,7 +163,7 @@ export function StaffRegistrationsPage() {
   }
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       <StaffHero
         icon={<UserCheck size={13} />}
         eyebrow="Par organisme"
@@ -212,6 +212,7 @@ export function StaffRegistrationsPage() {
         }
       />
 
+      <div className="min-h-0 flex-1">
       {orgId === '' && (
         <EmptyState icon={<UserCheck size={28} />} label="Choisissez un organisme pour voir ses inscriptions." />
       )}
@@ -248,6 +249,7 @@ export function StaffRegistrationsPage() {
           ))}
         </StaffTable>
       )}
+      </div>
 
       {selected && !showCancelConfirm && (
         <Modal title="Inscription" onClose={() => setSelected(null)}>

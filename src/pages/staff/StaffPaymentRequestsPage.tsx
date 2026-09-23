@@ -63,7 +63,7 @@ export function StaffPaymentRequestsPage() {
   }
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       <StaffHero
         icon={<CreditCard size={13} />}
         eyebrow="PayFiP, tous organismes confondus"
@@ -77,6 +77,7 @@ export function StaffPaymentRequestsPage() {
         stats={[{ label: 'Demandes', value: meta ? String(meta.total) : null, icon: <CreditCard size={14} />, tone: 'blue' }]}
       />
 
+      <div className="min-h-0 flex-1">
       {loadFailed && <LoadError onRetry={reload} />}
       {!loadFailed && paymentRequests === null && <StaffTableSkeleton columns={5} />}
       {!loadFailed && paymentRequests?.length === 0 && (
@@ -121,6 +122,7 @@ export function StaffPaymentRequestsPage() {
           ))}
         </StaffTable>
       )}
+      </div>
     </div>
   )
 }

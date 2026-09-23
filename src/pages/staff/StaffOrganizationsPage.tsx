@@ -95,7 +95,7 @@ export function StaffOrganizationsPage() {
   }
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       <StaffHero
         icon={<Building2 size={13} />}
         eyebrow="Tous les clients AREGIE"
@@ -130,6 +130,7 @@ export function StaffOrganizationsPage() {
         ]}
       />
 
+      <div className="min-h-0 flex-1">
       {loadFailed && <LoadError onRetry={() => setReloadKey((k) => k + 1)} />}
       {!loadFailed && orgs === null && <StaffTableSkeleton columns={4} />}
       {!loadFailed && orgs?.length === 0 && <EmptyState icon={<Building2 size={28} />} label="Aucun organisme." />}
@@ -175,6 +176,7 @@ export function StaffOrganizationsPage() {
           )}
         </StaffTable>
       )}
+      </div>
 
       {showCreate && (
         <Modal title="Nouvel organisme" onClose={() => setShowCreate(false)}>

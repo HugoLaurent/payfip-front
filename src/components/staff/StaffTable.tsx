@@ -24,17 +24,27 @@ export function StaffTable({
     // vraies données là (juste après StaffTableSkeleton), donc ce
     // initial/animate se déclenche naturellement à chaque bascule
     // squelette → contenu réel, sans logique de chargement à gérer ici.
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35, ease: 'easeOut' }}>
-      <Card className="overflow-hidden p-0">
+    // h-full : remplit exactement l'espace que lui laisse le conteneur
+    // flex-1/min-h-0 de la page (voir StaffOrdersPage etc.) — un max-h en
+    // vh fixe ne marche pas, il s'ajoute à la hauteur de la bannière/
+    // stats/filtres au-dessus au lieu de tenir compte de ce qui reste
+    // réellement à l'écran, d'où les deux barres de défilement empilées
+    // observées le 2026-09-23.
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      className="flex h-full min-h-0 flex-col"
+    >
+      <Card className="flex h-full min-h-0 flex-col overflow-hidden p-0">
         {toolbar && (
-          <div className="flex flex-wrap items-center gap-2.5 border-b border-gray-100 px-4 py-3">{toolbar}</div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2.5 border-b border-gray-100 px-4 py-3">
+            {toolbar}
+          </div>
         )}
-        {/* max-h + overflow-y-auto ici plutôt que de laisser le tableau
-            grandir sans limite avec le nombre de lignes — sinon toute la
-            page (bannière comprise) défile hors de l'écran sur les pages
-            avec beaucoup de résultats. thead sticky pour rester lisible
-            pendant le défilement des lignes. */}
-        <div className="max-h-[65vh] overflow-x-auto overflow-y-auto">
+        {/* thead sticky pour rester lisible pendant le défilement des
+            lignes — le scroll se fait ici, jamais sur la page entière. */}
+        <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto">
           <table className="w-full text-left text-sm">
             <thead className="sticky top-0 z-10 bg-white">
               <tr className="border-b border-gray-100">
@@ -48,7 +58,7 @@ export function StaffTable({
             <tbody>{children}</tbody>
           </table>
         </div>
-        {footer && <div className="border-t border-gray-100 px-4 py-3">{footer}</div>}
+        {footer && <div className="shrink-0 border-t border-gray-100 px-4 py-3">{footer}</div>}
       </Card>
     </motion.div>
   )
@@ -71,22 +81,24 @@ export function StaffTableSkeleton({
   toolbar?: boolean
 }) {
   return (
-    <Card className="overflow-hidden p-0">
-      {toolbar && (
-        <div className="flex items-center gap-2.5 border-b border-gray-100 px-4 py-3">
-          <div className="h-8 w-52 animate-pulse rounded-full bg-gray-100" />
-        </div>
-      )}
-      <div className="divide-y divide-gray-50">
-        {Array.from({ length: rows }).map((_, row) => (
-          <div key={row} className="flex items-center gap-4 px-4 py-3.5">
-            {Array.from({ length: columns }).map((_, col) => (
-              <div key={col} className="h-3.5 flex-1 animate-pulse rounded bg-gray-100" />
-            ))}
+    <div className="flex h-full min-h-0 flex-col">
+      <Card className="flex h-full min-h-0 flex-col overflow-hidden p-0">
+        {toolbar && (
+          <div className="flex shrink-0 items-center gap-2.5 border-b border-gray-100 px-4 py-3">
+            <div className="h-8 w-52 animate-pulse rounded-full bg-gray-100" />
           </div>
-        ))}
-      </div>
-    </Card>
+        )}
+        <div className="min-h-0 flex-1 divide-y divide-gray-50 overflow-hidden">
+          {Array.from({ length: rows }).map((_, row) => (
+            <div key={row} className="flex items-center gap-4 px-4 py-3.5">
+              {Array.from({ length: columns }).map((_, col) => (
+                <div key={col} className="h-3.5 flex-1 animate-pulse rounded bg-gray-100" />
+              ))}
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
   )
 }
 

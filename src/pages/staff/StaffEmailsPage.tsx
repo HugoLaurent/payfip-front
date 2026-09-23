@@ -109,7 +109,7 @@ export function StaffEmailsPage() {
   }
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       <StaffHero
         icon={<Mail size={13} />}
         eyebrow="Envois, tous organismes confondus"
@@ -123,8 +123,11 @@ export function StaffEmailsPage() {
         stats={[{ label: 'Emails', value: meta ? String(meta.total) : null, icon: <Mail size={14} />, tone: 'blue' }]}
       />
 
-      <AregieMailSettingsCard />
+      <div className="shrink-0">
+        <AregieMailSettingsCard />
+      </div>
 
+      <div className="min-h-0 flex-1">
       {loadFailed && <LoadError onRetry={reload} />}
       {!loadFailed && emails === null && <StaffTableSkeleton columns={5} />}
       {!loadFailed && emails?.length === 0 && <EmptyState icon={<Mail size={28} />} label="Aucun email." />}
@@ -171,6 +174,7 @@ export function StaffEmailsPage() {
           ))}
         </StaffTable>
       )}
+      </div>
 
       {previewing &&
         createPortal(

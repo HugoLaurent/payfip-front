@@ -157,7 +157,7 @@ export function StaffOrdersPage() {
   }
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       <StaffHero
         icon={<ShoppingCart size={13} />}
         eyebrow="Billetterie, par organisme"
@@ -218,6 +218,7 @@ export function StaffOrdersPage() {
         }
       />
 
+      <div className="min-h-0 flex-1">
       {orgId === '' && <EmptyState icon={<ShoppingCart size={28} />} label="Choisissez un organisme pour voir ses commandes." />}
       {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
       {orgId !== '' && !loadFailed && orders === null && <StaffTableSkeleton columns={6} toolbar={false} />}
@@ -250,6 +251,7 @@ export function StaffOrdersPage() {
           ))}
         </StaffTable>
       )}
+      </div>
 
       {showTicketTool && (
         <Modal title="Gérer un billet" onClose={() => setShowTicketTool(false)}>

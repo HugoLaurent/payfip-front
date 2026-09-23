@@ -105,7 +105,7 @@ export function StaffInvoicesPage() {
   }
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       <StaffHero
         icon={<FileText size={13} />}
         eyebrow="Par organisme"
@@ -154,6 +154,7 @@ export function StaffInvoicesPage() {
         }
       />
 
+      <div className="min-h-0 flex-1">
       {orgId === '' && <EmptyState icon={<FileText size={28} />} label="Choisissez un organisme pour voir ses factures." />}
       {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
       {orgId !== '' && !loadFailed && invoices === null && <StaffTableSkeleton columns={5} toolbar={false} />}
@@ -185,6 +186,7 @@ export function StaffInvoicesPage() {
           ))}
         </StaffTable>
       )}
+      </div>
 
       {selected && (
         <Modal title="Tentatives de paiement" onClose={() => setSelected(null)}>

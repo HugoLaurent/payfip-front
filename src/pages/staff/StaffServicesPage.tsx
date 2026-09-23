@@ -108,7 +108,7 @@ export function StaffServicesPage() {
   }
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       <StaffHero
         icon={<Store size={13} />}
         eyebrow="Tous organismes confondus"
@@ -128,6 +128,7 @@ export function StaffServicesPage() {
         stats={[{ label: 'Services', value: meta ? String(meta.total) : null, icon: <Store size={14} />, tone: 'blue' }]}
       />
 
+      <div className="min-h-0 flex-1">
       {loadFailed && <LoadError onRetry={reload} />}
       {!loadFailed && services === null && <StaffTableSkeleton columns={6} />}
       {!loadFailed && services?.length === 0 && <EmptyState icon={<Store size={28} />} label="Aucun service." />}
@@ -183,6 +184,7 @@ export function StaffServicesPage() {
           ))}
         </StaffTable>
       )}
+      </div>
 
       {showCreate && (
         <Modal title="Nouveau service" onClose={() => setShowCreate(false)}>

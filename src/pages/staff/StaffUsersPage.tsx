@@ -245,7 +245,7 @@ export function StaffUsersPage() {
   }
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       <StaffHero
         icon={<Users size={13} />}
         eyebrow="Identifiants, tous organismes confondus"
@@ -265,12 +265,12 @@ export function StaffUsersPage() {
         stats={[{ label: 'Utilisateurs', value: meta ? String(meta.total) : null, icon: <Users size={14} />, tone: 'blue' }]}
       />
 
+      <div className="min-h-0 flex-1">
       {loadFailed && <LoadError onRetry={reload} />}
       {!loadFailed && users === null && <StaffTableSkeleton columns={7} />}
       {!loadFailed && users?.length === 0 && <EmptyState icon={<Users size={28} />} label="Aucun utilisateur." />}
 
       {!loadFailed && users && users.length > 0 && (
-        <>
           <StaffTable
             headers={['Email', 'Nom', 'Organisme', 'Rôle', 'Statut', 'Dernière connexion', '']}
             toolbar={
@@ -374,8 +374,8 @@ export function StaffUsersPage() {
               </StaffRow>
             ))}
           </StaffTable>
-        </>
       )}
+      </div>
 
       {showCreate && (
         <Modal title="Nouvel utilisateur" onClose={() => setShowCreate(false)}>
