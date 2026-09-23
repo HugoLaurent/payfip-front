@@ -1,8 +1,14 @@
 import type { ReactNode } from 'react'
+import { motion } from 'framer-motion'
 
 export interface StaffStat {
   label: string
-  value: string
+  // null = donnée pas encore chargée (squelette animé) — passer un tableau
+  // de stats dès le premier rendu avec des value:null plutôt que stats
+  // undefined le temps du chargement, pour que la bannière n'apparaisse
+  // jamais "sans chiffres" puis ne saute pas de taille une fraction de
+  // seconde plus tard une fois les données arrivées.
+  value: string | null
   note?: string
   icon?: ReactNode
   tone?: 'blue' | 'green' | 'red' | 'gray'
@@ -35,17 +41,27 @@ export function StaffHero({
   stats?: StaffStat[]
 }) {
   const hasStats = !!stats && stats.length > 0
+  const LAYOUT_TRANSITION = { duration: 0.25, ease: 'easeOut' as const }
 
   return (
-    <div className={hasStats ? 'mb-8' : 'mb-6'}>
+    <motion.div layout transition={LAYOUT_TRANSITION} className={hasStats ? 'mb-8' : 'mb-6'}>
       {/* Bannière pleine largeur, pas une carte : les marges négatives
           annulent exactement le padding de StaffSpace's <main> (px-4 py-6
           sm:px-6 md:px-8 md:py-8) pour que le bleu touche la sidebar et le
           haut de page comme dans la maquette "1d" — donc pas de coins
           arrondis ici (contrairement aux cartes de chiffres en dessous,
           qui elles restent arrondies). StaffSpace n'a plus de max-width
-          partagé pour permettre ce plein-bord ; voir son commentaire. */}
-      <div
+          partagé pour permettre ce plein-bord ; voir son commentaire.
+          `layout` (ici et sur le bloc de chiffres en dessous) anime la
+          transition en douceur au lieu du saut sec observé au chargement
+          — les pages qui ont toujours des stats les passent avec des
+          value:null (squelette) dès le premier rendu pour ne même pas
+          déclencher ce changement de taille dans le cas courant ; il ne
+          reste plus qu'aux pages où les stats dépendent d'un choix de
+          l'utilisateur (ex: choisir un organisme) à réellement l'animer. */}
+      <motion.div
+        layout
+        transition={LAYOUT_TRANSITION}
         className={`-mx-4 -mt-6 bg-aregie-deep px-4 pt-6 text-white sm:-mx-6 sm:px-6 md:-mx-8 md:-mt-8 md:px-8 md:pt-8 ${hasStats ? 'pb-10' : 'pb-6 md:pb-8'}`}
       >
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -65,15 +81,20 @@ export function StaffHero({
           </div>
           {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
         </div>
-      </div>
+      </motion.div>
 
       {hasStats && (
-        <div
+        <motion.div
+          layout
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={LAYOUT_TRANSITION}
           className="grid gap-3 px-4 sm:px-6 md:px-8"
           style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', marginTop: '-28px' }}
         >
           {stats!.map((s) => {
             const tone = TONE_CLASSES[s.tone ?? 'blue']
+            const loading = s.value === null
             return (
               <div
                 key={s.label}
@@ -89,18 +110,25 @@ export function StaffHero({
                   )}
                   <p className="truncate text-[11.5px] font-medium text-gray-400">{s.label}</p>
                 </div>
-                <p
-                  className="text-2xl font-semibold tracking-tight text-gray-900"
-                  style={{ fontFamily: 'var(--font-display)' }}
-                >
-                  {s.value}
-                </p>
-                {s.note && <p className={`mt-0.5 text-[11.5px] ${tone.note}`}>{s.note}</p>}
+                {loading ? (
+                  <div className="h-7 w-14 animate-pulse rounded-md bg-gray-100" />
+                ) : (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-2xl font-semibold tracking-tight text-gray-900"
+                    style={{ fontFamily: 'var(--font-display)' }}
+                  >
+                    {s.value}
+                  </motion.p>
+                )}
+                {!loading && s.note && <p className={`mt-0.5 text-[11.5px] ${tone.note}`}>{s.note}</p>}
               </div>
             )
           })}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }

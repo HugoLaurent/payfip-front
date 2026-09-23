@@ -75,7 +75,7 @@ export function StaffPaymentRequestsPage() {
             Exporter
           </HeroGhostButton>
         }
-        stats={meta ? [{ label: 'Demandes', value: String(meta.total), icon: <CreditCard size={14} />, tone: 'blue' }] : undefined}
+        stats={[{ label: 'Demandes', value: meta ? String(meta.total) : null, icon: <CreditCard size={14} />, tone: 'blue' }]}
       />
 
       {loadFailed && <LoadError onRetry={reload} />}

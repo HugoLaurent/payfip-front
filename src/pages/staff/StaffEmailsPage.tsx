@@ -121,7 +121,7 @@ export function StaffEmailsPage() {
             Exporter
           </HeroGhostButton>
         }
-        stats={meta ? [{ label: 'Emails', value: String(meta.total), icon: <Mail size={14} />, tone: 'blue' }] : undefined}
+        stats={[{ label: 'Emails', value: meta ? String(meta.total) : null, icon: <Mail size={14} />, tone: 'blue' }]}
       />
 
       <AregieMailSettingsCard />

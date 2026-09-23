@@ -176,8 +176,8 @@ export function StaffRegistrationsPage() {
           </HeroGhostButton>
         }
         stats={
-          orgId !== '' && meta
-            ? [{ label: 'Inscriptions', value: String(meta.total), icon: <UserCheck size={14} />, tone: 'blue' }]
+          orgId !== ''
+            ? [{ label: 'Inscriptions', value: meta ? String(meta.total) : null, icon: <UserCheck size={14} />, tone: 'blue' }]
             : undefined
         }
       />

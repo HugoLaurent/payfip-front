@@ -263,7 +263,7 @@ export function StaffUsersPage() {
             </HeroButton>
           </>
         }
-        stats={meta ? [{ label: 'Utilisateurs', value: String(meta.total), icon: <Users size={14} />, tone: 'blue' }] : undefined}
+        stats={[{ label: 'Utilisateurs', value: meta ? String(meta.total) : null, icon: <Users size={14} />, tone: 'blue' }]}
       />
 
       {loadFailed && <LoadError onRetry={reload} />}

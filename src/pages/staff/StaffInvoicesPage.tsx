@@ -118,8 +118,8 @@ export function StaffInvoicesPage() {
           </HeroGhostButton>
         }
         stats={
-          orgId !== '' && meta
-            ? [{ label: 'Factures', value: String(meta.total), icon: <FileText size={14} />, tone: 'blue' }]
+          orgId !== ''
+            ? [{ label: 'Factures', value: meta ? String(meta.total) : null, icon: <FileText size={14} />, tone: 'blue' }]
             : undefined
         }
       />

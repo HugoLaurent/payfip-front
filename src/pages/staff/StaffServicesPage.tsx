@@ -126,7 +126,7 @@ export function StaffServicesPage() {
             </HeroButton>
           </>
         }
-        stats={meta ? [{ label: 'Services', value: String(meta.total), icon: <Store size={14} />, tone: 'blue' }] : undefined}
+        stats={[{ label: 'Services', value: meta ? String(meta.total) : null, icon: <Store size={14} />, tone: 'blue' }]}
       />
 
       {loadFailed && <LoadError onRetry={reload} />}

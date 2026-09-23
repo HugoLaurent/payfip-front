@@ -114,14 +114,21 @@ export function StaffOrganizationsPage() {
             </HeroButton>
           </>
         }
-        stats={
-          orgs
-            ? [
-                { label: 'Organismes actifs', value: String(activeCount), note: `sur ${orgs.length} au total`, icon: <Building2 size={14} />, tone: 'blue' },
-                { label: 'Suspendus', value: String(suspendedCount), icon: <Pause size={14} />, tone: suspendedCount > 0 ? 'red' : 'gray' },
-              ]
-            : undefined
-        }
+        stats={[
+          {
+            label: 'Organismes actifs',
+            value: orgs ? String(activeCount) : null,
+            note: orgs ? `sur ${orgs.length} au total` : undefined,
+            icon: <Building2 size={14} />,
+            tone: 'blue',
+          },
+          {
+            label: 'Suspendus',
+            value: orgs ? String(suspendedCount) : null,
+            icon: <Pause size={14} />,
+            tone: orgs && suspendedCount > 0 ? 'red' : 'gray',
+          },
+        ]}
       />
 
       {loadFailed && <LoadError onRetry={() => setReloadKey((k) => k + 1)} />}

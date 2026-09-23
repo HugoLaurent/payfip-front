@@ -176,8 +176,8 @@ export function StaffOrdersPage() {
           </>
         }
         stats={
-          orgId !== '' && meta
-            ? [{ label: 'Commandes', value: String(meta.total), icon: <ShoppingCart size={14} />, tone: 'blue' }]
+          orgId !== ''
+            ? [{ label: 'Commandes', value: meta ? String(meta.total) : null, icon: <ShoppingCart size={14} />, tone: 'blue' }]
             : undefined
         }
       />
