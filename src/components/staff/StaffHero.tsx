@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
+import { Card } from '@/components/ui'
 
 export interface StaffStat {
   label: string
@@ -38,18 +39,28 @@ export function StaffHero({
   title,
   actions,
   stats,
+  toolbar,
 }: {
   icon?: ReactNode
   eyebrow?: string
   title: string
   actions?: ReactNode
   stats?: StaffStat[]
+  // Contenu brut (select + recherche…) — StaffHero l'habille lui-même
+  // (carte, hauteur) pour qu'il flotte avec les cartes de chiffres sur le
+  // même bloc, par-dessus la bannière, comme dans la maquette "1d" (le
+  // bloc entier — chiffres + reste — flotte ensemble, pas juste les
+  // chiffres isolément). Utilisé par les pages où le choix de
+  // l'organisme doit rester accessible même sans aucune stat encore
+  // affichée (Commandes/Factures/Inscriptions).
+  toolbar?: ReactNode
 }) {
   const hasStats = !!stats && stats.length > 0
+  const hasFloating = hasStats || !!toolbar
   const LAYOUT_TRANSITION = { duration: 0.25, ease: 'easeOut' as const }
 
   return (
-    <motion.div layout transition={LAYOUT_TRANSITION} className={hasStats ? 'mb-8' : 'mb-6'}>
+    <motion.div layout transition={LAYOUT_TRANSITION} className={hasFloating ? 'mb-8' : 'mb-6'}>
       {/* Bannière pleine largeur, pas une carte : les marges négatives
           annulent exactement le padding de StaffSpace's <main> (px-4 py-6
           sm:px-6 md:px-8 md:py-8) pour que le bleu touche la sidebar et le
@@ -67,7 +78,7 @@ export function StaffHero({
       <motion.div
         layout
         transition={LAYOUT_TRANSITION}
-        className={`-mx-4 -mt-6 bg-aregie-deep px-4 pt-6 text-white sm:-mx-6 sm:px-6 md:-mx-8 md:-mt-8 md:px-8 md:pt-8 ${hasStats ? 'pb-10' : 'pb-6 md:pb-8'}`}
+        className={`-mx-4 -mt-6 bg-aregie-deep px-4 pt-6 text-white sm:-mx-6 sm:px-6 md:-mx-8 md:-mt-8 md:px-8 md:pt-8 ${hasFloating ? 'pb-10' : 'pb-6 md:pb-8'}`}
       >
         <motion.div
           initial={{ opacity: 0 }}
@@ -93,59 +104,72 @@ export function StaffHero({
         </motion.div>
       </motion.div>
 
-      {hasStats && (
+      {hasFloating && (
         <motion.div
           layout
           transition={LAYOUT_TRANSITION}
-          className="grid gap-3 px-4 sm:px-6 md:px-8"
-          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', marginTop: '-28px' }}
+          className="flex flex-col gap-3 px-4 sm:px-6 md:px-8"
+          style={{ marginTop: '-28px' }}
         >
-          {stats!.map((s) => {
-            const tone = TONE_CLASSES[s.tone ?? 'blue']
-            const loading = s.value === null
-            return (
-              <div
-                key={s.label}
-                className="squircle rounded-2xl border border-gray-100 bg-white p-4 shadow-[0_4px_14px_-6px_rgba(22,26,43,0.18)]"
-              >
-                <div className="mb-2 flex items-center gap-2">
-                  {s.icon && (
-                    <div
-                      className={`squircle flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${tone.bg} ${tone.fg}`}
-                    >
-                      {s.icon}
-                    </div>
-                  )}
-                  <p className="truncate text-[11.5px] font-medium text-gray-400">{s.label}</p>
-                </div>
-                {loading ? (
-                  // h-8 = 2rem, la hauteur de ligne réelle de text-2xl —
-                  // même valeur exacte que le texte qui le remplace, pour
-                  // que la carte ne bouge pas d'un pixel à la bascule.
-                  <div className="h-8 w-14 animate-pulse rounded-md bg-gray-100" />
-                ) : (
-                  // Fondu sûr maintenant que le squelette fait exactement
-                  // la même hauteur (h-8) que ce texte : seule l'opacité
-                  // bouge, jamais la taille de la boîte.
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.35, ease: 'easeOut' }}
-                    className="text-2xl font-semibold tracking-tight text-gray-900"
-                    style={{ fontFamily: 'var(--font-display)' }}
+          {hasStats && (
+            <div
+              className="grid gap-3"
+              style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))' }}
+            >
+              {stats!.map((s) => {
+                const tone = TONE_CLASSES[s.tone ?? 'blue']
+                const loading = s.value === null
+                return (
+                  <div
+                    key={s.label}
+                    className="squircle rounded-2xl border border-gray-100 bg-white p-4 shadow-[0_4px_14px_-6px_rgba(22,26,43,0.18)]"
                   >
-                    {s.value}
-                  </motion.p>
-                )}
-                {s.hasNote &&
-                  (loading ? (
-                    <div className="mt-1 h-3 w-20 animate-pulse rounded bg-gray-100" />
-                  ) : (
-                    <p className={`mt-0.5 text-[11.5px] ${tone.note}`}>{s.note}</p>
-                  ))}
-              </div>
-            )
-          })}
+                    <div className="mb-2 flex items-center gap-2">
+                      {s.icon && (
+                        <div
+                          className={`squircle flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${tone.bg} ${tone.fg}`}
+                        >
+                          {s.icon}
+                        </div>
+                      )}
+                      <p className="truncate text-[11.5px] font-medium text-gray-400">{s.label}</p>
+                    </div>
+                    {loading ? (
+                      // h-8 = 2rem, la hauteur de ligne réelle de text-2xl
+                      // — même valeur exacte que le texte qui le
+                      // remplace, pour que la carte ne bouge pas d'un
+                      // pixel à la bascule.
+                      <div className="h-8 w-14 animate-pulse rounded-md bg-gray-100" />
+                    ) : (
+                      // Fondu sûr maintenant que le squelette fait
+                      // exactement la même hauteur (h-8) que ce texte :
+                      // seule l'opacité bouge, jamais la taille de la
+                      // boîte.
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.35, ease: 'easeOut' }}
+                        className="text-2xl font-semibold tracking-tight text-gray-900"
+                        style={{ fontFamily: 'var(--font-display)' }}
+                      >
+                        {s.value}
+                      </motion.p>
+                    )}
+                    {s.hasNote &&
+                      (loading ? (
+                        <div className="mt-1 h-3 w-20 animate-pulse rounded bg-gray-100" />
+                      ) : (
+                        <p className={`mt-0.5 text-[11.5px] ${tone.note}`}>{s.note}</p>
+                      ))}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {toolbar && (
+            <Card className="flex min-h-24 flex-wrap items-center gap-2.5 p-3">{toolbar}</Card>
+          )}
         </motion.div>
       )}
     </motion.div>
