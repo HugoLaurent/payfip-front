@@ -29,9 +29,14 @@ export function StaffTable({
         {toolbar && (
           <div className="flex flex-wrap items-center gap-2.5 border-b border-gray-100 px-4 py-3">{toolbar}</div>
         )}
-        <div className="overflow-x-auto">
+        {/* max-h + overflow-y-auto ici plutôt que de laisser le tableau
+            grandir sans limite avec le nombre de lignes — sinon toute la
+            page (bannière comprise) défile hors de l'écran sur les pages
+            avec beaucoup de résultats. thead sticky pour rester lisible
+            pendant le défilement des lignes. */}
+        <div className="max-h-[65vh] overflow-x-auto overflow-y-auto">
           <table className="w-full text-left text-sm">
-            <thead>
+            <thead className="sticky top-0 z-10 bg-white">
               <tr className="border-b border-gray-100">
                 {headers.map((h) => (
                   <th key={h} className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
