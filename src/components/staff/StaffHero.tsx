@@ -121,12 +121,18 @@ export function StaffHero({
                   // que la carte ne bouge pas d'un pixel à la bascule.
                   <div className="h-8 w-14 animate-pulse rounded-md bg-gray-100" />
                 ) : (
-                  <p
+                  // Fondu sûr maintenant que le squelette fait exactement
+                  // la même hauteur (h-8) que ce texte : seule l'opacité
+                  // bouge, jamais la taille de la boîte.
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
                     className="text-2xl font-semibold tracking-tight text-gray-900"
                     style={{ fontFamily: 'var(--font-display)' }}
                   >
                     {s.value}
-                  </p>
+                  </motion.p>
                 )}
                 {s.hasNote &&
                   (loading ? (
