@@ -26,6 +26,13 @@ import type { PageMeta, ServiceRow } from '@/lib/types'
 
 const PER_PAGE = 25
 
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  draft: 'Brouillon',
+  awaiting_payment: 'En attente',
+  confirmed: 'Payée',
+  cancelled: 'Annulée',
+}
+
 function euros(cents: number): string {
   return `${(cents / 100).toFixed(2)} €`
 }
@@ -150,7 +157,7 @@ export function StaffOrdersPage() {
         o.email,
         o.qtyTickets,
         euros(o.totalAmountCents),
-        o.status,
+        ORDER_STATUS_LABELS[o.status] ?? o.status,
         new Date(o.createdAt).toLocaleDateString('fr-FR'),
       ])
     )
@@ -244,7 +251,7 @@ export function StaffOrdersPage() {
               <Td>{o.qtyTickets}</Td>
               <Td>{euros(o.totalAmountCents)}</Td>
               <Td>
-                <StatusBadge label={o.status} className={genericStatusTint(o.status)} />
+                <StatusBadge label={ORDER_STATUS_LABELS[o.status] ?? o.status} className={genericStatusTint(o.status)} />
               </Td>
               <Td className="text-gray-400">{new Date(o.createdAt).toLocaleDateString('fr-FR')}</Td>
             </StaffRow>

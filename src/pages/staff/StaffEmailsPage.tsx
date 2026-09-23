@@ -14,6 +14,13 @@ import type { PageMeta } from '@/lib/types'
 
 const PER_PAGE = 25
 
+const EMAIL_STATUS_LABELS: Record<string, string> = {
+  pending: 'En attente',
+  sent: 'Envoyé',
+  failed: 'Échec',
+  fake: 'Démo',
+}
+
 interface StaffEmail {
   id: number
   template: string
@@ -102,7 +109,7 @@ export function StaffEmailsPage() {
         e.toEmail,
         e.template,
         e.attempts,
-        e.status,
+        EMAIL_STATUS_LABELS[e.status] ?? e.status,
         new Date(e.createdAt).toLocaleDateString('fr-FR'),
       ])
     )
@@ -163,7 +170,7 @@ export function StaffEmailsPage() {
               <Td>{e.template}</Td>
               <Td>{e.attempts}</Td>
               <Td>
-                <StatusBadge label={e.status} className={genericStatusTint(e.status)} />
+                <StatusBadge label={EMAIL_STATUS_LABELS[e.status] ?? e.status} className={genericStatusTint(e.status)} />
                 {e.error && <p className="mt-1 text-xs text-red-500">{e.error}</p>}
               </Td>
               <Td className="text-gray-400">

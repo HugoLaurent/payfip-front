@@ -124,7 +124,7 @@ export function StaffRow({
 }
 
 const SUCCESS_STATUSES = new Set(['confirmed', 'paid', 'sent', 'active'])
-const FAILURE_STATUSES = new Set(['cancelled', 'failed', 'expired'])
+const FAILURE_STATUSES = new Set(['cancelled', 'failed', 'expired', 'rejected'])
 
 // Les statuts diffèrent par domaine (commandes/factures/paiements/emails)
 // mais suivent tous la même intuition succès/échec/en cours — un mapping

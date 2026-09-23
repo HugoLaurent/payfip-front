@@ -28,6 +28,15 @@ interface StaffPaymentRequest {
 
 const SOURCE_SERVICE_LABELS: Record<string, string> = { billetterie: 'Billetterie', factures: 'Facture' }
 
+const PAYMENT_REQUEST_STATUS_LABELS: Record<string, string> = {
+  draft: 'Brouillon',
+  awaiting_payment: 'En cours',
+  paid: 'Payée',
+  failed: 'Échouée',
+  cancelled: 'Annulée',
+  expired: 'Expirée',
+}
+
 export function StaffPaymentRequestsPage() {
   const { staffToken } = useStaffAuth()
   const [q, setQ] = useState('')
@@ -56,7 +65,7 @@ export function StaffPaymentRequestsPage() {
         pr.sourceReference,
         SOURCE_SERVICE_LABELS[pr.sourceService] ?? pr.sourceService,
         euros(pr.amountCents),
-        pr.status,
+        PAYMENT_REQUEST_STATUS_LABELS[pr.status] ?? pr.status,
         new Date(pr.createdAt).toLocaleDateString('fr-FR'),
       ])
     )
@@ -115,7 +124,7 @@ export function StaffPaymentRequestsPage() {
               <Td>{SOURCE_SERVICE_LABELS[pr.sourceService] ?? pr.sourceService}</Td>
               <Td>{euros(pr.amountCents)}</Td>
               <Td>
-                <StatusBadge label={pr.status} className={genericStatusTint(pr.status)} />
+                <StatusBadge label={PAYMENT_REQUEST_STATUS_LABELS[pr.status] ?? pr.status} className={genericStatusTint(pr.status)} />
               </Td>
               <Td className="text-gray-400">{new Date(pr.createdAt).toLocaleDateString('fr-FR')}</Td>
             </StaffRow>

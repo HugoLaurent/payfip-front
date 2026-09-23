@@ -24,6 +24,16 @@ import type { PageMeta } from '@/lib/types'
 
 const PER_PAGE = 25
 
+const REGISTRATION_STATUS_LABELS: Record<string, string> = {
+  waitlisted: "Liste d'attente",
+  awaiting_review: 'À valider',
+  rejected: 'Rejetée',
+  awaiting_payment: 'Attente paiement',
+  confirmed: 'Validée',
+  cancelled: 'Annulée',
+  expired: 'Expirée',
+}
+
 function euros(cents: number): string {
   return `${(cents / 100).toFixed(2)} €`
 }
@@ -156,7 +166,7 @@ export function StaffRegistrationsPage() {
         `${r.firstName} ${r.lastName}`,
         r.email,
         euros(r.amountCents),
-        r.status,
+        REGISTRATION_STATUS_LABELS[r.status] ?? r.status,
         new Date(r.createdAt).toLocaleDateString('fr-FR'),
       ])
     )
@@ -242,7 +252,7 @@ export function StaffRegistrationsPage() {
               </Td>
               <Td>{euros(r.amountCents)}</Td>
               <Td>
-                <StatusBadge label={r.status} className={genericStatusTint(r.status)} />
+                <StatusBadge label={REGISTRATION_STATUS_LABELS[r.status] ?? r.status} className={genericStatusTint(r.status)} />
               </Td>
               <Td className="text-gray-400">{new Date(r.createdAt).toLocaleDateString('fr-FR')}</Td>
             </StaffRow>

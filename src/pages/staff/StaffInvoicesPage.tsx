@@ -21,6 +21,13 @@ import type { PageMeta } from '@/lib/types'
 
 const PER_PAGE = 25
 
+const INVOICE_STATUS_LABELS: Record<string, string> = {
+  draft: 'Brouillon',
+  awaiting_payment: 'En attente',
+  confirmed: 'Payée',
+  cancelled: 'Annulée',
+}
+
 function euros(cents: number): string {
   return `${(cents / 100).toFixed(2)} €`
 }
@@ -98,7 +105,7 @@ export function StaffInvoicesPage() {
         inv.paymentReference ?? inv.hospitalReference,
         inv.objectLabel,
         euros(inv.amountCents),
-        inv.status,
+        INVOICE_STATUS_LABELS[inv.status] ?? inv.status,
         new Date(inv.createdAt).toLocaleDateString('fr-FR'),
       ])
     )
@@ -179,7 +186,7 @@ export function StaffInvoicesPage() {
               <Td>{inv.objectLabel}</Td>
               <Td>{euros(inv.amountCents)}</Td>
               <Td>
-                <StatusBadge label={inv.status} className={genericStatusTint(inv.status)} />
+                <StatusBadge label={INVOICE_STATUS_LABELS[inv.status] ?? inv.status} className={genericStatusTint(inv.status)} />
               </Td>
               <Td className="text-gray-400">{new Date(inv.createdAt).toLocaleDateString('fr-FR')}</Td>
             </StaffRow>
