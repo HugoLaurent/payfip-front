@@ -38,7 +38,16 @@ export function StaffHero({
 
   return (
     <div className={hasStats ? 'mb-8' : 'mb-6'}>
-      <div className="squircle rounded-2xl bg-aregie-deep px-6 py-5 text-white">
+      {/* Bannière pleine largeur, pas une carte : les marges négatives
+          annulent exactement le padding de StaffSpace's <main> (px-4 py-6
+          sm:px-6 md:px-8 md:py-8) pour que le bleu touche la sidebar et le
+          haut de page comme dans la maquette "1d" — donc pas de coins
+          arrondis ici (contrairement aux cartes de chiffres en dessous,
+          qui elles restent arrondies). StaffSpace n'a plus de max-width
+          partagé pour permettre ce plein-bord ; voir son commentaire. */}
+      <div
+        className={`-mx-4 -mt-6 bg-aregie-deep px-4 pt-6 text-white sm:-mx-6 sm:px-6 md:-mx-8 md:-mt-8 md:px-8 md:pt-8 ${hasStats ? 'pb-10' : 'pb-6 md:pb-8'}`}
+      >
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             {eyebrow && (
@@ -60,7 +69,7 @@ export function StaffHero({
 
       {hasStats && (
         <div
-          className="grid gap-3 px-1"
+          className="grid gap-3 px-4 sm:px-6 md:px-8"
           style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', marginTop: '-28px' }}
         >
           {stats!.map((s) => {

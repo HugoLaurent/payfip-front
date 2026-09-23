@@ -374,7 +374,7 @@ export function StaffOrganizationDetailPage() {
   const suspended = org.status === 'suspended'
 
   return (
-    <div>
+    <div className="mx-auto max-w-5xl">
       <button
         type="button"
         onClick={() => navigate('/staff/organismes')}
