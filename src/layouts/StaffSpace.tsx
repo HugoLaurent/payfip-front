@@ -26,10 +26,15 @@ export function StaffSpace() {
           <p className="truncate text-sm font-semibold text-gray-900">Panel staff AREGIE</p>
         </div>
 
+        {/* Pas de max-width ici (contrairement à OrgSpace) : les 8 pages du
+            panel staff (refonte "1d") ont une bannière StaffHero pensée
+            pour occuper toute la largeur disponible, jusqu'au bord de la
+            sidebar — voir StaffHero.tsx qui compense ce padding par des
+            marges négatives. StaffOrganizationDetailPage, seule page du
+            panel qui n'a pas cette bannière, porte son propre max-w-5xl
+            directement pour ne pas dépendre de ce choix partagé. */}
         <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:px-8 md:py-8">
-          <div className="mx-auto max-w-5xl">
-            <Outlet />
-          </div>
+          <Outlet />
         </main>
       </div>
     </div>
