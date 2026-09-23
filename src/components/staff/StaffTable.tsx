@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { motion } from 'framer-motion'
 import { Card } from '@/components/ui'
 
 // Coquille commune aux 8 vues du panel staff (organismes, services,
@@ -19,26 +20,32 @@ export function StaffTable({
   footer?: ReactNode
 }) {
   return (
-    <Card className="overflow-hidden p-0">
-      {toolbar && (
-        <div className="flex flex-wrap items-center gap-2.5 border-b border-gray-100 px-4 py-3">{toolbar}</div>
-      )}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-gray-100">
-              {headers.map((h) => (
-                <th key={h} className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>{children}</tbody>
-        </table>
-      </div>
-      {footer && <div className="border-t border-gray-100 px-4 py-3">{footer}</div>}
-    </Card>
+    // Fondu à l'apparition : StaffTable ne se monte qu'une fois les
+    // vraies données là (juste après StaffTableSkeleton), donc ce
+    // initial/animate se déclenche naturellement à chaque bascule
+    // squelette → contenu réel, sans logique de chargement à gérer ici.
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35, ease: 'easeOut' }}>
+      <Card className="overflow-hidden p-0">
+        {toolbar && (
+          <div className="flex flex-wrap items-center gap-2.5 border-b border-gray-100 px-4 py-3">{toolbar}</div>
+        )}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                {headers.map((h) => (
+                  <th key={h} className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>{children}</tbody>
+          </table>
+        </div>
+        {footer && <div className="border-t border-gray-100 px-4 py-3">{footer}</div>}
+      </Card>
+    </motion.div>
   )
 }
 
