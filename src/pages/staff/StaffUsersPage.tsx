@@ -293,7 +293,7 @@ export function StaffUsersPage() {
                     setOrgId(e.target.value)
                     setPage(1)
                   }}
-                  className="w-auto"
+                  className="max-w-xs shrink-0"
                 >
                   <option value="">Tous les organismes</option>
                   {orgs.map((o) => (
