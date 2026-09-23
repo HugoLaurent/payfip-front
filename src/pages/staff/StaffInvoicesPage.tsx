@@ -6,6 +6,7 @@ import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
 import { downloadCsv } from '@/lib/exportCsv'
 import {
+  Card,
   EmptyState,
   HeroGhostButton,
   LoadError,
@@ -123,45 +124,44 @@ export function StaffInvoicesPage() {
         }
       />
 
+      <Card className="mb-4 flex flex-wrap items-center gap-2.5 p-3">
+        <SelectInput
+          value={orgId}
+          onChange={(e) => {
+            setOrgId(e.target.value)
+            setPage(1)
+          }}
+          className="max-w-xs"
+        >
+          <option value="">Choisir un organisme…</option>
+          {orgs?.map((org) => (
+            <option key={org.id} value={org.id}>
+              {org.name}
+            </option>
+          ))}
+        </SelectInput>
+        <div className="relative min-w-[200px] flex-1">
+          <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+          <TextInput
+            placeholder="Référence hospitalière ou de paiement…"
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value)
+              setPage(1)
+            }}
+            className="pl-9"
+          />
+        </div>
+      </Card>
+
       {orgId === '' && <EmptyState icon={<FileText size={28} />} label="Choisissez un organisme pour voir ses factures." />}
       {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
-      {orgId !== '' && !loadFailed && invoices === null && <StaffTableSkeleton columns={5} />}
+      {orgId !== '' && !loadFailed && invoices === null && <StaffTableSkeleton columns={5} toolbar={false} />}
       {orgId !== '' && !loadFailed && invoices?.length === 0 && <EmptyState icon={<FileText size={28} />} label="Aucune facture." />}
 
       {orgId !== '' && !loadFailed && invoices && invoices.length > 0 && (
         <StaffTable
           headers={['Référence', 'Objet', 'Montant', 'Statut', 'Date']}
-          toolbar={
-            <>
-              <SelectInput
-                value={orgId}
-                onChange={(e) => {
-                  setOrgId(e.target.value)
-                  setPage(1)
-                }}
-                className="max-w-xs"
-              >
-                <option value="">Choisir un organisme…</option>
-                {orgs?.map((org) => (
-                  <option key={org.id} value={org.id}>
-                    {org.name}
-                  </option>
-                ))}
-              </SelectInput>
-              <div className="relative min-w-[200px] flex-1">
-                <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-                <TextInput
-                  placeholder="Référence hospitalière ou de paiement…"
-                  value={q}
-                  onChange={(e) => {
-                    setQ(e.target.value)
-                    setPage(1)
-                  }}
-                  className="pl-9"
-                />
-              </div>
-            </>
-          }
           footer={
             meta && meta.lastPage > 1 ? (
               <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />

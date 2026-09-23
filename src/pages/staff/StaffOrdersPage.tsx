@@ -7,6 +7,7 @@ import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
 import { useToast } from '@/lib/useToast'
 import { downloadCsv } from '@/lib/exportCsv'
 import {
+  Card,
   EmptyState,
   HeroButton,
   HeroGhostButton,
@@ -181,9 +182,43 @@ export function StaffOrdersPage() {
         }
       />
 
+      {/* Toujours visible, même sans organisme choisi ni données chargées
+          — c'est le seul moyen de choisir un organisme, il ne peut pas
+          être piégé dans le toolbar de StaffTable qui ne s'affiche que
+          lorsque des données existent déjà (bug corrigé le 2026-09-23). */}
+      <Card className="mb-4 flex flex-wrap items-center gap-2.5 p-3">
+        <SelectInput
+          value={orgId}
+          onChange={(e) => {
+            setOrgId(e.target.value)
+            setPage(1)
+          }}
+          className="max-w-xs"
+        >
+          <option value="">Choisir un organisme…</option>
+          {orgs?.map((org) => (
+            <option key={org.id} value={org.id}>
+              {org.name}
+            </option>
+          ))}
+        </SelectInput>
+        <div className="relative min-w-[200px] flex-1">
+          <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+          <TextInput
+            placeholder="Référence ou email…"
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value)
+              setPage(1)
+            }}
+            className="pl-9"
+          />
+        </div>
+      </Card>
+
       {orgId === '' && <EmptyState icon={<ShoppingCart size={28} />} label="Choisissez un organisme pour voir ses commandes." />}
       {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
-      {orgId !== '' && !loadFailed && orders === null && <StaffTableSkeleton columns={6} />}
+      {orgId !== '' && !loadFailed && orders === null && <StaffTableSkeleton columns={6} toolbar={false} />}
       {orgId !== '' && !loadFailed && orders?.length === 0 && (
         <EmptyState icon={<ShoppingCart size={28} />} label="Aucune commande." />
       )}
@@ -191,37 +226,6 @@ export function StaffOrdersPage() {
       {orgId !== '' && !loadFailed && orders && orders.length > 0 && (
         <StaffTable
           headers={['Référence', 'Email', 'Billets', 'Montant', 'Statut', 'Date']}
-          toolbar={
-            <>
-              <SelectInput
-                value={orgId}
-                onChange={(e) => {
-                  setOrgId(e.target.value)
-                  setPage(1)
-                }}
-                className="max-w-xs"
-              >
-                <option value="">Choisir un organisme…</option>
-                {orgs?.map((org) => (
-                  <option key={org.id} value={org.id}>
-                    {org.name}
-                  </option>
-                ))}
-              </SelectInput>
-              <div className="relative min-w-[200px] flex-1">
-                <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-                <TextInput
-                  placeholder="Référence ou email…"
-                  value={q}
-                  onChange={(e) => {
-                    setQ(e.target.value)
-                    setPage(1)
-                  }}
-                  className="pl-9"
-                />
-              </div>
-            </>
-          }
           footer={
             meta && meta.lastPage > 1 ? (
               <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />

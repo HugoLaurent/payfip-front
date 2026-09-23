@@ -7,6 +7,7 @@ import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
 import { useToast } from '@/lib/useToast'
 import { downloadCsv } from '@/lib/exportCsv'
 import {
+  Card,
   DangerButton,
   EmptyState,
   HeroGhostButton,
@@ -181,11 +182,41 @@ export function StaffRegistrationsPage() {
         }
       />
 
+      <Card className="mb-4 flex flex-wrap items-center gap-2.5 p-3">
+        <SelectInput
+          value={orgId}
+          onChange={(e) => {
+            setOrgId(e.target.value)
+            setPage(1)
+          }}
+          className="max-w-xs"
+        >
+          <option value="">Choisir un organisme…</option>
+          {orgs?.map((org) => (
+            <option key={org.id} value={org.id}>
+              {org.name}
+            </option>
+          ))}
+        </SelectInput>
+        <div className="relative min-w-[200px] flex-1">
+          <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+          <TextInput
+            placeholder="Nom, email ou référence…"
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value)
+              setPage(1)
+            }}
+            className="pl-9"
+          />
+        </div>
+      </Card>
+
       {orgId === '' && (
         <EmptyState icon={<UserCheck size={28} />} label="Choisissez un organisme pour voir ses inscriptions." />
       )}
       {orgId !== '' && loadFailed && <LoadError onRetry={reload} />}
-      {orgId !== '' && !loadFailed && registrations === null && <StaffTableSkeleton columns={5} />}
+      {orgId !== '' && !loadFailed && registrations === null && <StaffTableSkeleton columns={5} toolbar={false} />}
       {orgId !== '' && !loadFailed && registrations?.length === 0 && (
         <EmptyState icon={<UserCheck size={28} />} label="Aucune inscription." />
       )}
@@ -193,37 +224,6 @@ export function StaffRegistrationsPage() {
       {orgId !== '' && !loadFailed && registrations && registrations.length > 0 && (
         <StaffTable
           headers={['Référence', 'Nom', 'Montant', 'Statut', 'Date']}
-          toolbar={
-            <>
-              <SelectInput
-                value={orgId}
-                onChange={(e) => {
-                  setOrgId(e.target.value)
-                  setPage(1)
-                }}
-                className="max-w-xs"
-              >
-                <option value="">Choisir un organisme…</option>
-                {orgs?.map((org) => (
-                  <option key={org.id} value={org.id}>
-                    {org.name}
-                  </option>
-                ))}
-              </SelectInput>
-              <div className="relative min-w-[200px] flex-1">
-                <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-                <TextInput
-                  placeholder="Nom, email ou référence…"
-                  value={q}
-                  onChange={(e) => {
-                    setQ(e.target.value)
-                    setPage(1)
-                  }}
-                  className="pl-9"
-                />
-              </div>
-            </>
-          }
           footer={
             meta && meta.lastPage > 1 ? (
               <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />
