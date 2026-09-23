@@ -10,6 +10,11 @@ export interface StaffStat {
   // seconde plus tard une fois les données arrivées.
   value: string | null
   note?: string
+  // Prévient StaffHero que cette stat aura une note une fois chargée,
+  // indépendamment du fait qu'elle soit déjà là — sans ça, la ligne de
+  // note apparaît/disparaît selon le chargement et fait varier la
+  // hauteur de la carte (une source de plus du sursaut d'un pixel).
+  hasNote?: boolean
   icon?: ReactNode
   tone?: 'blue' | 'green' | 'red' | 'gray'
 }
@@ -111,19 +116,24 @@ export function StaffHero({
                   <p className="truncate text-[11.5px] font-medium text-gray-400">{s.label}</p>
                 </div>
                 {loading ? (
-                  <div className="h-7 w-14 animate-pulse rounded-md bg-gray-100" />
+                  // h-8 = 2rem, la hauteur de ligne réelle de text-2xl —
+                  // même valeur exacte que le texte qui le remplace, pour
+                  // que la carte ne bouge pas d'un pixel à la bascule.
+                  <div className="h-8 w-14 animate-pulse rounded-md bg-gray-100" />
                 ) : (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
+                  <p
                     className="text-2xl font-semibold tracking-tight text-gray-900"
                     style={{ fontFamily: 'var(--font-display)' }}
                   >
                     {s.value}
-                  </motion.p>
+                  </p>
                 )}
-                {!loading && s.note && <p className={`mt-0.5 text-[11.5px] ${tone.note}`}>{s.note}</p>}
+                {s.hasNote &&
+                  (loading ? (
+                    <div className="mt-1 h-3 w-20 animate-pulse rounded bg-gray-100" />
+                  ) : (
+                    <p className={`mt-0.5 text-[11.5px] ${tone.note}`}>{s.note}</p>
+                  ))}
               </div>
             )
           })}

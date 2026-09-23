@@ -117,6 +117,7 @@ export function StaffOrganizationsPage() {
             label: 'Organismes actifs',
             value: orgs ? String(activeCount) : null,
             note: orgs ? `sur ${orgs.length} au total` : undefined,
+            hasNote: true,
             icon: <Building2 size={14} />,
             tone: 'blue',
           },
