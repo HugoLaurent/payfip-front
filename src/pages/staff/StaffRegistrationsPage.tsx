@@ -182,7 +182,7 @@ export function StaffRegistrationsPage() {
         }
       />
 
-      <Card className="mb-4 flex flex-wrap items-center gap-2.5 p-3">
+      <Card className="mb-4 flex min-h-24 flex-wrap items-center gap-2.5 p-3">
         <SelectInput
           value={orgId}
           onChange={(e) => {

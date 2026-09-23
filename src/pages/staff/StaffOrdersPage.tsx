@@ -186,7 +186,7 @@ export function StaffOrdersPage() {
           — c'est le seul moyen de choisir un organisme, il ne peut pas
           être piégé dans le toolbar de StaffTable qui ne s'affiche que
           lorsque des données existent déjà (bug corrigé le 2026-09-23). */}
-      <Card className="mb-4 flex flex-wrap items-center gap-2.5 p-3">
+      <Card className="mb-4 flex min-h-24 flex-wrap items-center gap-2.5 p-3">
         <SelectInput
           value={orgId}
           onChange={(e) => {
