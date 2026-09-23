@@ -91,8 +91,6 @@ export function StaffHero({
       {hasStats && (
         <motion.div
           layout
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={LAYOUT_TRANSITION}
           className="grid gap-3 px-4 sm:px-6 md:px-8"
           style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', marginTop: '-28px' }}
