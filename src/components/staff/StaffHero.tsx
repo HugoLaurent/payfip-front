@@ -69,7 +69,12 @@ export function StaffHero({
         transition={LAYOUT_TRANSITION}
         className={`-mx-4 -mt-6 bg-aregie-deep px-4 pt-6 text-white sm:-mx-6 sm:px-6 md:-mx-8 md:-mt-8 md:px-8 md:pt-8 ${hasStats ? 'pb-10' : 'pb-6 md:pb-8'}`}
       >
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+          className="flex flex-wrap items-start justify-between gap-4"
+        >
           <div className="min-w-0">
             {eyebrow && (
               <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-white/75">
@@ -85,7 +90,7 @@ export function StaffHero({
             </h1>
           </div>
           {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
-        </div>
+        </motion.div>
       </motion.div>
 
       {hasStats && (
