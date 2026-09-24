@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { ChevronRight, Plus, Ticket, Trash2 } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import {
@@ -208,16 +209,39 @@ export function TariffsManager({ auth, service }: { auth: AuthState; service: Se
         </div>
 
         {loadFailed && <LoadError onRetry={loadTariffs} />}
-        {!loadFailed && showLoading && <p className="py-3 text-sm text-gray-500">Chargement…</p>}
-        {!loadFailed && activeTariffs.length === 0 && (
+        {!loadFailed && showLoading && (
+          <div className="divide-y divide-gray-100">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 py-3">
+                <div className="h-3.5 w-32 animate-pulse rounded bg-gray-100" />
+                <div className="ml-auto h-3.5 w-14 animate-pulse rounded bg-gray-100" />
+                {canManage ? (
+                  <>
+                    <div className="h-5 w-9 shrink-0 animate-pulse rounded-full bg-gray-100" />
+                    <div className="h-[18px] w-[18px] shrink-0 animate-pulse rounded bg-gray-100" />
+                  </>
+                ) : (
+                  <div className="h-[18px] w-[18px] shrink-0 animate-pulse rounded bg-gray-100" />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {!loadFailed && !showLoading && activeTariffs.length === 0 && (
           <div className="py-2">
             <EmptyState icon={<Ticket size={24} />} label="Aucun tarif actif." />
           </div>
         )}
 
         <div className="divide-y divide-gray-100">
-          {activeTariffs.map((t) => (
-            <div key={t.id} className="flex items-center gap-3 py-3">
+          {!showLoading && activeTariffs.map((t, i) => (
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut', delay: Math.min(i, 6) * 0.02 }}
+              className="flex items-center gap-3 py-3"
+            >
               <p className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">
                 {t.tariffType}
               </p>
@@ -241,7 +265,7 @@ export function TariffsManager({ auth, service }: { auth: AuthState; service: Se
               ) : (
                 <ChevronRight size={18} className="shrink-0 text-gray-300" />
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       </Card>
