@@ -1,32 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { AlertTriangle, ArrowLeft, Building2, Check, Plus, Settings, X } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Building2, Check, Plus, X } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { useToast } from '@/lib/useToast'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
-import {
-  Card,
-  DangerButton,
-  LoadError,
-  Modal,
-  Pagination,
-  PrimaryButton,
-  SecondaryButton,
-  SelectInput,
-  StatusBadge,
-  Textarea,
-  TextInput,
-} from '@/components/ui'
-import {
-  ORG_STATUS_LABELS,
-  ORG_STATUS_TINTS,
-  SERVICE_STATUS_LABELS,
-  SERVICE_STATUS_TINTS,
-  SERVICE_TYPE_LABELS,
-} from '@/lib/serviceLabels'
+import { Card, DangerButton, LoadError, Pagination, PrimaryButton, SecondaryButton, StatusBadge, TextInput } from '@/components/ui'
+import { ORG_STATUS_LABELS, ORG_STATUS_TINTS } from '@/lib/serviceLabels'
 import type { PageMeta, ServiceRow, StaffOrganization } from '@/lib/types'
+import { ServiceListItem } from './ServiceListItem'
+import { SuspendModal, DeleteOrgModal, CreateServiceModal } from './OrganizationModals'
 
 const SERVICES_PER_PAGE = 25
 
@@ -135,11 +119,6 @@ export function StaffOrganizationDetailPage() {
     }
   }
 
-  // Suppression logique (status: 'deleted') — jamais de retour arrière
-  // possible via l'API une fois fait (voir organizations_controller.ts
-  // côté svc-auth), donc une friction volontaire en plus de la
-  // confirmation de la modale : il faut retaper le nom exact de
-  // l'organisme pour activer le bouton.
   const [showDelete, setShowDelete] = useState(false)
   const [deleteConfirmName, setDeleteConfirmName] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -403,104 +382,22 @@ export function StaffOrganizationDetailPage() {
         {!servicesFailed && services && services.length > 0 && (
           <div className="flex flex-col">
             {services.map((s) => (
-              <div key={s.id} className="flex flex-col gap-2 border-b border-gray-50 py-3 last:border-0">
-                <div className="flex items-center gap-3.5">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13.5px] font-semibold text-gray-900">{s.name}</p>
-                    <p className="text-xs text-gray-400">
-                      {SERVICE_TYPE_LABELS[s.serviceType] ?? s.serviceType}
-                      {s.numcli && ` · Client PayFiP n° ${s.numcli}`}
-                      {s.linkCode && (
-                        <>
-                          {' · Code de liaison AREGIE '}
-                          <span className="select-all font-mono text-gray-500">{s.linkCode}</span>
-                        </>
-                      )}
-                    </p>
-                  </div>
-                  {suspended ? (
-                    <StatusBadge label="Fermé (organisme)" className="bg-red-100 text-red-600" />
-                  ) : (
-                    <>
-                      <StatusBadge
-                        label={SERVICE_STATUS_LABELS[s.status] ?? s.status}
-                        className={SERVICE_STATUS_TINTS[s.status] ?? 'bg-gray-100 text-gray-600'}
-                      />
-                      {s.status === 'active' ? (
-                        <DangerButton
-                          type="button"
-                          onClick={() => toggleService(s)}
-                          disabled={togglingServiceId === s.id}
-                          className="px-3 py-1.5"
-                        >
-                          {togglingServiceId === s.id ? '…' : 'Fermer'}
-                        </DangerButton>
-                      ) : (
-                        <SecondaryButton
-                          type="button"
-                          onClick={() => toggleService(s)}
-                          disabled={togglingServiceId === s.id}
-                          className="px-3 py-1.5"
-                        >
-                          {togglingServiceId === s.id ? '…' : 'Réactiver'}
-                        </SecondaryButton>
-                      )}
-                    </>
-                  )}
-                  <SecondaryButton
-                    type="button"
-                    onClick={() => navigate(`/staff/organismes/${id}/services/${s.id}`)}
-                    className="px-3 py-1.5"
-                  >
-                    <Settings size={13} />
-                    Gérer
-                  </SecondaryButton>
-                </div>
-
-                {editingSlugId === s.id ? (
-                  <div className="flex flex-wrap items-center gap-1.5 pl-0.5">
-                    <span className="shrink-0 text-xs text-gray-400">/{s.serviceType}/</span>
-                    <TextInput
-                      value={slugInput}
-                      onChange={(e) => setSlugInput(e.target.value.toLowerCase())}
-                      placeholder="mon-service"
-                      autoFocus
-                      className="max-w-[200px] py-1 text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleSaveSlug(s)}
-                      disabled={savingSlug}
-                      className="squircle flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 disabled:opacity-50"
-                      aria-label="Enregistrer le lien"
-                    >
-                      <Check size={13} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditingSlugId(null)}
-                      className="squircle flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 text-gray-500"
-                      aria-label="Annuler la modification du lien"
-                    >
-                      <X size={13} />
-                    </button>
-                    {slugError && <p className="w-full text-xs text-red-600">{slugError}</p>}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 pl-0.5">
-                    <span className="text-xs text-gray-400">
-                      {s.slug ? `/${s.serviceType}/${s.slug}` : 'Aucun lien public'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => startEditingSlug(s)}
-                      className="text-xs font-semibold text-aregie-blue"
-                    >
-                      Modifier
-                    </button>
-                  </div>
-                )}
-              </div>
+              <ServiceListItem
+                key={s.id}
+                service={s}
+                suspended={suspended}
+                togglingServiceId={togglingServiceId}
+                onToggleService={toggleService}
+                onManage={(service) => navigate(`/staff/organismes/${id}/services/${service.id}`)}
+                editingSlugId={editingSlugId}
+                slugInput={slugInput}
+                slugError={slugError}
+                savingSlug={savingSlug}
+                onStartEditSlug={startEditingSlug}
+                onChangeSlugInput={setSlugInput}
+                onSaveSlug={handleSaveSlug}
+                onCancelEditSlug={() => setEditingSlugId(null)}
+              />
             ))}
           </div>
         )}
@@ -515,92 +412,41 @@ export function StaffOrganizationDetailPage() {
       </Card>
 
       {showSuspend && (
-        <Modal title="Suspendre l'organisme" onClose={() => setShowSuspend(false)}>
-          <p className="mb-4 text-sm text-gray-600">
-            Tous les administrateurs et agents de <strong>{org.name}</strong> seront déconnectés et ne
-            pourront plus se reconnecter. Leurs services publics afficheront "fermé" aux citoyens. Vous
-            pourrez réactiver l'organisme à tout moment.
-          </p>
-          <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium text-gray-700">Message affiché en interne (optionnel)</label>
-            <Textarea
-              value={suspendMessage}
-              onChange={(e) => setSuspendMessage(e.target.value)}
-              placeholder="Ex. impayé, contactez la facturation"
-              rows={3}
-              maxLength={300}
-            />
-          </div>
-          <div className="flex gap-2">
-            <DangerButton type="button" onClick={handleSuspend} disabled={suspending} className="flex-1 justify-center py-2">
-              {suspending ? 'Suspension…' : 'Suspendre'}
-            </DangerButton>
-            <SecondaryButton type="button" onClick={() => setShowSuspend(false)} className="flex-1 justify-center">
-              Annuler
-            </SecondaryButton>
-          </div>
-        </Modal>
+        <SuspendModal
+          org={org}
+          suspendMessage={suspendMessage}
+          onChangeSuspendMessage={setSuspendMessage}
+          suspending={suspending}
+          onConfirm={handleSuspend}
+          onClose={() => setShowSuspend(false)}
+        />
       )}
 
       {showDelete && (
-        <Modal title="Supprimer l'organisme" onClose={() => setShowDelete(false)}>
-          <p className="mb-4 text-sm text-gray-600">
-            <strong>{org.name}</strong> et tous ses services deviendront définitivement
-            inaccessibles (public, admins, agents). Aucune base de données n'est supprimée
-            automatiquement — c'est une suppression logique, mais irréversible depuis cette
-            interface. Tapez le nom exact de l'organisme pour confirmer.
-          </p>
-          <TextInput
-            value={deleteConfirmName}
-            onChange={(e) => setDeleteConfirmName(e.target.value)}
-            placeholder={org.name}
-            className="mb-4"
-          />
-          <div className="flex gap-2">
-            <DangerButton
-              type="button"
-              onClick={handleDelete}
-              disabled={deleting || deleteConfirmName !== org.name}
-              className="flex-1 justify-center py-2"
-            >
-              {deleting ? 'Suppression…' : "Supprimer définitivement"}
-            </DangerButton>
-            <SecondaryButton type="button" onClick={() => setShowDelete(false)} className="flex-1 justify-center">
-              Annuler
-            </SecondaryButton>
-          </div>
-        </Modal>
+        <DeleteOrgModal
+          org={org}
+          deleteConfirmName={deleteConfirmName}
+          onChangeDeleteConfirmName={setDeleteConfirmName}
+          deleting={deleting}
+          onConfirm={handleDelete}
+          onClose={() => setShowDelete(false)}
+        />
       )}
 
       {showCreateService && (
-        <Modal title="Nouveau service" onClose={() => setShowCreateService(false)}>
-          <form onSubmit={handleCreateService} className="space-y-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Nom du service</label>
-              <TextInput value={serviceName} onChange={(e) => setServiceName(e.target.value)} required />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Type</label>
-              <SelectInput
-                value={serviceType}
-                onChange={(e) => setServiceType(e.target.value as 'billetterie' | 'factures')}
-              >
-                <option value="billetterie">Billetterie</option>
-                <option value="factures">Facture</option>
-              </SelectInput>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Numéro client PayFiP</label>
-              <TextInput value={numcli} onChange={(e) => setNumcli(e.target.value)} placeholder="6 chiffres" required />
-            </div>
-            {createServiceError && <p className="text-sm text-red-600">{createServiceError}</p>}
-            <PrimaryButton type="submit" disabled={creatingService} className="w-full">
-              {creatingService ? 'Création…' : 'Créer'}
-            </PrimaryButton>
-          </form>
-        </Modal>
+        <CreateServiceModal
+          serviceName={serviceName}
+          onChangeServiceName={setServiceName}
+          serviceType={serviceType}
+          onChangeServiceType={setServiceType}
+          numcli={numcli}
+          onChangeNumcli={setNumcli}
+          createServiceError={createServiceError}
+          creatingService={creatingService}
+          onSubmit={handleCreateService}
+          onClose={() => setShowCreateService(false)}
+        />
       )}
-
     </div>
   )
 }
