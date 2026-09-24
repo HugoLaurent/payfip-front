@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { ChevronRight, KeyRound, Plus, Search, Users as UsersIcon } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import {
   Card,
   DangerButton,
   EmptyState,
+  ListRow,
+  ListRowSkeleton,
   LoadError,
   Modal,
   PageHeader,
@@ -512,20 +513,9 @@ export function UsersManager() {
 
       <div className="mb-2 space-y-2">
         {loadFailed && <LoadError onRetry={loadAgents} />}
-        {!loadFailed && showLoading &&
-          Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex w-full items-center gap-3 squircle rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(20,25,60,0.06)]"
-            >
-              <div className="h-9 w-9 shrink-0 animate-pulse rounded-full bg-gray-100" />
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <div className="h-4 w-40 animate-pulse rounded bg-gray-100" />
-                <div className="h-3 w-56 animate-pulse rounded bg-gray-100" />
-              </div>
-              <div className="h-4 w-4 shrink-0 animate-pulse rounded bg-gray-100" />
-            </div>
-          ))}
+        {!loadFailed && showLoading && (
+          <ListRowSkeleton iconWrapperClassName="h-9 w-9 rounded-full" trailingWidth={null} />
+        )}
         {!loadFailed && !showLoading && agents?.length === 0 && (
           <EmptyState
             icon={<UsersIcon size={28} />}
@@ -533,25 +523,17 @@ export function UsersManager() {
           />
         )}
         {!showLoading && agents?.map((agent, i) => (
-          <motion.button
+          <ListRow
             key={agent.id}
-            type="button"
+            index={i}
             onClick={() => selectManageAgent(agent)}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut', delay: Math.min(i, 6) * 0.02 }}
-            className="flex w-full items-center gap-3 squircle rounded-2xl bg-white p-4 text-left shadow-[0_1px_3px_rgba(20,25,60,0.06)] transition-shadow hover:shadow-md"
-          >
-            <div
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] font-bold ${
-                agent.status === 'inactive'
-                  ? 'bg-gray-100 text-gray-400'
-                  : 'bg-aregie-deep/10 text-aregie-deep'
-              }`}
-            >
-              {agentInitials(agent)}
-            </div>
-            <div className="min-w-0 flex-1">
+            iconWrapperClassName={`h-9 w-9 rounded-full text-[13px] font-bold ${
+              agent.status === 'inactive'
+                ? 'bg-gray-100 text-gray-400'
+                : 'bg-aregie-deep/10 text-aregie-deep'
+            }`}
+            icon={agentInitials(agent)}
+            title={
               <div className="flex items-center gap-2">
                 <p className="truncate font-medium text-gray-900">
                   {agentName(agent) ?? agent.email}
@@ -561,15 +543,17 @@ export function UsersManager() {
                   <StatusBadge label="Désactivé" className="bg-gray-100 text-gray-500" />
                 )}
               </div>
+            }
+            subtitle={
               <p className="truncate text-sm text-gray-500">
                 {agentName(agent) ? `${agent.email} · ` : ''}
                 {tab === 'agents' &&
                   `${agent.services.map((s) => s.name).join(', ') || 'Aucun service'} · `}
                 {formatLastLogin(agent.lastLoginAt)}
               </p>
-            </div>
-            <ChevronRight size={18} className="shrink-0 text-gray-400" />
-          </motion.button>
+            }
+            trailing={<ChevronRight size={18} className="shrink-0 text-gray-400" />}
+          />
         ))}
       </div>
 

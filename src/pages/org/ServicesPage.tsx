@@ -1,9 +1,18 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Search, Store } from 'lucide-react'
 import { apiCall, GATEWAY_URL } from '@/lib/api'
-import { Card, EmptyState, LoadError, PageHeader, Pagination, StatusBadge, TextInput } from '@/components/ui'
+import {
+  Card,
+  EmptyState,
+  ListRow,
+  ListRowSkeleton,
+  LoadError,
+  PageHeader,
+  Pagination,
+  StatusBadge,
+  TextInput,
+} from '@/components/ui'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useAuth } from '@/lib/useAuth'
 import { SERVICE_STATUS_LABELS, SERVICE_STATUS_TINTS, SERVICE_TYPE_LABELS } from '@/lib/serviceLabels'
@@ -49,41 +58,22 @@ export function ServicesPage() {
 
       <div className="space-y-2">
         {loadFailed && <LoadError onRetry={reload} />}
-        {!loadFailed && showLoading &&
-          Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex w-full items-center gap-3.5 squircle rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(20,25,60,0.06)]"
-            >
-              <div className="h-12 w-12 shrink-0 animate-pulse rounded-xl bg-gray-100" />
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <div className="h-4 w-36 animate-pulse rounded bg-gray-100" />
-                <div className="h-3 w-24 animate-pulse rounded bg-gray-100" />
-              </div>
-              <div className="h-5 w-16 shrink-0 animate-pulse rounded-full bg-gray-100" />
-            </div>
-          ))}
+        {!loadFailed && showLoading && <ListRowSkeleton />}
         {!loadFailed && !showLoading && services?.length === 0 && (
           <EmptyState icon={<Store size={28} />} label="Aucun service." />
         )}
         {!showLoading && services?.map((service, i) => (
-          <motion.button
+          <ListRow
             key={service.id}
-            type="button"
+            index={i}
             onClick={() => navigate(`/services/${service.id}`, { state: { service } })}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut', delay: Math.min(i, 6) * 0.02 }}
-            className="flex w-full items-center gap-3.5 squircle rounded-2xl bg-white p-4 text-left shadow-[0_1px_3px_rgba(20,25,60,0.06)] transition-shadow hover:shadow-md"
-          >
-            <div
-              className={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden squircle rounded-xl ${
-                service.hasLogo || service.status !== 'active'
-                  ? 'bg-gray-100'
-                  : 'bg-gradient-to-br from-aregie-deep to-aregie-light'
-              }`}
-            >
-              {service.hasLogo ? (
+            iconWrapperClassName={`h-12 w-12 rounded-xl ${
+              service.hasLogo || service.status !== 'active'
+                ? 'bg-gray-100'
+                : 'bg-gradient-to-br from-aregie-deep to-aregie-light'
+            }`}
+            icon={
+              service.hasLogo ? (
                 <img
                   src={`${GATEWAY_URL}/services/${service.id}/logo`}
                   alt={service.name}
@@ -91,27 +81,31 @@ export function ServicesPage() {
                 />
               ) : service.status !== 'active' ? (
                 <Store size={18} className="text-gray-300" />
-              ) : null}
-            </div>
-
-            <div className="min-w-0 flex-1">
+              ) : null
+            }
+            title={
               <p
                 className="truncate text-[14.5px] font-bold text-gray-900"
                 style={{ fontFamily: 'var(--font-public)' }}
               >
                 {service.name}
               </p>
-              <p className="text-[12.5px] font-medium text-gray-500">
+            }
+            subtitle={
+              <p className="truncate text-[12.5px] font-medium text-gray-500">
                 {SERVICE_TYPE_LABELS[service.serviceType] ?? service.serviceType}
               </p>
-            </div>
-
-            <StatusBadge
-              label={SERVICE_STATUS_LABELS[service.status] ?? service.status}
-              className={SERVICE_STATUS_TINTS[service.status] ?? 'bg-gray-100 text-gray-600'}
-            />
-            <ChevronRight size={18} className="shrink-0 text-gray-400" />
-          </motion.button>
+            }
+            trailing={
+              <>
+                <StatusBadge
+                  label={SERVICE_STATUS_LABELS[service.status] ?? service.status}
+                  className={SERVICE_STATUS_TINTS[service.status] ?? 'bg-gray-100 text-gray-600'}
+                />
+                <ChevronRight size={18} className="shrink-0 text-gray-400" />
+              </>
+            }
+          />
         ))}
       </div>
 

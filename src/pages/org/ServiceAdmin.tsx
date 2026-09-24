@@ -236,7 +236,7 @@ export function ServiceAdmin() {
         Services
       </button>
 
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex min-w-0 items-center gap-3.5">
           <div
             className={`flex h-[52px] w-[52px] shrink-0 items-center justify-center overflow-hidden squircle rounded-2xl ${
@@ -291,12 +291,12 @@ export function ServiceAdmin() {
       </div>
 
       {(hasTariffsTab || hasEventsTab) && (
-        <div className="mb-4 flex gap-1.5">
+        <div className="mb-4 flex gap-1.5 overflow-x-auto">
           {hasTariffsTab && (
             <button
               type="button"
               onClick={() => setTab('tariffs')}
-              className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
+              className={`shrink-0 squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
                 effectiveTab === 'tariffs' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
               }`}
             >
@@ -307,7 +307,7 @@ export function ServiceAdmin() {
             <button
               type="button"
               onClick={() => setTab('events')}
-              className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
+              className={`shrink-0 squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
                 effectiveTab === 'events' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
               }`}
             >
@@ -317,7 +317,7 @@ export function ServiceAdmin() {
           <button
             type="button"
             onClick={() => setTab('settings')}
-            className={`squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
+            className={`shrink-0 squircle rounded-xl px-3.5 py-1.5 text-sm font-semibold transition ${
               effectiveTab === 'settings' ? 'bg-aregie-deep text-white' : 'text-gray-500 hover:bg-gray-100'
             }`}
           >
@@ -371,22 +371,24 @@ export function ServiceAdmin() {
         </Card>
       )}
 
-      <Card className="mb-6 flex flex-wrap items-center gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden squircle rounded-xl bg-gray-100">
-          {logoUrl ? (
-            <img src={logoUrl} alt={service.name} className="h-full w-full object-contain" />
-          ) : (
-            <ImageIcon size={22} className="text-gray-300" />
-          )}
-        </div>
+      <Card className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden squircle rounded-xl bg-gray-100">
+            {logoUrl ? (
+              <img src={logoUrl} alt={service.name} className="h-full w-full object-contain" />
+            ) : (
+              <ImageIcon size={22} className="text-gray-300" />
+            )}
+          </div>
 
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-700">Logo du service</p>
-          {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-gray-700">Logo du service</p>
+            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+          </div>
         </div>
 
         {isAdmin && (
-          <label className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 squircle rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
+          <label className="inline-flex w-full shrink-0 cursor-pointer items-center justify-center gap-2 squircle rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 sm:w-auto">
             {uploading ? 'Envoi…' : 'Changer le logo'}
             <input
               type="file"
@@ -399,26 +401,28 @@ export function ServiceAdmin() {
         )}
       </Card>
 
-      <Card className="mb-6 flex flex-wrap items-center gap-4">
-        <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden squircle rounded-xl bg-gray-100">
-          {coverUrl ? (
-            <img src={coverUrl} alt={service.name} className="h-full w-full object-cover" />
-          ) : (
-            <ImageIcon size={22} className="text-gray-300" />
-          )}
-        </div>
+      <Card className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden squircle rounded-xl bg-gray-100">
+            {coverUrl ? (
+              <img src={coverUrl} alt={service.name} className="h-full w-full object-cover" />
+            ) : (
+              <ImageIcon size={22} className="text-gray-300" />
+            )}
+          </div>
 
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-700">Image de couverture</p>
-          <p className="mt-0.5 text-xs text-gray-400">
-            Affichée sur la page d'achat en ligne (parcours citoyen)
-          </p>
-          {coverError && <p className="mt-1 text-xs text-red-600">{coverError}</p>}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-gray-700">Image de couverture</p>
+            <p className="mt-0.5 text-xs text-gray-400">
+              Affichée sur la page d'achat en ligne (parcours citoyen)
+            </p>
+            {coverError && <p className="mt-1 text-xs text-red-600">{coverError}</p>}
+          </div>
         </div>
 
         {isAdmin && (
-          <div className="flex shrink-0 items-center gap-2">
-            <label className="inline-flex cursor-pointer items-center justify-center gap-2 squircle rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
+            <label className="inline-flex w-full cursor-pointer items-center justify-center gap-2 squircle rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 sm:w-auto">
               {uploadingCover ? 'Envoi…' : "Changer l'image"}
               <input
                 type="file"
@@ -429,7 +433,12 @@ export function ServiceAdmin() {
               />
             </label>
             {coverUrl && (
-              <DangerButton type="button" onClick={handleDeleteCover} disabled={deletingCover} className="px-3 py-2">
+              <DangerButton
+                type="button"
+                onClick={handleDeleteCover}
+                disabled={deletingCover}
+                className="w-full justify-center px-3 py-2 sm:w-auto"
+              >
                 {deletingCover ? 'Suppression…' : 'Supprimer'}
               </DangerButton>
             )}
