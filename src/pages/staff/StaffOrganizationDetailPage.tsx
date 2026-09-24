@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { AlertTriangle, ArrowLeft, Building2, CalendarOff, Check, Plus, Settings, Trash2, X } from 'lucide-react'
-import { apiCall, apiUpload, GATEWAY_URL } from '@/lib/api'
+import { AlertTriangle, ArrowLeft, Building2, Check, Plus, Settings, X } from 'lucide-react'
+import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { useToast } from '@/lib/useToast'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
@@ -18,9 +18,7 @@ import {
   TextInput,
 } from '@/components/ui'
 import { SERVICE_STATUS_LABELS, SERVICE_STATUS_TINTS, SERVICE_TYPE_LABELS } from '@/lib/serviceLabels'
-import { StaffServiceTariffs } from '@/components/staff/StaffServiceTariffs'
-import { StaffServiceFormations } from '@/components/staff/StaffServiceFormations'
-import type { ServiceClosure, ServiceRow, StaffOrganization } from '@/lib/types'
+import type { ServiceRow, StaffOrganization } from '@/lib/types'
 
 const ORG_STATUS_LABELS: Record<string, string> = { active: 'Actif', suspended: 'Suspendu' }
 const ORG_STATUS_TINTS: Record<string, string> = {
@@ -210,114 +208,6 @@ export function StaffOrganizationDetailPage() {
     setEditingSlugId(null)
     setReloadKey((k) => k + 1)
     showToast('success', 'Lien public mis à jour', service.name)
-  }
-
-  // Logo/couverture/fermetures ponctuelles — closures n'est renvoyé que
-  // par la fiche détaillée (GET /staff/services/:id), pas la liste, d'où
-  // un fetch à part à l'ouverture plutôt que de réutiliser la ligne déjà
-  // affichée.
-  const [manageService, setManageService] = useState<ServiceRow | null>(null)
-  const [manageCacheBust, setManageCacheBust] = useState(0)
-  const [uploadingLogo, setUploadingLogo] = useState(false)
-  const [uploadingCover, setUploadingCover] = useState(false)
-  const [deletingCover, setDeletingCover] = useState(false)
-  const [showAddClosure, setShowAddClosure] = useState(false)
-  const [closureLabel, setClosureLabel] = useState('')
-  const [closureStart, setClosureStart] = useState('')
-  const [closureEnd, setClosureEnd] = useState('')
-  const [creatingClosure, setCreatingClosure] = useState(false)
-  const [closureError, setClosureError] = useState<string | null>(null)
-
-  async function openManageService(service: ServiceRow) {
-    setManageService(service)
-    setManageCacheBust(0)
-    setShowAddClosure(false)
-    const result = await apiCall<{ data: ServiceRow }>('GET', `/staff/services/${service.id}`, { staffToken })
-    if (result.ok) setManageService(result.data.data)
-  }
-
-  async function handleUploadLogo(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !manageService) return
-    setUploadingLogo(true)
-    const result = await apiUpload(`/staff/services/${manageService.id}/logo`, file, staffToken, 'logo', true)
-    setUploadingLogo(false)
-    e.target.value = ''
-    if (result.ok) {
-      setManageService((prev) => (prev ? { ...prev, hasLogo: true } : prev))
-      setManageCacheBust(Date.now())
-      setReloadKey((k) => k + 1)
-      showToast('success', 'Logo mis à jour', manageService.name)
-    } else {
-      showToast('error', 'Échec', "Impossible d'envoyer le logo.")
-    }
-  }
-
-  async function handleUploadCover(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !manageService) return
-    setUploadingCover(true)
-    const result = await apiUpload(`/staff/services/${manageService.id}/cover`, file, staffToken, 'cover', true)
-    setUploadingCover(false)
-    e.target.value = ''
-    if (result.ok) {
-      setManageService((prev) => (prev ? { ...prev, hasCoverImage: true } : prev))
-      setManageCacheBust(Date.now())
-      showToast('success', 'Image de couverture mise à jour', manageService.name)
-    } else {
-      showToast('error', 'Échec', "Impossible d'envoyer l'image de couverture.")
-    }
-  }
-
-  async function handleDeleteCover() {
-    if (!manageService) return
-    setDeletingCover(true)
-    const result = await apiCall('DELETE', `/staff/services/${manageService.id}/cover`, { staffToken })
-    setDeletingCover(false)
-    if (result.ok) {
-      setManageService((prev) => (prev ? { ...prev, hasCoverImage: false } : prev))
-      showToast('success', 'Image de couverture supprimée', manageService.name)
-    } else {
-      showToast('error', 'Échec', "Impossible de supprimer l'image de couverture.")
-    }
-  }
-
-  async function handleAddClosure(e: React.FormEvent) {
-    e.preventDefault()
-    if (!manageService) return
-    setCreatingClosure(true)
-    setClosureError(null)
-    const result = await apiCall<{ data: ServiceClosure }>(
-      'POST',
-      `/staff/services/${manageService.id}/closures`,
-      { staffToken, body: { label: closureLabel, startDate: closureStart, endDate: closureEnd } }
-    )
-    setCreatingClosure(false)
-    if (result.ok) {
-      setManageService((prev) =>
-        prev ? { ...prev, closures: [...(prev.closures ?? []), result.data.data] } : prev
-      )
-      setShowAddClosure(false)
-      setClosureLabel('')
-      setClosureStart('')
-      setClosureEnd('')
-      showToast('success', 'Période de fermeture ajoutée', closureLabel)
-    } else if (result.status === 422) {
-      setClosureError('La date de fin doit être postérieure à la date de début.')
-    } else {
-      setClosureError("Échec de l'ajout.")
-    }
-  }
-
-  async function handleDeleteClosure(id: number) {
-    if (!manageService) return
-    const label = manageService.closures?.find((c) => c.id === id)?.label ?? ''
-    setManageService((prev) =>
-      prev ? { ...prev, closures: (prev.closures ?? []).filter((c) => c.id !== id) } : prev
-    )
-    const result = await apiCall('DELETE', `/staff/services/${manageService.id}/closures/${id}`, { staffToken })
-    if (result.ok) showToast('success', 'Période de fermeture supprimée', label)
-    else showToast('error', 'Échec', 'Impossible de supprimer la période de fermeture.')
   }
 
   const [showCreateService, setShowCreateService] = useState(false)
@@ -551,7 +441,11 @@ export function StaffOrganizationDetailPage() {
                       )}
                     </>
                   )}
-                  <SecondaryButton type="button" onClick={() => openManageService(s)} className="px-3 py-1.5">
+                  <SecondaryButton
+                    type="button"
+                    onClick={() => navigate(`/staff/organismes/${id}/services/${s.id}`)}
+                    className="px-3 py-1.5"
+                  >
                     <Settings size={13} />
                     Gérer
                   </SecondaryButton>
@@ -691,169 +585,6 @@ export function StaffOrganizationDetailPage() {
         </Modal>
       )}
 
-      {manageService && (
-        <Modal title={manageService.name} onClose={() => setManageService(null)}>
-          <div className="space-y-4">
-            <div>
-              <p className="mb-1.5 text-sm font-medium text-gray-700">Logo</p>
-              <div className="flex items-center gap-3">
-                <div className="squircle flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100">
-                  {manageService.hasLogo && (
-                    <img
-                      src={`${GATEWAY_URL}/services/${manageService.id}/logo${manageCacheBust ? `?v=${manageCacheBust}` : ''}`}
-                      alt=""
-                      className="h-full w-full object-contain"
-                    />
-                  )}
-                </div>
-                <label className="cursor-pointer">
-                  <span className="squircle inline-flex items-center rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-200">
-                    {uploadingLogo ? 'Envoi…' : 'Changer le logo'}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/svg+xml"
-                    className="hidden"
-                    disabled={uploadingLogo}
-                    onChange={handleUploadLogo}
-                  />
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-1.5 text-sm font-medium text-gray-700">Image de couverture</p>
-              <div className="flex items-center gap-3">
-                <div className="squircle flex h-14 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100">
-                  {manageService.hasCoverImage && (
-                    <img
-                      src={`${GATEWAY_URL}/services/${manageService.id}/cover${manageCacheBust ? `?v=${manageCacheBust}` : ''}`}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  )}
-                </div>
-                <label className="cursor-pointer">
-                  <span className="squircle inline-flex items-center rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-200">
-                    {uploadingCover ? 'Envoi…' : "Changer l'image"}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/svg+xml"
-                    className="hidden"
-                    disabled={uploadingCover}
-                    onChange={handleUploadCover}
-                  />
-                </label>
-                {manageService.hasCoverImage && (
-                  <button
-                    type="button"
-                    onClick={handleDeleteCover}
-                    disabled={deletingCover}
-                    className="text-xs font-semibold text-red-600 disabled:opacity-50"
-                  >
-                    Retirer
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {manageService.serviceType === 'billetterie' && (
-              <div className="border-t border-gray-100 pt-4">
-                <StaffServiceTariffs staffToken={staffToken} service={manageService} />
-              </div>
-            )}
-
-            {manageService.serviceType === 'inscription' && (
-              <div className="border-t border-gray-100 pt-4">
-                <StaffServiceFormations staffToken={staffToken} service={manageService} />
-              </div>
-            )}
-
-            <div>
-              <div className="mb-1.5 flex items-center justify-between">
-                <p className="text-sm font-medium text-gray-700">Fermetures ponctuelles</p>
-                {!showAddClosure && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAddClosure(true)}
-                    className="flex items-center gap-1 text-xs font-semibold text-aregie-blue"
-                  >
-                    <Plus size={12} />
-                    Ajouter
-                  </button>
-                )}
-              </div>
-
-              {(manageService.closures ?? []).length === 0 && !showAddClosure && (
-                <p className="flex items-center gap-1.5 text-sm text-gray-400">
-                  <CalendarOff size={14} />
-                  Aucune période de fermeture.
-                </p>
-              )}
-
-              <div className="space-y-1.5">
-                {(manageService.closures ?? []).map((c) => (
-                  <div key={c.id} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm">
-                    <div>
-                      <p className="font-medium text-gray-700">{c.label}</p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(`${c.startDate}T00:00:00`).toLocaleDateString('fr-FR')} —{' '}
-                        {new Date(`${c.endDate}T00:00:00`).toLocaleDateString('fr-FR')}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteClosure(c.id)}
-                      className="text-gray-400 hover:text-red-600"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {showAddClosure && (
-                <form onSubmit={handleAddClosure} className="mt-2 space-y-2 rounded-lg bg-gray-50 p-3">
-                  <TextInput
-                    placeholder="Libellé (ex. vacances de Noël)"
-                    value={closureLabel}
-                    onChange={(e) => setClosureLabel(e.target.value)}
-                    required
-                  />
-                  <div className="flex gap-2">
-                    <TextInput
-                      type="date"
-                      value={closureStart}
-                      onChange={(e) => setClosureStart(e.target.value)}
-                      required
-                    />
-                    <TextInput
-                      type="date"
-                      value={closureEnd}
-                      onChange={(e) => setClosureEnd(e.target.value)}
-                      required
-                    />
-                  </div>
-                  {closureError && <p className="text-xs text-red-600">{closureError}</p>}
-                  <div className="flex gap-2">
-                    <PrimaryButton type="submit" disabled={creatingClosure} className="flex-1 justify-center py-1.5 text-xs">
-                      {creatingClosure ? 'Ajout…' : 'Ajouter'}
-                    </PrimaryButton>
-                    <SecondaryButton
-                      type="button"
-                      onClick={() => setShowAddClosure(false)}
-                      className="flex-1 justify-center py-1.5 text-xs"
-                    >
-                      Annuler
-                    </SecondaryButton>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
-        </Modal>
-      )}
     </div>
   )
 }

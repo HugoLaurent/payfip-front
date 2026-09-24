@@ -10,6 +10,7 @@ import { ToastProvider } from '@/lib/ToastProvider'
 const StaffSpace = lazy(() => import('@/layouts/StaffSpace'))
 const StaffOrganizationsPage = lazy(() => import('@/pages/staff/StaffOrganizationsPage'))
 const StaffOrganizationDetailPage = lazy(() => import('@/pages/staff/StaffOrganizationDetailPage'))
+const StaffServiceDetailPage = lazy(() => import('@/pages/staff/StaffServiceDetailPage'))
 const StaffServicesPage = lazy(() => import('@/pages/staff/StaffServicesPage'))
 const StaffUsersPage = lazy(() => import('@/pages/staff/StaffUsersPage'))
 const StaffOrdersPage = lazy(() => import('@/pages/staff/StaffOrdersPage'))
@@ -83,6 +84,7 @@ export function StaffGate() {
           <Route path="/" element={<Navigate to="organismes" replace />} />
           <Route path="organismes" element={<StaffOrganizationsPage />} />
           <Route path="organismes/:id" element={<StaffOrganizationDetailPage />} />
+          <Route path="organismes/:id/services/:serviceId" element={<StaffServiceDetailPage />} />
           <Route path="services" element={<StaffServicesPage />} />
           <Route path="utilisateurs" element={<StaffUsersPage />} />
           <Route path="commandes" element={<StaffOrdersPage />} />

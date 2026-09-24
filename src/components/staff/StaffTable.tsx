@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
-import { Card } from '@/components/ui'
 
 // Coquille commune aux 8 vues du panel staff (organismes, services,
 // utilisateurs, commandes, factures, inscriptions, demandes de paiement,
@@ -36,7 +35,11 @@ export function StaffTable({
       transition={{ duration: 0.35, ease: 'easeOut' }}
       className="flex h-full min-h-0 flex-col"
     >
-      <Card className="flex h-full min-h-0 flex-col overflow-hidden p-0">
+      {/* Pas le Card partagé ici : son p-5 câblé et ce p-0 sont deux
+          utilities Tailwind de même poids — lequel gagne dépend de
+          l'ordre de génération, pas de l'ordre dans className, donc rien
+          ne garantit que p-0 l'emporte. */}
+      <div className="squircle flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(20,25,60,0.06)]">
         {toolbar && (
           <div className="flex shrink-0 flex-wrap items-center gap-2.5 border-b border-gray-100 px-4 py-3">
             {toolbar}
@@ -59,7 +62,7 @@ export function StaffTable({
           </table>
         </div>
         {footer && <div className="shrink-0 border-t border-gray-100 px-4 py-3">{footer}</div>}
-      </Card>
+      </div>
     </motion.div>
   )
 }
@@ -82,7 +85,7 @@ export function StaffTableSkeleton({
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <Card className="flex h-full min-h-0 flex-col overflow-hidden p-0">
+      <div className="squircle flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(20,25,60,0.06)]">
         {toolbar && (
           <div className="flex shrink-0 items-center gap-2.5 border-b border-gray-100 px-4 py-3">
             <div className="h-8 w-52 animate-pulse rounded-full bg-gray-100" />
@@ -97,7 +100,7 @@ export function StaffTableSkeleton({
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </div>
   )
 }

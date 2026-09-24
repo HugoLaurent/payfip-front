@@ -257,7 +257,10 @@ export function VentePage() {
 
   if (sellableServices.length === 0) {
     return (
-      <div>
+      // OrgSpace ne borne plus la largeur des pages (voir OrgSpace.tsx) —
+      // Vente reste volontairement étroite : formulaire vertical façon
+      // caisse, pas une liste/tableau qui profiterait de plus d'espace.
+      <div className="mx-auto max-w-2xl">
         <PageHeader icon={<ShoppingCart size={20} />} title="Vente" subtitle={auth.orgName} />
         <p className="text-sm text-gray-500">Aucun service où vous pouvez vendre des billets.</p>
       </div>
@@ -276,7 +279,7 @@ export function VentePage() {
     const paymentLabel = PAYMENT_METHOD_LABELS[saleResult.paymentMethod] ?? saleResult.paymentMethod
 
     return (
-      <div>
+      <div className="mx-auto max-w-2xl">
         <PageHeader icon={<ShoppingCart size={20} />} title="Vente" subtitle={auth.orgName} />
 
         <Card className="mb-4">
@@ -349,7 +352,7 @@ export function VentePage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto max-w-2xl">
       <PageHeader icon={<ShoppingCart size={20} />} title="Vente" subtitle={auth.orgName} />
 
       <form onSubmit={handleSubmit} className="space-y-4">

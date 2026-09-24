@@ -330,7 +330,10 @@ export function ServiceAdmin() {
       {showEvents && <EventsManager auth={auth} service={service} />}
 
       {showSettings && (
-        <>
+        // Paramètres = cartes de réglages (logo, couverture, message de
+        // fermeture...), pas une liste/tableau — bornée comme Vente
+        // plutôt que d'utiliser toute la largeur (voir OrgSpace.tsx).
+        <div className="mx-auto max-w-2xl">
       {service.serviceType === 'billetterie' && (
         <div className="mb-6">
           <OpeningScheduleManager
@@ -445,7 +448,7 @@ export function ServiceAdmin() {
           </div>
         )}
       </Card>
-        </>
+        </div>
       )}
 
       {showCloseConfirm && (
