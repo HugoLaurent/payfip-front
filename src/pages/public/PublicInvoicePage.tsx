@@ -176,7 +176,7 @@ export function PublicInvoicePage() {
           frontRedirectUrl: `${window.location.origin}/factures/${slug}/retour`,
           payerEmail: email.trim(),
           fiscalYear: proof.fiscalYear,
-          amountCents: proof.amountCents,
+          amountCents: invoice.amountCents,
         },
       },
     );
@@ -277,7 +277,7 @@ export function PublicInvoicePage() {
               >
                 {paying
                   ? "Redirection…"
-                  : `Payer ${euros(proof.amountCents)} →`}
+                  : `Payer ${euros(invoice.amountCents)} →`}
               </PublicButton>
             </div>
           )
@@ -398,7 +398,7 @@ export function PublicInvoicePage() {
               <PublicButton type="button" onClick={handlePay} disabled={paying}>
                 {paying
                   ? "Redirection…"
-                  : `Payer ${euros(proof.amountCents)} →`}
+                  : `Payer ${euros(invoice.amountCents)} →`}
               </PublicButton>
             </div>
           )}
