@@ -43,6 +43,7 @@ export function ManualEntrySheet({
           value={code}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Code du billet…"
+          aria-label="Code du billet"
           className="h-[72px] squircle rounded-[18px] border-[2.5px] border-aregie-deep bg-[oklch(0.98_0.008_265)] px-[18px] font-mono text-[26px] font-bold tracking-wide text-gray-900 outline-none"
         />
         <button

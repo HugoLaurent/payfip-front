@@ -16,6 +16,7 @@ import { apiCall } from '@/lib/api'
 import { useAuth } from '@/lib/useAuth'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { useIsDesktop } from '@/lib/useIsDesktop'
+import { formatDayMonth } from '@/lib/format'
 import { PageHeader } from '@/components/ui'
 import { OrderScanPanel, type OrderScanResult, type OrderScanTicket } from './OrderScanPanel'
 import { useQrScanner } from './useQrScanner'
@@ -62,10 +63,6 @@ type ScreenResult =
       consumedLabel: string | null
     }
   | { kind: 'refused'; title: string; subtitle: string | null }
-
-function formatDayMonth(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
-}
 
 function timeAgoFr(iso: string): string {
   const diffMin = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000))

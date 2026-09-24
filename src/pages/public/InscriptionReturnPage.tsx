@@ -70,7 +70,7 @@ export function InscriptionReturnPage() {
     setPayNowError(null)
     const result = await apiCall<{ data: { paymentUrl?: string } }>(
       'POST',
-      `/inscription/registrations/by-token/${accessToken}/pay?orgId=${orgId}`,
+      `/inscription/registrations/by-token/${encodeURIComponent(accessToken)}/pay?orgId=${orgId}`,
       { body: { frontRedirectUrl: `${window.location.origin}/inscription/${slug}/retour` } },
     )
     if (result.ok && result.data.data.paymentUrl) {
@@ -94,7 +94,7 @@ export function InscriptionReturnPage() {
     setRegistrationFailed(false)
 
     const request = isInstant
-      ? apiCall<RegistrationLookupResponse>('GET', `/inscription/registrations/by-token/${accessTokenParam}?orgId=${orgId}`)
+      ? apiCall<RegistrationLookupResponse>('GET', `/inscription/registrations/by-token/${encodeURIComponent(accessTokenParam ?? '')}?orgId=${orgId}`)
       : apiCall<RegistrationLookupResponse>(
           'GET',
           `/inscription/registrations/by-reference/${sourceReference}?orgId=${orgId}&idop=${idop}`,
@@ -116,7 +116,7 @@ export function InscriptionReturnPage() {
     setRetryError(null)
     const result = await apiCall<{ data: { paymentUrl: string } }>(
       'POST',
-      `/inscription/registrations/by-token/${accessToken}/retry-payment?orgId=${orgId}`,
+      `/inscription/registrations/by-token/${encodeURIComponent(accessToken)}/retry-payment?orgId=${orgId}`,
       { body: { frontRedirectUrl: `${window.location.origin}/inscription/${slug}/retour` } },
     )
     if (result.ok) {

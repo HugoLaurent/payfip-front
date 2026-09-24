@@ -43,7 +43,7 @@ export function RegistrationConfirmation({
     setCancelError(null)
     const result = await apiCall(
       'POST',
-      `/inscription/registrations/by-token/${accessToken}/cancel?orgId=${orgId}`,
+      `/inscription/registrations/by-token/${encodeURIComponent(accessToken)}/cancel?orgId=${orgId}`,
       { body: {} },
     )
     setCancelling(false)
@@ -66,7 +66,7 @@ export function RegistrationConfirmation({
     setDownloadError(false)
     setDownloading(true)
     const ok = await openPdfInNewTab(
-      `/inscription/registrations/by-token/${accessToken}/attestation?orgId=${orgId}`,
+      `/inscription/registrations/by-token/${encodeURIComponent(accessToken)}/attestation?orgId=${orgId}`,
     )
     setDownloading(false)
     if (!ok) setDownloadError(true)

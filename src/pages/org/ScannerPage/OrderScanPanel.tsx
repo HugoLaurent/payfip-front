@@ -1,4 +1,5 @@
 import { CheckSquare, Loader2, ScanLine, Ticket as TicketIcon } from 'lucide-react'
+import { formatDayMonth as formatVisitDate } from '@/lib/format'
 
 export interface OrderScanTicket {
   id: number
@@ -13,10 +14,6 @@ export interface OrderScanResult {
   orderId: number
   paymentReference: string | null
   tickets: OrderScanTicket[]
-}
-
-function formatVisitDate(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
 }
 
 function formatTime(iso: string): string {

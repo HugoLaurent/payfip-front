@@ -5,7 +5,7 @@ import { Calendar, ShoppingCart } from "lucide-react";
 import { apiCall, GATEWAY_URL } from "@/lib/api";
 import { LoadError } from "@/components/ui";
 import { useDelayedLoading } from "@/lib/useDelayedLoading";
-import { euros } from "@/lib/format";
+import { euros, formatDateLabel } from "@/lib/format";
 import { useEmailOtpVerification } from "@/lib/useEmailOtpVerification";
 import type { ServiceLookup } from "@/lib/types";
 import { PublicShell } from "@/layouts/PublicShell";
@@ -76,16 +76,6 @@ function nextOpenDate(
     d = new Date(d.getTime() + 24 * 60 * 60 * 1000);
   }
   return fromIso;
-}
-
-function formatDateLabel(iso: string): string {
-  const date = new Date(`${iso}T00:00:00`);
-  return date.toLocaleDateString("fr-FR", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 }
 
 // Maquette : boutons ronds 32px, "−" nu (bordure fine) / "+" plein bleu

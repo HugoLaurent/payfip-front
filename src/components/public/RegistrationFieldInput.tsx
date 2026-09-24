@@ -24,9 +24,13 @@ export function isFieldFilled(field: RegistrationFormField, value: FieldValue | 
 // Obligatoire = un point corail (jamais le mot répété partout) ; facultatif
 // = le mot en toutes lettres — convention de la maquette "Parcours
 // Inscription" (écrans A4/D2), reprise ici pour tout champ du formulaire.
-function FieldLabel({ field }: { field: RegistrationFormField }) {
-  return (
-    <div className="mb-[7px] flex items-baseline gap-[5px]">
+// `htmlFor` associe le libellé à un input/select/textarea unique (rendu en
+// vrai <label>) ; sans lui (groupe de boutons choix/nombre, pas un seul
+// contrôle ciblable), reste un <div id=...> à référencer via
+// aria-labelledby sur le conteneur du groupe.
+function FieldLabel({ field, id, htmlFor }: { field: RegistrationFormField; id: string; htmlFor?: string }) {
+  const content = (
+    <>
       <span className="text-[10.5px] leading-none font-semibold tracking-[0.05em] text-ink-soft uppercase">
         {field.label}
       </span>
@@ -37,6 +41,15 @@ function FieldLabel({ field }: { field: RegistrationFormField }) {
       ) : (
         <span className="text-[10.5px] leading-none font-medium text-ink-faint">facultatif</span>
       )}
+    </>
+  )
+  return htmlFor ? (
+    <label id={id} htmlFor={htmlFor} className="mb-[7px] flex items-baseline gap-[5px]">
+      {content}
+    </label>
+  ) : (
+    <div id={id} className="mb-[7px] flex items-baseline gap-[5px]">
+      {content}
     </div>
   )
 }
@@ -70,48 +83,64 @@ export function RegistrationFieldInput({
     )
   }
 
+  const labelId = `field-label-${field.key}`
+  const controlId = `field-control-${field.key}`
+
   return (
     <div>
-      <FieldLabel field={field} />
-
       {field.type === 'short_text' && (
-        <input
-          type="text"
-          value={typeof value === 'string' ? value : ''}
-          onChange={(e) => onChange(e.target.value)}
-          className={FIELD_BOX}
-        />
+        <>
+          <FieldLabel field={field} id={labelId} htmlFor={controlId} />
+          <input
+            id={controlId}
+            type="text"
+            value={typeof value === 'string' ? value : ''}
+            onChange={(e) => onChange(e.target.value)}
+            className={FIELD_BOX}
+          />
+        </>
       )}
 
       {field.type === 'date' && (
-        <div className="relative">
-          <input
-            type="date"
-            value={typeof value === 'string' ? value : ''}
-            onChange={(e) => onChange(e.target.value)}
-            className={`${FIELD_BOX} appearance-none pr-10`}
-          />
-          <ChevronDown
-            size={15}
-            className="pointer-events-none absolute top-1/2 right-[15px] -translate-y-1/2 text-ink-faint"
-          />
-        </div>
+        <>
+          <FieldLabel field={field} id={labelId} htmlFor={controlId} />
+          <div className="relative">
+            <input
+              id={controlId}
+              type="date"
+              value={typeof value === 'string' ? value : ''}
+              onChange={(e) => onChange(e.target.value)}
+              className={`${FIELD_BOX} appearance-none pr-10`}
+            />
+            <ChevronDown
+              size={15}
+              className="pointer-events-none absolute top-1/2 right-[15px] -translate-y-1/2 text-ink-faint"
+            />
+          </div>
+        </>
       )}
 
       {field.type === 'long_text' && (
-        <textarea
-          value={typeof value === 'string' ? value : ''}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={field.helperText}
-          rows={3}
-          className="squircle w-full resize-none rounded-[14px] border-[1.5px] border-hairline px-[15px] py-[13px] text-[13.5px] leading-[1.5] text-ink outline-none transition placeholder:text-ink-faint focus:border-aregie-blue"
-        />
+        <>
+          <FieldLabel field={field} id={labelId} htmlFor={controlId} />
+          <textarea
+            id={controlId}
+            value={typeof value === 'string' ? value : ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.helperText}
+            rows={3}
+            className="squircle w-full resize-none rounded-[14px] border-[1.5px] border-hairline px-[15px] py-[13px] text-[13.5px] leading-[1.5] text-ink outline-none transition placeholder:text-ink-faint focus:border-aregie-blue"
+          />
+        </>
       )}
 
+      {field.type === 'choice' && field.options && (
+        <FieldLabel field={field} id={labelId} />
+      )}
       {field.type === 'choice' &&
         field.options &&
         (field.options.length <= 3 ? (
-          <div className="flex gap-[7px]">
+          <div role="group" aria-labelledby={labelId} className="flex gap-[7px]">
             {field.options.map((opt) => {
               const active = value === opt
               return (
@@ -133,6 +162,8 @@ export function RegistrationFieldInput({
         ) : (
           <div className="relative">
             <select
+              id={controlId}
+              aria-labelledby={labelId}
               value={typeof value === 'string' ? value : ''}
               onChange={(e) => onChange(e.target.value)}
               className={`${FIELD_BOX} appearance-none pr-10`}
@@ -154,25 +185,34 @@ export function RegistrationFieldInput({
         ))}
 
       {field.type === 'number' && (
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onChange(Math.max(0, (typeof value === 'number' ? value : 0) - 1))}
-            className="squircle flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[14px] border-[1.5px] border-hairline text-xl font-semibold text-[oklch(0.45_0.02_260)]"
-          >
-            −
-          </button>
-          <div className="squircle flex h-[50px] flex-1 items-center justify-center rounded-[14px] border-[1.5px] border-hairline text-[17px] font-bold text-ink">
-            {typeof value === 'number' ? value : 0}
+        <>
+          <FieldLabel field={field} id={labelId} />
+          <div role="group" aria-labelledby={labelId} className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => onChange(Math.max(0, (typeof value === 'number' ? value : 0) - 1))}
+              aria-label={`Diminuer ${field.label}`}
+              className="squircle flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[14px] border-[1.5px] border-hairline text-xl font-semibold text-[oklch(0.45_0.02_260)]"
+            >
+              −
+            </button>
+            <div
+              role="status"
+              aria-live="polite"
+              className="squircle flex h-[50px] flex-1 items-center justify-center rounded-[14px] border-[1.5px] border-hairline text-[17px] font-bold text-ink"
+            >
+              {typeof value === 'number' ? value : 0}
+            </div>
+            <button
+              type="button"
+              onClick={() => onChange((typeof value === 'number' ? value : 0) + 1)}
+              aria-label={`Augmenter ${field.label}`}
+              className="squircle flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[14px] border-[1.5px] border-hairline text-xl font-semibold text-[oklch(0.45_0.02_260)]"
+            >
+              +
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => onChange((typeof value === 'number' ? value : 0) + 1)}
-            className="squircle flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[14px] border-[1.5px] border-hairline text-xl font-semibold text-[oklch(0.45_0.02_260)]"
-          >
-            +
-          </button>
-        </div>
+        </>
       )}
 
       {field.helperText && field.type !== 'long_text' && (

@@ -7,7 +7,7 @@ import { apiCall, openPdfInNewTab } from '@/lib/api'
 import { LoadError } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { usePaymentStatusPolling, isPendingPaymentStatus } from '@/lib/usePaymentStatusPolling'
-import { euros } from '@/lib/format'
+import { euros, formatDateLabel } from '@/lib/format'
 import type { ServiceLookup } from '@/lib/types'
 import { PublicShell } from '@/layouts/PublicShell'
 import { FadeIn, PaymentFailedState, PaymentPendingState, PublicButton } from '@/components/public'
@@ -31,11 +31,6 @@ const STATUS_LABELS: Record<PaymentStatus, string> = {
   failed: 'Le paiement a échoué',
   cancelled: 'Paiement annulé',
   expired: 'Le délai de paiement a expiré',
-}
-
-function formatDateLabel(iso: string): string {
-  const date = new Date(`${iso}T00:00:00`)
-  return date.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 export function PurchaseReturnPage() {

@@ -44,7 +44,7 @@ export function RegistrationWaitlist({
     setLeaveError(null)
     const result = await apiCall(
       'POST',
-      `/inscription/registrations/by-token/${accessToken}/cancel?orgId=${orgId}`,
+      `/inscription/registrations/by-token/${encodeURIComponent(accessToken)}/cancel?orgId=${orgId}`,
       { body: {} },
     )
     setLeaving(false)
@@ -57,7 +57,7 @@ export function RegistrationWaitlist({
     setConfirmError(null)
     const result = await apiCall<{ data: { status: string; paymentUrl?: string } }>(
       'POST',
-      `/inscription/registrations/by-token/${accessToken}/pay?orgId=${orgId}`,
+      `/inscription/registrations/by-token/${encodeURIComponent(accessToken)}/pay?orgId=${orgId}`,
       { body: { frontRedirectUrl: `${window.location.origin}/inscription/${slug}/retour` } },
     )
     if (result.ok) {

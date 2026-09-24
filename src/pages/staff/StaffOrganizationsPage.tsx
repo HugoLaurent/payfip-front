@@ -38,12 +38,17 @@ export function StaffOrganizationsPage() {
   const [createError, setCreateError] = useState<string | null>(null)
 
   useEffect(() => {
+    let cancelled = false
     setOrgs(null)
     setLoadFailed(false)
     apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffToken }).then((result) => {
+      if (cancelled) return
       if (result.ok) setOrgs(result.data.data)
       else setLoadFailed(true)
     })
+    return () => {
+      cancelled = true
+    }
   }, [staffToken, reloadKey])
 
   async function handleCreate(e: React.FormEvent) {

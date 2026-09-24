@@ -121,7 +121,7 @@ export function UsersManager() {
   }
 
   async function saveAgentPermissions() {
-    if (manageAgentId === null || !editPermissions) return
+    if (manageAgentId === null || !editPermissions || !manageAgent) return
     setSavingPermissions(true)
     const result = await apiCall('PATCH', `/auth/users/${manageAgentId}`, {
       token: auth.token,
@@ -142,7 +142,7 @@ export function UsersManager() {
     setManageAgentId(null)
     setEditPermissions(null)
     if (result.ok) {
-      showToast('success', 'Utilisateur mis à jour', agentName(manageAgent!) ?? manageAgent!.email)
+      showToast('success', 'Utilisateur mis à jour', agentName(manageAgent) ?? manageAgent.email)
     } else {
       showToast('error', 'Échec', "Impossible d'enregistrer les modifications.")
     }
@@ -150,7 +150,7 @@ export function UsersManager() {
   }
 
   async function updateAgentStatus(status: 'active' | 'inactive') {
-    if (manageAgentId === null || !editPermissions) return
+    if (manageAgentId === null || !editPermissions || !manageAgent) return
     setStatusUpdating(true)
     setStatusError(null)
     const result = await apiCall('PATCH', `/auth/users/${manageAgentId}`, {
@@ -168,7 +168,7 @@ export function UsersManager() {
       showToast(
         'success',
         status === 'active' ? 'Utilisateur réactivé' : 'Utilisateur désactivé',
-        agentName(manageAgent!) ?? manageAgent!.email
+        agentName(manageAgent) ?? manageAgent.email
       )
       await loadAgents()
     } else if (result.status === 409) {
@@ -182,7 +182,7 @@ export function UsersManager() {
 
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault()
-    if (manageAgentId === null) return
+    if (manageAgentId === null || !manageAgent) return
     setResettingPassword(true)
     setResetPasswordError(null)
     setResetPasswordSuccess(false)
@@ -197,7 +197,7 @@ export function UsersManager() {
     if (result.ok) {
       setResetPasswordValue('')
       setResetPasswordSuccess(true)
-      showToast('success', 'Mot de passe réinitialisé', agentName(manageAgent!) ?? manageAgent!.email)
+      showToast('success', 'Mot de passe réinitialisé', agentName(manageAgent) ?? manageAgent.email)
     } else if (result.status === 422) {
       setResetPasswordError('Ce mot de passe a déjà été utilisé récemment par cet utilisateur.')
       showToast('error', 'Échec', 'Ce mot de passe a déjà été utilisé récemment.')

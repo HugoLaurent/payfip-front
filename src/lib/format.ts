@@ -9,3 +9,10 @@ export function formatDateLabel(iso: string): string {
   const date = new Date(`${iso}T00:00:00`)
   return date.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 }
+
+// "YYYY-MM-DD" -> "12 septembre" — même garde-fou local que formatDateLabel,
+// pour une date sans année (ex: date de visite d'un billet).
+export function formatDayMonth(iso: string): string {
+  const date = new Date(`${iso}T00:00:00`)
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+}
