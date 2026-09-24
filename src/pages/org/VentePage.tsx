@@ -72,26 +72,26 @@ function Stepper({
   onChange: (value: number) => void
 }) {
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-1">
       <button
         type="button"
         onClick={() => onChange(Math.max(0, value - 1))}
         disabled={value === 0}
-        className="flex h-6 w-6 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 disabled:opacity-30"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 active:scale-95 disabled:opacity-30"
       >
-        <Minus size={12} />
+        <Minus size={16} />
       </button>
       <span
-        className={`w-5 text-center text-sm font-bold ${value > 0 ? 'text-aregie-deep' : 'text-gray-400'}`}
+        className={`w-6 text-center text-base font-bold ${value > 0 ? 'text-aregie-deep' : 'text-gray-400'}`}
       >
         {value}
       </span>
       <button
         type="button"
         onClick={() => onChange(value + 1)}
-        className="flex h-6 w-6 items-center justify-center rounded-md text-aregie-deep transition hover:bg-aregie-deep/10"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-aregie-deep transition hover:bg-aregie-deep/10 active:scale-95"
       >
-        <Plus size={12} />
+        <Plus size={16} />
       </button>
     </div>
   )
@@ -353,44 +353,26 @@ export function VentePage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Card>
-          <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">Service</p>
           {sellableServices.length > 1 ? (
-            <SelectInput value={serviceId ?? ''} onChange={(e) => setServiceId(Number(e.target.value))}>
-              {sellableServices.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </SelectInput>
+            <>
+              <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">Service</p>
+              <SelectInput
+                value={serviceId ?? ''}
+                onChange={(e) => setServiceId(Number(e.target.value))}
+                className="mb-4"
+              >
+                {sellableServices.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </SelectInput>
+            </>
           ) : (
-            <p className="font-bold text-gray-900">{sellableServices[0].name}</p>
+            <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+              Billets — {sellableServices[0].name}
+            </p>
           )}
-        </Card>
-
-        <Card className="space-y-3">
-          <p className="text-xs font-semibold tracking-wide text-gray-400 uppercase">Client</p>
-          <div className="relative">
-            <Mail size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
-            <TextInput
-              type="email"
-              placeholder="Email du client"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="pl-9"
-            />
-          </div>
-          <TextInput
-            type="date"
-            value={visitDate}
-            onChange={(e) => setVisitDate(e.target.value)}
-            min={todayIso()}
-            required
-          />
-        </Card>
-
-        <Card>
-          <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">Billets</p>
 
           {tariffsFailed && <LoadError onRetry={() => setReloadKey((k) => k + 1)} />}
           {!tariffsFailed && showTariffsLoading && (
@@ -400,11 +382,11 @@ export function VentePage() {
             <p className="text-sm text-gray-500">Aucun tarif actif.</p>
           )}
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2">
             {tariffs?.map((t) => (
               <div
                 key={t.id}
-                className={`flex items-center justify-between gap-2 squircle rounded-lg border px-2.5 py-2 transition ${
+                className={`flex items-center justify-between gap-2 squircle rounded-lg border px-3 py-3 transition ${
                   (quantities[t.tariffType] ?? 0) > 0
                     ? 'border-aregie-deep bg-aregie-deep/[0.04]'
                     : 'border-gray-100'
@@ -420,6 +402,33 @@ export function VentePage() {
                 />
               </div>
             ))}
+          </div>
+        </Card>
+
+        <Card className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <p className="mb-1.5 text-xs font-semibold tracking-wide text-gray-400 uppercase">Client</p>
+            <div className="relative">
+              <Mail size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+              <TextInput
+                type="email"
+                placeholder="Email du client"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="pl-9"
+              />
+            </div>
+          </div>
+          <div>
+            <p className="mb-1.5 text-xs font-semibold tracking-wide text-gray-400 uppercase">Visite</p>
+            <TextInput
+              type="date"
+              value={visitDate}
+              onChange={(e) => setVisitDate(e.target.value)}
+              min={todayIso()}
+              required
+            />
           </div>
         </Card>
 
@@ -442,13 +451,13 @@ export function VentePage() {
                     key={m.value}
                     type="button"
                     onClick={() => setPaymentMethod(m.value)}
-                    className={`flex flex-col items-center gap-1.5 squircle rounded-xl border px-2 py-3 text-xs font-medium transition ${
+                    className={`flex min-h-[4.5rem] flex-col items-center justify-center gap-1.5 squircle rounded-xl border px-2 py-3 text-xs font-medium transition active:scale-95 ${
                       active
                         ? 'border-aregie-deep bg-aregie-deep text-white'
                         : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                     }`}
                   >
-                    <Icon size={18} />
+                    <Icon size={20} />
                     {m.label}
                   </button>
                 )
@@ -459,16 +468,16 @@ export function VentePage() {
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <Card className="sticky bottom-4 shadow-md">
+        <Card className="sticky bottom-4 border-aregie-deep/15 shadow-lg shadow-aregie-deep/10">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm text-gray-500">
               {qtyTotal} billet{qtyTotal > 1 ? 's' : ''}
             </p>
-            <p className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
+            <p className="text-2xl font-bold text-aregie-deep" style={{ fontFamily: 'var(--font-display)' }}>
               {isFree ? 'Gratuit' : euros(totalCents)}
             </p>
           </div>
-          <PrimaryButton type="submit" disabled={submitting || qtyTotal === 0} className="w-full py-3">
+          <PrimaryButton type="submit" disabled={submitting || qtyTotal === 0} className="w-full py-3.5 text-base">
             {submitting ? 'Enregistrement…' : isFree ? 'Valider' : 'Encaisser'}
           </PrimaryButton>
         </Card>
