@@ -7,7 +7,6 @@ import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useToast } from '@/lib/useToast'
 import { euros } from '@/lib/format'
 import {
-  Card,
   DangerButton,
   EmptyState,
   LoadError,
@@ -197,7 +196,7 @@ export function EventRegistrationsPanel({
   const isSheet = variant === 'sheet'
 
   const header = (
-    <div className={`flex items-center gap-3 border-b border-gray-100 ${isSheet ? 'px-4 py-3' : 'px-1 pb-4'}`}>
+    <div className={`flex items-center gap-3 border-b border-gray-100 px-4 ${isSheet ? 'py-3' : 'py-4'}`}>
       {isSheet && (
         <button
           type="button"
@@ -235,7 +234,7 @@ export function EventRegistrationsPanel({
   )
 
   const filters = (
-    <div className={`flex flex-wrap gap-2 border-b border-gray-100 ${isSheet ? 'px-4 py-3' : 'py-3'}`}>
+    <div className={`flex flex-wrap gap-2 border-b border-gray-100 px-4 py-3`}>
       <div className="relative min-w-0 flex-1">
         <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
         <TextInput
@@ -267,67 +266,76 @@ export function EventRegistrationsPanel({
     </div>
   )
 
+  // Une ligne d'inscrit — tout le contenu se serre à gauche (`flex-wrap`
+  // sans `flex-1`/`justify-between`, rien qui s'étire) au lieu d'écarter
+  // nom/statut d'un côté et montant/actions de l'autre : un nom court
+  // laissait sinon un grand vide au milieu de la ligne, quelle que soit la
+  // largeur de la colonne de détail. Le nom tronque à 200px max ; email et
+  // référence passent sur une seconde ligne (`w-full` force le retour dans
+  // le flex-wrap) plutôt que de pousser le reste plus loin encore.
+  function registrationRow(r: RegistrationAgent) {
+    const docs = r.documents?.filter((d) => d.isCurrent) ?? []
+    return (
+      <div
+        key={r.id}
+        className={`flex flex-wrap items-center gap-x-2.5 gap-y-1.5 py-2.5 ${isSheet ? '' : 'border-t border-gray-100 first:border-t-0'}`}
+      >
+        <p className="max-w-[200px] truncate text-sm font-semibold text-gray-900">
+          {r.firstName} {r.lastName}
+        </p>
+        <StatusBadge label={STATUS_LABELS[r.status]} className={`${STATUS_TINTS[r.status]} px-2.5 py-1 text-xs`} />
+        <span className="text-sm font-bold text-gray-900">{r.amountCents === 0 ? 'Gratuit' : euros(r.amountCents)}</span>
+        {docs.length > 0 && (
+          <button
+            type="button"
+            onClick={() => openReview(r)}
+            className="squircle flex shrink-0 items-center gap-1 rounded-lg bg-gray-100 px-2 py-1.5 text-xs font-medium text-gray-500 transition hover:bg-gray-200 hover:text-aregie-deep"
+            aria-label={`Voir les ${docs.length} document(s) de ${r.firstName} ${r.lastName}`}
+          >
+            <Paperclip size={13} />
+            {docs.length}
+          </button>
+        )}
+        {r.status === 'awaiting_review' && (
+          <PrimaryButton type="button" onClick={() => openReview(r)} className="shrink-0 px-3 py-1.5 text-xs">
+            Vérifier
+          </PrimaryButton>
+        )}
+        {(r.status === 'awaiting_payment' || r.status === 'rejected') && (
+          <SecondaryButton
+            type="button"
+            onClick={() => handleResendReminder(r)}
+            disabled={resendingId === r.id}
+            className="shrink-0 px-3 py-1.5 text-xs"
+          >
+            {resendingId === r.id ? '…' : 'Relancer'}
+          </SecondaryButton>
+        )}
+        {r.status !== 'cancelled' && r.status !== 'expired' && (
+          <DangerButton
+            type="button"
+            onClick={() => handleCancelRegistration(r)}
+            disabled={cancellingId === r.id}
+            className="shrink-0 px-3 py-1.5 text-xs"
+          >
+            {cancellingId === r.id ? '…' : 'Annuler'}
+          </DangerButton>
+        )}
+        <p className="w-full truncate text-xs text-gray-400">
+          {r.email} · {r.registrationReference}
+          {r.quantity > 1 ? ` · ${r.quantity} participants` : ''}
+        </p>
+      </div>
+    )
+  }
+
   const list = (
-    <div className={`flex-1 overflow-y-auto ${isSheet ? 'px-4 py-3' : 'py-3'}`}>
+    <div className="flex-1 overflow-y-auto px-4 py-2">
       {loadFailed && <LoadError onRetry={reload} />}
       {!loadFailed && showLoading && <p className="py-6 text-sm text-gray-500">Chargement…</p>}
       {!loadFailed && data?.length === 0 && <EmptyState label="Aucune inscription pour ce filtre." />}
 
-      <div className="flex flex-col gap-2">
-        {data?.map((r) => (
-          <Card key={r.id} className="flex flex-wrap items-center gap-3 p-0 px-4 py-3">
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-gray-900">
-                {r.firstName} {r.lastName}
-              </p>
-              <p className="truncate text-xs text-gray-400">
-                {r.email} · {r.registrationReference}
-                {r.quantity > 1 ? ` · ${r.quantity} participants` : ''}
-              </p>
-            </div>
-            <StatusBadge label={STATUS_LABELS[r.status]} className={STATUS_TINTS[r.status]} />
-            <p className="w-20 shrink-0 text-right text-sm font-bold text-gray-900">
-              {r.amountCents === 0 ? 'Gratuit' : euros(r.amountCents)}
-            </p>
-            {r.documents && r.documents.filter((d) => d.isCurrent).length > 0 && (
-              <button
-                type="button"
-                onClick={() => openReview(r)}
-                className="squircle flex shrink-0 items-center gap-1 rounded-lg bg-gray-100 px-2 py-1.5 text-xs font-medium text-gray-500 transition hover:bg-gray-200 hover:text-aregie-deep"
-                aria-label={`Voir les ${r.documents.filter((d) => d.isCurrent).length} document(s) de ${r.firstName} ${r.lastName}`}
-              >
-                <Paperclip size={13} />
-                {r.documents.filter((d) => d.isCurrent).length}
-              </button>
-            )}
-            {r.status === 'awaiting_review' && (
-              <PrimaryButton type="button" onClick={() => openReview(r)} className="shrink-0 px-3 py-1.5 text-xs">
-                Vérifier
-              </PrimaryButton>
-            )}
-            {(r.status === 'awaiting_payment' || r.status === 'rejected') && (
-              <SecondaryButton
-                type="button"
-                onClick={() => handleResendReminder(r)}
-                disabled={resendingId === r.id}
-                className="shrink-0 px-3 py-1.5 text-xs"
-              >
-                {resendingId === r.id ? '…' : 'Relancer'}
-              </SecondaryButton>
-            )}
-            {r.status !== 'cancelled' && r.status !== 'expired' && (
-              <DangerButton
-                type="button"
-                onClick={() => handleCancelRegistration(r)}
-                disabled={cancellingId === r.id}
-                className="shrink-0 px-3 py-1.5 text-xs"
-              >
-                {cancellingId === r.id ? '…' : 'Annuler'}
-              </DangerButton>
-            )}
-          </Card>
-        ))}
-      </div>
+      <div className="flex flex-col">{data?.map(registrationRow)}</div>
 
       {meta && <Pagination currentPage={meta.currentPage} lastPage={meta.lastPage} total={meta.total} onChange={setPage} />}
     </div>
