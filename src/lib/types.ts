@@ -65,6 +65,16 @@ export interface AuthState {
   passwordChangeRequired: boolean
 }
 
+// Tentative de paiement PayFiP (facture, commande ou inscription) — même
+// forme quel que soit le domaine métier, dupliquée avant dans 3 pages.
+export interface PaymentAttempt {
+  id: number
+  status: string
+  createdAt: string
+  paidAt: string | null
+  isRetry: boolean
+}
+
 export interface StaffOrganization {
   id: number
   name: string

@@ -15,6 +15,7 @@ import {
 import { apiCall } from '@/lib/api'
 import { useAuth } from '@/lib/useAuth'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
+import { useIsDesktop } from '@/lib/useIsDesktop'
 import { PageHeader } from '@/components/ui'
 import { OrderScanPanel, type OrderScanResult, type OrderScanTicket } from './OrderScanPanel'
 import { useQrScanner } from './useQrScanner'
@@ -123,23 +124,6 @@ function buildScreenResult(
     return { kind: 'refused', title: 'Service non assigné', subtitle: 'Ce billet appartient à un autre service.' }
   }
   return { kind: 'refused', title: 'Entrée refusée', subtitle: 'Billet non valide.' }
-}
-
-// Fixe (mobile, < 768px) et immersif comme un scanner de caisse dédié,
-// vs intégré à la mise en page habituelle (>= 768px, sidebar visible) —
-// même seuil que le tiroir mobile de la Sidebar (voir Sidebar.tsx), pour
-// ne jamais superposer un plein écran fixe à une sidebar déjà statique.
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
-  )
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)')
-    const handler = () => setIsDesktop(mq.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
-  return isDesktop
 }
 
 export function ScannerPage() {

@@ -14,7 +14,7 @@ import {
   Send,
   ShoppingCart,
 } from 'lucide-react'
-import { apiCall, GATEWAY_URL } from '@/lib/api'
+import { apiCall, openPdfInNewTab } from '@/lib/api'
 import { Card, LoadError, PageHeader, PrimaryButton, SecondaryButton, SelectInput, TextInput } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { useAuth } from '@/lib/useAuth'
@@ -181,21 +181,9 @@ export function VentePage() {
   async function handlePrint() {
     if (!saleResult) return
     setPrinting(true)
-
-    const res = await fetch(
-      `${GATEWAY_URL}/billetterie/orders/${saleResult.orderId}/agent-tickets-pdf`,
-      { headers: { Authorization: `Bearer ${auth.token}` } }
-    )
-
+    const ok = await openPdfInNewTab(`/billetterie/orders/${saleResult.orderId}/agent-tickets-pdf`, auth.token)
     setPrinting(false)
-
-    if (!res.ok) {
-      setResendMessage('Échec du chargement du PDF.')
-      return
-    }
-
-    const blob = await res.blob()
-    window.open(URL.createObjectURL(blob), '_blank')
+    if (!ok) setResendMessage('Échec du chargement du PDF.')
   }
 
   async function handleSubmit(e: React.FormEvent) {

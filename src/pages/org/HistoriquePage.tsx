@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, Globe, History, Printer, Search, User } from 'lucide-react'
-import { apiCall, GATEWAY_URL } from '@/lib/api'
+import { apiCall, openPdfInNewTab } from '@/lib/api'
 import { Card, EmptyState, LoadError, PageHeader, Pagination, SecondaryButton, SelectInput, StatusBadge, TextInput } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useAuth } from '@/lib/useAuth'
 import { useToast } from '@/lib/useToast'
 import { euros } from '@/lib/format'
-import type { PageMeta } from '@/lib/types'
+import type { PageMeta, PaymentAttempt } from '@/lib/types'
 
 interface OrderTicket {
   id: number
@@ -35,14 +35,6 @@ interface Order {
   consumedCount: number
   retryCount: number
   tickets: OrderTicket[]
-}
-
-interface PaymentAttempt {
-  id: number
-  status: string
-  createdAt: string
-  paidAt: string | null
-  isRetry: boolean
 }
 
 interface ScanEntry {
@@ -245,20 +237,9 @@ export function HistoriquePage() {
   async function openTicketsPdf(orderId: number) {
     setPdfErrorId(null)
     setPdfLoadingId(orderId)
-
-    const res = await fetch(`${GATEWAY_URL}/billetterie/orders/${orderId}/agent-tickets-pdf`, {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    })
-
+    const ok = await openPdfInNewTab(`/billetterie/orders/${orderId}/agent-tickets-pdf`, auth.token)
     setPdfLoadingId(null)
-
-    if (!res.ok) {
-      setPdfErrorId(orderId)
-      return
-    }
-
-    const blob = await res.blob()
-    window.open(URL.createObjectURL(blob), '_blank')
+    if (!ok) setPdfErrorId(orderId)
   }
 
   if (visibleServices.length === 0) {

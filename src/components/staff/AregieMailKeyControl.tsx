@@ -99,11 +99,12 @@ export function AregieMailKeyControl({ serviceId }: { serviceId?: number }) {
       {editing && (
         <div className="flex flex-wrap items-center gap-2">
           <TextInput
-            type="text"
+            type="password"
             placeholder="sk_..."
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             className="max-w-xs"
+            autoComplete="off"
             autoFocus
           />
           <PrimaryButton type="button" onClick={saveApiKey} disabled={saving || !apiKey.trim()} className="px-4 py-1.5 text-xs">

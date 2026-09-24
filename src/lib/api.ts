@@ -92,6 +92,25 @@ export async function apiCall<T = unknown>(
 }
 
 /**
+ * Récupère un PDF (billets, facture…) et l'ouvre dans un nouvel onglet —
+ * factorise le fetch+blob+window.open répété dans HistoriquePage,
+ * VentePage et PurchaseReturnPage, avec le même filet try/catch que
+ * apiCall (sans lui, une coupure réseau laissait un état "chargement en
+ * cours" bloqué indéfiniment côté appelant).
+ */
+export async function openPdfInNewTab(path: string, token?: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${GATEWAY_URL}${path}`, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined)
+    if (!res.ok) return false
+    const blob = await res.blob()
+    window.open(URL.createObjectURL(blob), '_blank')
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
  * Upload multipart — pas de Content-Type manuel, le navigateur génère
  * lui-même le boundary à partir du FormData.
  */

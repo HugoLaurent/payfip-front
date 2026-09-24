@@ -307,7 +307,12 @@ export function StaffServiceDetailPage() {
                       {new Date(`${c.endDate}T00:00:00`).toLocaleDateString('fr-FR')}
                     </p>
                   </div>
-                  <button type="button" onClick={() => handleDeleteClosure(c.id)} className="text-gray-400 hover:text-red-600">
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteClosure(c.id)}
+                    className="text-gray-400 hover:text-red-600"
+                    aria-label={`Supprimer « ${c.label} »`}
+                  >
                     <Trash2 size={14} />
                   </button>
                 </div>
