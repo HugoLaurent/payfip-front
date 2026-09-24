@@ -511,14 +511,27 @@ export function UsersManager() {
 
       <div className="mb-2 space-y-2">
         {loadFailed && <LoadError onRetry={loadAgents} />}
-        {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
-        {!loadFailed && agents?.length === 0 && (
+        {!loadFailed && showLoading &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex w-full items-center gap-3 squircle rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(20,25,60,0.06)]"
+            >
+              <div className="h-9 w-9 shrink-0 animate-pulse rounded-full bg-gray-100" />
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="h-4 w-40 animate-pulse rounded bg-gray-100" />
+                <div className="h-3 w-56 animate-pulse rounded bg-gray-100" />
+              </div>
+              <div className="h-4 w-4 shrink-0 animate-pulse rounded bg-gray-100" />
+            </div>
+          ))}
+        {!loadFailed && !showLoading && agents?.length === 0 && (
           <EmptyState
             icon={<UsersIcon size={28} />}
             label={tab === 'admins' ? 'Aucun administrateur pour l\'instant.' : 'Aucun agent pour l\'instant.'}
           />
         )}
-        {agents?.map((agent) => (
+        {!showLoading && agents?.map((agent) => (
           <button
             key={agent.id}
             type="button"

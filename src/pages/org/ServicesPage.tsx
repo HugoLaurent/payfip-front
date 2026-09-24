@@ -48,11 +48,24 @@ export function ServicesPage() {
 
       <div className="space-y-2">
         {loadFailed && <LoadError onRetry={reload} />}
-        {!loadFailed && showLoading && <p className="text-sm text-gray-500">Chargement…</p>}
-        {!loadFailed && services?.length === 0 && (
+        {!loadFailed && showLoading &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex w-full items-center gap-3.5 squircle rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(20,25,60,0.06)]"
+            >
+              <div className="h-12 w-12 shrink-0 animate-pulse rounded-xl bg-gray-100" />
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="h-4 w-36 animate-pulse rounded bg-gray-100" />
+                <div className="h-3 w-24 animate-pulse rounded bg-gray-100" />
+              </div>
+              <div className="h-5 w-16 shrink-0 animate-pulse rounded-full bg-gray-100" />
+            </div>
+          ))}
+        {!loadFailed && !showLoading && services?.length === 0 && (
           <EmptyState icon={<Store size={28} />} label="Aucun service." />
         )}
-        {services?.map((service) => (
+        {!showLoading && services?.map((service) => (
           <button
             key={service.id}
             type="button"

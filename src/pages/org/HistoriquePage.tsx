@@ -389,11 +389,25 @@ export function HistoriquePage() {
       {tab === 'scans' ? (
         <div className="space-y-2">
           {scansFailed && <LoadError onRetry={reloadScans} />}
-          {!scansFailed && showScansLoading && <p className="text-sm text-gray-500">Chargement…</p>}
-          {!scansFailed && scans?.length === 0 && (
+          {!scansFailed && showScansLoading &&
+            Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} className="p-0 px-5 py-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div className="h-5 w-20 animate-pulse rounded-full bg-gray-100" />
+                      <div className="h-3.5 w-16 animate-pulse rounded bg-gray-100" />
+                    </div>
+                    <div className="mt-1.5 h-3 w-40 animate-pulse rounded bg-gray-100" />
+                  </div>
+                  <div className="h-3 w-12 shrink-0 animate-pulse rounded bg-gray-100" />
+                </div>
+              </Card>
+            ))}
+          {!scansFailed && !showScansLoading && scans?.length === 0 && (
             <EmptyState icon={<History size={28} />} label="Aucun scan." />
           )}
-          {scans?.map((s) => (
+          {!showScansLoading && scans?.map((s) => (
             <Card key={s.id} className="p-0 px-5 py-2.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
@@ -425,11 +439,27 @@ export function HistoriquePage() {
       ) : (
       <div className="space-y-2">
         {loadFailed && <LoadError onRetry={reloadOrders} />}
-        {!loadFailed && showOrdersLoading && <p className="text-sm text-gray-500">Chargement…</p>}
-        {!loadFailed && orders?.length === 0 && (
+        {!loadFailed && showOrdersLoading &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="p-0 px-5 py-2">
+              <div className="flex w-full items-center justify-between py-1">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline gap-2">
+                    <div className="h-4 w-36 animate-pulse rounded bg-gray-100" />
+                    <div className="h-3 w-16 animate-pulse rounded bg-gray-100" />
+                  </div>
+                  <div className="mt-1.5 h-3 w-48 animate-pulse rounded bg-gray-100" />
+                </div>
+                <div className="flex shrink-0 items-center gap-2 pl-3">
+                  <div className="h-5 w-20 animate-pulse rounded-full bg-gray-100" />
+                </div>
+              </div>
+            </Card>
+          ))}
+        {!loadFailed && !showOrdersLoading && orders?.length === 0 && (
           <EmptyState icon={<History size={28} />} label="Aucune commande." />
         )}
-        {orders?.map((order) => (
+        {!showOrdersLoading && orders?.map((order) => (
           <Card key={order.id} className="p-0 px-5 py-2">
             <div className="flex w-full items-center justify-between">
               <button
@@ -543,9 +573,12 @@ export function HistoriquePage() {
                       </p>
                       {attemptsFailed && <LoadError onRetry={() => loadAttempts(order)} />}
                       {!attemptsFailed && showAttemptsLoading && (
-                        <p className="text-sm text-gray-500">Chargement…</p>
+                        <div className="space-y-2 py-1">
+                          <div className="h-3.5 w-32 animate-pulse rounded bg-gray-100" />
+                          <div className="h-3.5 w-28 animate-pulse rounded bg-gray-100" />
+                        </div>
                       )}
-                      {!attemptsFailed && attempts?.length === 0 && (
+                      {!attemptsFailed && !showAttemptsLoading && attempts?.length === 0 && (
                         <p className="text-sm text-gray-400">Aucune tentative de paiement enregistrée.</p>
                       )}
                       {attempts?.map((a) => (

@@ -3,6 +3,7 @@ import { ScanLine, Ticket, TrendingUp } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { Card } from '@/components/ui'
 import { useAuth } from '@/lib/useAuth'
+import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { euros } from '@/lib/format'
 
 interface RecentActivityEntry {
@@ -87,6 +88,7 @@ export function Dashboard() {
   const { auth } = useAuth()
   const hasBilletterie = auth.services.some((s) => s.serviceType === 'billetterie')
   const [monthStats, setMonthStats] = useState<MonthStats | null>(null)
+  const showLoading = useDelayedLoading(monthStats === null)
 
   useEffect(() => {
     if (hasBilletterie) {
@@ -139,12 +141,16 @@ export function Dashboard() {
                 <TrendingUp size={16} className="text-aregie-blue" />
                 <p className="text-sm">Chiffre d'affaires</p>
               </div>
-              <p
-                className="mt-1 text-4xl font-bold tracking-tight text-gray-900"
-                style={{ fontFamily: 'var(--font-display)' }}
-              >
-                {monthStats ? euros(monthStats.monthRevenueCents) : '…'}
-              </p>
+              {monthStats ? (
+                <p
+                  className="mt-1 text-4xl font-bold tracking-tight text-gray-900"
+                  style={{ fontFamily: 'var(--font-display)' }}
+                >
+                  {euros(monthStats.monthRevenueCents)}
+                </p>
+              ) : (
+                <div className="mt-2 h-9 w-32 animate-pulse rounded bg-gray-100" />
+              )}
               {monthStats && monthStats.dailyRevenue.length > 1 && (
                 <div className="mt-2">
                   <Sparkline points={monthStats.dailyRevenue.map((d) => d.revenueCents)} />
@@ -165,12 +171,16 @@ export function Dashboard() {
                 <Ticket size={18} />
               </div>
               <div>
-                <p
-                  className="text-xl font-bold text-gray-900"
-                  style={{ fontFamily: 'var(--font-display)' }}
-                >
-                  {monthStats ? monthStats.monthTicketsSold : '…'}
-                </p>
+                {monthStats ? (
+                  <p
+                    className="text-xl font-bold text-gray-900"
+                    style={{ fontFamily: 'var(--font-display)' }}
+                  >
+                    {monthStats.monthTicketsSold}
+                  </p>
+                ) : (
+                  <div className="h-6 w-10 animate-pulse rounded bg-gray-100" />
+                )}
                 <p className="text-xs text-gray-500">Billets vendus</p>
               </div>
             </Card>
@@ -179,18 +189,38 @@ export function Dashboard() {
                 <ScanLine size={18} />
               </div>
               <div>
-                <p
-                  className="text-xl font-bold text-gray-900"
-                  style={{ fontFamily: 'var(--font-display)' }}
-                >
-                  {monthStats ? monthStats.monthTicketsScanned : '…'}
-                </p>
+                {monthStats ? (
+                  <p
+                    className="text-xl font-bold text-gray-900"
+                    style={{ fontFamily: 'var(--font-display)' }}
+                  >
+                    {monthStats.monthTicketsScanned}
+                  </p>
+                ) : (
+                  <div className="h-6 w-10 animate-pulse rounded bg-gray-100" />
+                )}
                 <p className="text-xs text-gray-500">Billets scannés</p>
               </div>
             </Card>
           </div>
 
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          {!monthStats && showLoading && (
+            <Card>
+              <div className="mb-3 h-4 w-24 animate-pulse rounded bg-gray-100" />
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i}>
+                    <div className="mb-1 flex justify-between gap-2">
+                      <div className="h-3 w-28 animate-pulse rounded bg-gray-100" />
+                      <div className="h-3 w-12 animate-pulse rounded bg-gray-100" />
+                    </div>
+                    <div className="h-1.5 w-full animate-pulse rounded-full bg-gray-100" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
           {monthStats && monthStats.topServices.length > 0 && (
             <Card>
               <p
@@ -224,6 +254,20 @@ export function Dashboard() {
             </Card>
           )}
 
+          {!monthStats && showLoading && (
+            <Card>
+              <div className="mb-3 h-4 w-32 animate-pulse rounded bg-gray-100" />
+              <div className="space-y-2.5">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-2.5">
+                    <div className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-gray-200" />
+                    <div className="h-3 flex-1 animate-pulse rounded bg-gray-100" />
+                    <div className="h-3 w-10 shrink-0 animate-pulse rounded bg-gray-100" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
           {monthStats && monthStats.recentActivity.length > 0 && (
             <Card>
               <p

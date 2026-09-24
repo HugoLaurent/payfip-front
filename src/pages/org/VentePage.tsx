@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   Banknote,
   CheckCircle2,
@@ -376,14 +377,24 @@ export function VentePage() {
 
           {tariffsFailed && <LoadError onRetry={() => setReloadKey((k) => k + 1)} />}
           {!tariffsFailed && showTariffsLoading && (
-            <p className="text-sm text-gray-500">Chargement des tarifs…</p>
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between gap-2 rounded-lg border border-gray-100 px-3 py-3">
+                  <div className="space-y-1.5">
+                    <div className="h-3.5 w-24 animate-pulse rounded bg-gray-100" />
+                    <div className="h-3 w-12 animate-pulse rounded bg-gray-100" />
+                  </div>
+                  <div className="h-9 w-20 animate-pulse rounded-lg bg-gray-100" />
+                </div>
+              ))}
+            </div>
           )}
-          {!tariffsFailed && tariffs?.length === 0 && (
+          {!tariffsFailed && !showTariffsLoading && tariffs?.length === 0 && (
             <p className="text-sm text-gray-500">Aucun tarif actif.</p>
           )}
 
           <div className="space-y-2">
-            {tariffs?.map((t) => (
+            {!showTariffsLoading && tariffs?.map((t) => (
               <div
                 key={t.id}
                 className={`flex items-center justify-between gap-2 squircle rounded-lg border px-3 py-3 transition ${
@@ -432,39 +443,59 @@ export function VentePage() {
           </div>
         </Card>
 
-        {isFree ? (
-          <Card className="flex items-center gap-3 border border-emerald-100 bg-emerald-50">
-            <Gift size={20} className="shrink-0 text-emerald-600" />
-            <p className="text-sm font-medium text-emerald-800">
-              Gratuit — aucun encaissement nécessaire
-            </p>
-          </Card>
-        ) : (
-          <Card>
-            <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">Paiement</p>
-            <div className="grid grid-cols-4 gap-2">
-              {PAYMENT_METHODS.map((m) => {
-                const Icon = m.icon
-                const active = paymentMethod === m.value
-                return (
-                  <button
-                    key={m.value}
-                    type="button"
-                    onClick={() => setPaymentMethod(m.value)}
-                    className={`flex min-h-[4.5rem] flex-col items-center justify-center gap-1.5 squircle rounded-xl border px-2 py-3 text-xs font-medium transition active:scale-95 ${
-                      active
-                        ? 'border-aregie-deep bg-aregie-deep text-white'
-                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <Icon size={20} />
-                    {m.label}
-                  </button>
-                )
-              })}
-            </div>
-          </Card>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {isFree ? (
+            <motion.div
+              key="free"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              style={{ overflow: 'hidden' }}
+            >
+              <Card className="flex items-center gap-3 border border-emerald-100 bg-emerald-50">
+                <Gift size={20} className="shrink-0 text-emerald-600" />
+                <p className="text-sm font-medium text-emerald-800">
+                  Gratuit — aucun encaissement nécessaire
+                </p>
+              </Card>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="payment"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              style={{ overflow: 'hidden' }}
+            >
+              <Card>
+                <p className="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">Paiement</p>
+                <div className="grid grid-cols-4 gap-2">
+                  {PAYMENT_METHODS.map((m) => {
+                    const Icon = m.icon
+                    const active = paymentMethod === m.value
+                    return (
+                      <button
+                        key={m.value}
+                        type="button"
+                        onClick={() => setPaymentMethod(m.value)}
+                        className={`flex min-h-[4.5rem] flex-col items-center justify-center gap-1.5 squircle rounded-xl border px-2 py-3 text-xs font-medium transition active:scale-95 ${
+                          active
+                            ? 'border-aregie-deep bg-aregie-deep text-white'
+                            : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <Icon size={20} />
+                        {m.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 

@@ -184,7 +184,27 @@ export function ServiceAdmin() {
   }
 
   if (!service) {
-    return showLoading ? <p className="text-sm text-gray-500">Chargement…</p> : null
+    if (!showLoading) return null
+    return (
+      <div>
+        <div className="mb-6 flex items-center gap-3">
+          <div className="h-9 w-9 shrink-0 animate-pulse rounded-full bg-gray-100" />
+          <div className="space-y-2">
+            <div className="h-5 w-48 animate-pulse rounded bg-gray-100" />
+            <div className="h-3.5 w-32 animate-pulse rounded bg-gray-100" />
+          </div>
+        </div>
+        <div className="mb-4 flex gap-1.5">
+          <div className="h-8 w-24 animate-pulse rounded-xl bg-gray-100" />
+          <div className="h-8 w-24 animate-pulse rounded-xl bg-gray-100" />
+        </div>
+        <Card className="space-y-3">
+          <div className="h-3.5 w-full animate-pulse rounded bg-gray-100" />
+          <div className="h-3.5 w-5/6 animate-pulse rounded bg-gray-100" />
+          <div className="h-3.5 w-2/3 animate-pulse rounded bg-gray-100" />
+        </Card>
+      </div>
+    )
   }
 
   const logoUrl = service.hasLogo

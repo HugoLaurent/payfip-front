@@ -82,9 +82,19 @@ export function HistorySheet({
 
       <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto">
         {failed && <LoadError onRetry={onRetry} />}
-        {!failed && loading && <p className="text-sm text-gray-500">Chargement…</p>}
-        {!failed && entries?.length === 0 && <p className="text-sm text-gray-400">Aucun scan pour l'instant.</p>}
-        {entries?.map((e) => {
+        {!failed && loading &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 rounded-[16px] bg-gray-50 px-3.5 py-3">
+              <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-gray-200" />
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="h-3.5 w-28 animate-pulse rounded bg-gray-200" />
+                <div className="h-3 w-16 animate-pulse rounded bg-gray-200" />
+              </div>
+              <div className="h-3 w-10 shrink-0 animate-pulse rounded bg-gray-200" />
+            </div>
+          ))}
+        {!failed && !loading && entries?.length === 0 && <p className="text-sm text-gray-400">Aucun scan pour l'instant.</p>}
+        {!loading && entries?.map((e) => {
           const { dot, bg, text } = dotAndTint(e.result)
           return (
             <div key={e.id} className={`flex items-center gap-3 rounded-[16px] ${bg} px-3.5 py-3`}>
