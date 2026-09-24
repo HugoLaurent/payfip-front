@@ -1,18 +1,15 @@
 import { useState } from 'react'
-import { ChevronRight, KeyRound, Plus, Search, Users as UsersIcon } from 'lucide-react'
+import { ChevronRight, Plus, Search, Users as UsersIcon } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import {
   Card,
-  DangerButton,
   EmptyState,
   ListRow,
   ListRowSkeleton,
   LoadError,
-  Modal,
   PageHeader,
   Pagination,
   PrimaryButton,
-  SecondaryButton,
   StatusBadge,
   TextInput,
 } from '@/components/ui'
@@ -20,58 +17,12 @@ import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useAuth } from '@/lib/useAuth'
 import { useToast } from '@/lib/useToast'
 import { UserFormModal } from './UserFormModal'
-import { getPermissionLabels } from './permissions'
+import { ManageAgentPanel } from './ManageAgentPanel'
+import { agentInitials, agentName, formatLastLogin } from './agentHelpers'
+import type { Agent } from './types'
 import type { AgentPermissions, PageMeta } from '@/lib/types'
 
 const PER_PAGE = 10
-
-interface AgentServiceLink {
-  id: number
-  name: string
-  serviceType: string
-  permissions: AgentPermissions
-}
-
-interface Agent {
-  id: number
-  email: string
-  firstName: string | null
-  lastName: string | null
-  status: string
-  role: 'admin' | 'agent'
-  lastLoginAt: string | null
-  services: AgentServiceLink[]
-}
-
-function agentName(agent: Agent): string | null {
-  if (!agent.firstName && !agent.lastName) return null
-  return [agent.firstName, agent.lastName].filter(Boolean).join(' ')
-}
-
-function agentInitials(agent: Agent): string {
-  const name = agentName(agent)
-  if (!name) return agent.email.slice(0, 2).toUpperCase()
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-}
-
-function formatLastLogin(iso: string | null): string {
-  if (!iso) return 'Jamais connecté'
-  const diffMs = Date.now() - new Date(iso).getTime()
-  const diffMin = Math.floor(diffMs / 60_000)
-  if (diffMin < 1) return "Connecté à l'instant"
-  if (diffMin < 60) return `Connecté il y a ${diffMin} min`
-  const diffH = Math.floor(diffMin / 60)
-  if (diffH < 24) return `Connecté il y a ${diffH} h`
-  const diffD = Math.floor(diffH / 24)
-  if (diffD < 30) return `Connecté il y a ${diffD} j`
-  return `Dernière connexion le ${new Date(iso).toLocaleDateString('fr-FR')}`
-}
 
 export function UsersManager() {
   const { auth } = useAuth()
@@ -118,6 +69,13 @@ export function UsersManager() {
     setEditPermissions(Object.fromEntries(agent.services.map((s) => [s.id, s.permissions])))
     setEditFirstName(agent.firstName ?? '')
     setEditLastName(agent.lastName ?? '')
+  }
+
+  function changePermission(serviceId: number, key: keyof AgentPermissions, checked: boolean) {
+    setEditPermissions((prev) => ({
+      ...prev,
+      [serviceId]: { ...prev![serviceId], [key]: checked },
+    }))
   }
 
   async function saveAgentPermissions() {
@@ -234,226 +192,45 @@ export function UsersManager() {
 
   if (manageAgent && editPermissions) {
     return (
-      <div>
-        <PageHeader
-          icon={<UsersIcon size={20} />}
-          title={agentName(manageAgent) ?? manageAgent.email}
-          subtitle={
-            manageAgent.role === 'admin'
-              ? `${manageAgent.email} · Administrateur`
-              : agentName(manageAgent)
-                ? `${manageAgent.email} · Permissions par service`
-                : 'Permissions par service'
-          }
-        />
-
-        {managingSelf ? (
-          <Card className="mb-4">
-            <p className="text-sm text-gray-500">
-              C'est votre propre compte — utilisez « Mon profil » (en haut de la barre latérale)
-              pour changer votre nom ou votre mot de passe.
-            </p>
-          </Card>
-        ) : (
-          <>
-            <Card className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium text-gray-700">Statut</p>
-                <p className="text-sm text-gray-500">
-                  {manageAgent.status === 'active'
-                    ? 'Actif — peut se connecter'
-                    : 'Désactivé — connexion bloquée'}
-                </p>
-                {statusError && <p className="mt-1 text-sm text-red-600">{statusError}</p>}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {manageAgent.status === 'active' ? (
-                  <DangerButton
-                    type="button"
-                    onClick={() => updateAgentStatus('inactive')}
-                    disabled={statusUpdating}
-                  >
-                    {statusUpdating ? '…' : 'Désactiver'}
-                  </DangerButton>
-                ) : (
-                  <>
-                    <SecondaryButton
-                      type="button"
-                      onClick={() => updateAgentStatus('active')}
-                      disabled={statusUpdating}
-                    >
-                      {statusUpdating ? '…' : 'Réactiver'}
-                    </SecondaryButton>
-                    <DangerButton type="button" onClick={() => setShowDeleteConfirm(true)}>
-                      Supprimer
-                    </DangerButton>
-                  </>
-                )}
-              </div>
-            </Card>
-
-            <Card className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium text-gray-700">Mot de passe</p>
-                <p className="text-sm text-gray-500">
-                  Devra en choisir un nouveau à sa prochaine connexion.
-                </p>
-              </div>
-              <SecondaryButton
-                type="button"
-                onClick={() => {
-                  setResetPasswordValue('')
-                  setResetPasswordError(null)
-                  setResetPasswordSuccess(false)
-                  setShowResetPasswordModal(true)
-                }}
-              >
-                <KeyRound size={14} />
-                Réinitialiser
-              </SecondaryButton>
-            </Card>
-          </>
-        )}
-
-        <Card className="mb-4 space-y-3">
-          <p className="text-sm font-medium text-gray-700">Nom</p>
-          <div className="flex gap-3">
-            <TextInput
-              placeholder="Prénom"
-              value={editFirstName}
-              onChange={(e) => setEditFirstName(e.target.value)}
-            />
-            <TextInput
-              placeholder="Nom"
-              value={editLastName}
-              onChange={(e) => setEditLastName(e.target.value)}
-            />
-          </div>
-        </Card>
-
-        {manageAgent.role === 'admin' ? (
-          <Card>
-            <p className="text-sm text-gray-500">
-              Un administrateur a un accès complet à tout l'organisme — aucune permission par
-              service à configurer.
-            </p>
-            <div className="flex gap-2 pt-3">
-              <PrimaryButton onClick={saveAgentPermissions} disabled={savingPermissions}>
-                {savingPermissions ? 'Enregistrement…' : 'Enregistrer'}
-              </PrimaryButton>
-              <SecondaryButton
-                onClick={() => {
-                  setManageAgentId(null)
-                  setEditPermissions(null)
-                }}
-              >
-                Annuler
-              </SecondaryButton>
-            </div>
-          </Card>
-        ) : (
-        <Card className="space-y-4">
-          {manageAgent.services.map((s) => {
-            const labels = getPermissionLabels(s.serviceType)
-            return (
-              <div key={s.id} className="border-t border-gray-100 pt-4 first:border-t-0 first:pt-0">
-                <p className="mb-2 text-sm font-medium text-gray-700">{s.name}</p>
-                {labels.length === 0 ? (
-                  <p className="text-sm text-gray-400 italic">
-                    Ce service n'a pas de permission spécifique pour l'instant.
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    {labels.map(({ key, label }) => (
-                      <label key={key} className="flex items-center gap-2 text-sm text-gray-600">
-                        <input
-                          type="checkbox"
-                          checked={editPermissions[s.id]?.[key] ?? false}
-                          onChange={(e) =>
-                            setEditPermissions((prev) => ({
-                              ...prev,
-                              [s.id]: { ...prev![s.id], [key]: e.target.checked },
-                            }))
-                          }
-                        />
-                        {label}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-
-          <div className="flex gap-2 pt-2">
-            <PrimaryButton onClick={saveAgentPermissions} disabled={savingPermissions}>
-              {savingPermissions ? 'Enregistrement…' : 'Enregistrer'}
-            </PrimaryButton>
-            <SecondaryButton
-              onClick={() => {
-                setManageAgentId(null)
-                setEditPermissions(null)
-              }}
-            >
-              Annuler
-            </SecondaryButton>
-          </div>
-        </Card>
-        )}
-
-        {showDeleteConfirm && (
-          <Modal title="Supprimer l'utilisateur" onClose={() => setShowDeleteConfirm(false)}>
-            <p className="mb-4 text-sm text-gray-600">
-              <strong>{agentName(manageAgent) ?? manageAgent.email}</strong> sera supprimé
-              définitivement. Cette action est irréversible.
-            </p>
-            {deleteError && <p className="mb-3 text-sm text-red-600">{deleteError}</p>}
-            <div className="flex gap-2">
-              <DangerButton
-                type="button"
-                onClick={handleDeleteAgent}
-                disabled={deleting}
-                className="flex-1 justify-center py-2"
-              >
-                {deleting ? 'Suppression…' : 'Supprimer'}
-              </DangerButton>
-              <SecondaryButton
-                type="button"
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 justify-center"
-              >
-                Annuler
-              </SecondaryButton>
-            </div>
-          </Modal>
-        )}
-
-        {showResetPasswordModal && (
-          <Modal title="Réinitialiser le mot de passe" onClose={() => setShowResetPasswordModal(false)}>
-            <form onSubmit={handleResetPassword} className="space-y-3">
-              <p className="text-sm text-gray-600">
-                <strong>{agentName(manageAgent) ?? manageAgent.email}</strong> devra choisir un
-                nouveau mot de passe à sa prochaine connexion.
-              </p>
-              <TextInput
-                type="password"
-                placeholder="Nouveau mot de passe"
-                value={resetPasswordValue}
-                onChange={(e) => setResetPasswordValue(e.target.value)}
-                required
-                minLength={6}
-              />
-              {resetPasswordError && <p className="text-sm text-red-600">{resetPasswordError}</p>}
-              {resetPasswordSuccess && (
-                <p className="text-sm text-emerald-600">Mot de passe réinitialisé.</p>
-              )}
-              <PrimaryButton type="submit" disabled={resettingPassword} className="w-full">
-                {resettingPassword ? 'Réinitialisation…' : 'Réinitialiser'}
-              </PrimaryButton>
-            </form>
-          </Modal>
-        )}
-      </div>
+      <ManageAgentPanel
+        manageAgent={manageAgent}
+        managingSelf={managingSelf}
+        editFirstName={editFirstName}
+        onChangeFirstName={setEditFirstName}
+        editLastName={editLastName}
+        onChangeLastName={setEditLastName}
+        editPermissions={editPermissions}
+        onChangePermission={changePermission}
+        statusUpdating={statusUpdating}
+        statusError={statusError}
+        onUpdateStatus={updateAgentStatus}
+        savingPermissions={savingPermissions}
+        onSave={saveAgentPermissions}
+        onCancel={() => {
+          setManageAgentId(null)
+          setEditPermissions(null)
+        }}
+        showDeleteConfirm={showDeleteConfirm}
+        onRequestDelete={() => setShowDeleteConfirm(true)}
+        onCloseDeleteConfirm={() => setShowDeleteConfirm(false)}
+        deleting={deleting}
+        deleteError={deleteError}
+        onConfirmDelete={handleDeleteAgent}
+        showResetPasswordModal={showResetPasswordModal}
+        onRequestResetPassword={() => {
+          setResetPasswordValue('')
+          setResetPasswordError(null)
+          setResetPasswordSuccess(false)
+          setShowResetPasswordModal(true)
+        }}
+        onCloseResetPasswordModal={() => setShowResetPasswordModal(false)}
+        resetPasswordValue={resetPasswordValue}
+        onChangeResetPasswordValue={setResetPasswordValue}
+        resettingPassword={resettingPassword}
+        resetPasswordError={resetPasswordError}
+        resetPasswordSuccess={resetPasswordSuccess}
+        onSubmitResetPassword={handleResetPassword}
+      />
     )
   }
 
