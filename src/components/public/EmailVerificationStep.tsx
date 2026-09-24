@@ -175,8 +175,13 @@ export function EmailVerificationStep({
                     </span>
                   </>
                 ) : (
-                  <button type="button" onClick={handleRequestOtp} className="font-bold text-aregie-blue">
-                    Renvoyer le code
+                  <button
+                    type="button"
+                    onClick={handleRequestOtp}
+                    disabled={otpRequesting}
+                    className="font-bold text-aregie-blue disabled:opacity-50"
+                  >
+                    {otpRequesting ? 'Envoi…' : 'Renvoyer le code'}
                   </button>
                 )}
               </p>

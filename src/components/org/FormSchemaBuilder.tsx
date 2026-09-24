@@ -59,6 +59,16 @@ function slugifyKey(label: string, index: number): string {
 // (utilisée pour stocker les réponses citoyennes) est dérivée du libellé,
 // jamais éditée directement par l'agent — pas de concept de "clé" à lui
 // exposer.
+// Deux champs (ex: deux libellés proches qui se slugifient pareil, ou un
+// libellé qui rejoue la clé d'un preset actif) partageraient sinon la
+// même `key` de réponse côté citoyen — la seconde valeur écraserait
+// silencieusement la première sans qu'aucun signal ne prévienne l'agent.
+function findDuplicateKeys(fields: RegistrationFormField[]): Set<string> {
+  const counts = new Map<string, number>()
+  for (const f of fields) counts.set(f.key, (counts.get(f.key) ?? 0) + 1)
+  return new Set([...counts.entries()].filter(([, count]) => count > 1).map(([key]) => key))
+}
+
 export function FormSchemaBuilder({
   fields,
   onChange,
@@ -66,6 +76,8 @@ export function FormSchemaBuilder({
   fields: RegistrationFormField[]
   onChange: (fields: RegistrationFormField[]) => void
 }) {
+  const duplicateKeys = findDuplicateKeys(fields)
+
   function updateField(index: number, patch: Partial<RegistrationFormField>) {
     const next = fields.map((f, i) => (i === index ? { ...f, ...patch } : f))
     onChange(next)
@@ -114,6 +126,11 @@ export function FormSchemaBuilder({
               <Trash2 size={16} />
             </button>
           </div>
+          {duplicateKeys.has(field.key) && (
+            <p className="text-xs text-red-600">
+              Un autre champ utilise déjà cette clé une fois converti — modifiez l'un des deux libellés.
+            </p>
+          )}
           <div className="flex items-center gap-2">
             <SelectInput
               value={field.type}

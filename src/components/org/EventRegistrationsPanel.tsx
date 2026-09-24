@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import { ChevronLeft, Check, Download, Eye, Paperclip, Search, X } from 'lucide-react'
@@ -54,11 +54,17 @@ export function EventRegistrationsPanel({
   event,
   variant,
   onClose,
+  onRegistrationsChanged,
 }: {
   auth: AuthState
   event: EventAgent
   variant: Variant
   onClose: () => void
+  // Prévient EventsManager qu'un compteur affiché sur la carte évènement
+  // (pendingReviewCount, registeredCount) a pu changer, pour qu'il
+  // recharge sa liste — sinon ces compteurs restent périmés jusqu'à ce
+  // que l'agent quitte et rouvre le panneau.
+  onRegistrationsChanged?: () => void
 }) {
   const { showToast } = useToast()
   const [status, setStatus] = useState('')
@@ -127,6 +133,7 @@ export function EventRegistrationsPanel({
       setRejectionReason('')
       setCheckedDocIds(new Set())
       await reload()
+      onRegistrationsChanged?.()
     } else {
       showToast('error', 'Échec', "Impossible d'enregistrer la décision.")
     }
@@ -163,6 +170,7 @@ export function EventRegistrationsPanel({
     if (result.ok) {
       showToast('success', 'Inscription annulée', `${r.firstName} ${r.lastName}`)
       await reload()
+      onRegistrationsChanged?.()
     } else {
       showToast('error', 'Échec', "Impossible d'annuler l'inscription.")
     }
@@ -192,6 +200,17 @@ export function EventRegistrationsPanel({
     if (previewing) URL.revokeObjectURL(previewing.url)
     setPreviewing(null)
   }
+
+  // Filet de sécurité si le panneau est démonté (EventsManager change de
+  // sélection, ferme le panneau...) pendant qu'un aperçu est ouvert —
+  // closePreview() seul ne suffit pas dans ce cas, la blob URL fuirait.
+  const previewingRef = useRef(previewing)
+  previewingRef.current = previewing
+  useEffect(() => {
+    return () => {
+      if (previewingRef.current) URL.revokeObjectURL(previewingRef.current.url)
+    }
+  }, [])
 
   const isSheet = variant === 'sheet'
 

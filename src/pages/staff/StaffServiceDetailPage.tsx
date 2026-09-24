@@ -30,12 +30,17 @@ export function StaffServiceDetailPage() {
   const showLoading = useDelayedLoading(service === null && !loadFailed)
 
   useEffect(() => {
+    let cancelled = false
     setService(null)
     setLoadFailed(false)
     apiCall<{ data: ServiceRow }>('GET', `/staff/services/${serviceId}`, { staffToken }).then((result) => {
+      if (cancelled) return
       if (result.ok) setService(result.data.data)
       else setLoadFailed(true)
     })
+    return () => {
+      cancelled = true
+    }
   }, [staffToken, serviceId, reloadKey])
 
   const [cacheBust, setCacheBust] = useState(0)
@@ -125,11 +130,19 @@ export function StaffServiceDetailPage() {
 
   async function handleDeleteClosure(id: number) {
     if (!service) return
-    const label = service.closures?.find((c) => c.id === id)?.label ?? ''
+    if (!window.confirm('Supprimer cette période de fermeture ?')) return
+    const removed = service.closures?.find((c) => c.id === id)
+    const label = removed?.label ?? ''
     setService((prev) => (prev ? { ...prev, closures: (prev.closures ?? []).filter((c) => c.id !== id) } : prev))
     const result = await apiCall('DELETE', `/staff/services/${service.id}/closures/${id}`, { staffToken })
-    if (result.ok) showToast('success', 'Période de fermeture supprimée', label)
-    else showToast('error', 'Échec', 'Impossible de supprimer la période de fermeture.')
+    if (result.ok) {
+      showToast('success', 'Période de fermeture supprimée', label)
+    } else {
+      // Échec : on remet la période supprimée optimistiquement plutôt que
+      // de laisser l'UI désynchronisée du serveur.
+      setService((prev) => (prev && removed ? { ...prev, closures: [...(prev.closures ?? []), removed] } : prev))
+      showToast('error', 'Échec', 'Impossible de supprimer la période de fermeture.')
+    }
   }
 
   if (loadFailed) return <LoadError onRetry={() => setReloadKey((k) => k + 1)} />

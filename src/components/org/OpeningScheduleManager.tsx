@@ -113,11 +113,19 @@ export function OpeningScheduleManager({
   }
 
   async function handleDeleteClosure(id: number) {
-    const label = closures.find((c) => c.id === id)?.label ?? ''
+    if (!window.confirm('Supprimer cette période de fermeture ?')) return
+    const removed = closures.find((c) => c.id === id)
+    const label = removed?.label ?? ''
     setClosures((prev) => prev.filter((c) => c.id !== id))
     const result = await apiCall('DELETE', `/auth/services/${service.id}/closures/${id}`, { token: auth.token })
-    if (result.ok) showToast('success', 'Période de fermeture supprimée', label)
-    else showToast('error', 'Échec', 'Impossible de supprimer la période de fermeture.')
+    if (result.ok) {
+      showToast('success', 'Période de fermeture supprimée', label)
+    } else {
+      // Échec : on remet la période supprimée optimistiquement plutôt que
+      // de laisser l'UI désynchronisée du serveur.
+      setClosures((prev) => (removed ? [...prev, removed] : prev))
+      showToast('error', 'Échec', 'Impossible de supprimer la période de fermeture.')
+    }
   }
 
   return (

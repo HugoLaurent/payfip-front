@@ -41,9 +41,11 @@ export function StaffOrganizationDetailPage() {
   const [servicesFailed, setServicesFailed] = useState(false)
 
   useEffect(() => {
+    let cancelled = false
     setOrg(null)
     setLoadFailed(false)
     apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffToken }).then((result) => {
+      if (cancelled) return
       if (!result.ok) {
         setLoadFailed(true)
         return
@@ -55,17 +57,25 @@ export function StaffOrganizationDetailPage() {
       }
       setOrg(found)
     })
+    return () => {
+      cancelled = true
+    }
   }, [staffToken, id, reloadKey])
 
   useEffect(() => {
+    let cancelled = false
     setServices(null)
     setServicesFailed(false)
     apiCall<{ data: ServiceRow[] }>('GET', `/staff/services?orgId=${id}&perPage=100`, { staffToken }).then(
       (result) => {
+        if (cancelled) return
         if (result.ok) setServices(result.data.data)
         else setServicesFailed(true)
       }
     )
+    return () => {
+      cancelled = true
+    }
   }, [staffToken, id, reloadKey])
 
   const [editingName, setEditingName] = useState(false)

@@ -36,6 +36,17 @@ export interface ApiResult<T = unknown> {
   data: T
 }
 
+// Au-delà, on considère le Gateway injoignable plutôt que de laisser l'UI
+// en "Chargement…" indéfiniment (ex: coupure réseau côté agent terrain).
+const DEFAULT_TIMEOUT_MS = 20_000
+
+// status: 0 distingue une panne réseau/timeout (jamais renvoyée par le
+// Gateway) d'une vraie réponse HTTP, pour que les appelants puissent
+// afficher "pas de réseau" plutôt qu'une erreur métier.
+function networkFailureResult<T>(): ApiResult<T> {
+  return { ok: false, status: 0, data: null as T }
+}
+
 /** Appelle le Gateway — jamais un service interne directement. */
 export async function apiCall<T = unknown>(
   method: string,
@@ -48,11 +59,24 @@ export async function apiCall<T = unknown>(
   if (options.token) headers.Authorization = `Bearer ${options.token}`
   else if (options.staffToken) headers.Authorization = `Bearer ${options.staffToken}`
 
-  const res = await fetch(`${GATEWAY_URL}${path}`, {
-    method,
-    headers,
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
+
+  let res: Response
+  try {
+    res = await fetch(`${GATEWAY_URL}${path}`, {
+      method,
+      headers,
+      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      signal: controller.signal,
+    })
+  } catch {
+    // Coupure réseau, DNS, CORS, ou timeout (abort) — jamais laisser
+    // l'appelant sans réponse, sinon l'UI reste bloquée en chargement.
+    return networkFailureResult<T>()
+  } finally {
+    clearTimeout(timeout)
+  }
 
   handleUnauthorized(res.status, Boolean(options.token))
   handleStaffUnauthorized(res.status, Boolean(options.staffToken))

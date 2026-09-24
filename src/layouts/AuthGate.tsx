@@ -90,6 +90,20 @@ export function AuthGate() {
     return <ForcedPasswordChange auth={auth} onChanged={updateAuth} onLogout={handleLogout} />
   }
 
+  // Même condition que le filtrage interne de VentePage/HistoriquePage/
+  // ScannerPage (service billetterie + permission ou admin) — répétée ici
+  // pour que l'accès direct à l'URL soit bloqué au routeur, pas seulement
+  // masqué dans la nav, cohérent avec /utilisateurs ci-dessous.
+  const canSell =
+    auth.role === 'admin' ||
+    auth.services.some((s) => s.serviceType === 'billetterie' && s.permissions?.canSell)
+  const canViewHistory =
+    auth.role === 'admin' ||
+    auth.services.some((s) => s.serviceType === 'billetterie' && s.permissions?.canViewHistory)
+  const canScan =
+    auth.role === 'admin' ||
+    auth.services.some((s) => s.serviceType === 'billetterie' && s.permissions?.canScan)
+
   return (
     <AuthProvider value={{ auth, onLogout: handleLogout, onAuthUpdate: updateAuth }}>
       <ToastProvider>
@@ -100,9 +114,11 @@ export function AuthGate() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/services/:id" element={<ServiceAdmin />} />
-              <Route path="/vente" element={<VentePage />} />
-              <Route path="/historique" element={<HistoriquePage />} />
-              <Route path="/scanner" element={<ScannerPage />} />
+              {canSell && <Route path="/vente" element={<VentePage />} />}
+              {canViewHistory && (
+                <Route path="/historique" element={<HistoriquePage />} />
+              )}
+              {canScan && <Route path="/scanner" element={<ScannerPage />} />}
               {auth.role === 'admin' && (
                 <Route path="/utilisateurs" element={<UsersManager />} />
               )}

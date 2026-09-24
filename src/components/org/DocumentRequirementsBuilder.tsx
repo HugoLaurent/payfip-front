@@ -36,6 +36,16 @@ function slugifyKeyForPreset(label: string): string {
 
 const PRESET_KEYS = new Set(DOCUMENT_PRESETS.map((p) => slugifyKeyForPreset(p.requirement.label)))
 
+// Deux pièces qui se slugifient sur la même clé partageraient sinon le
+// même slot de dépôt côté citoyen (voir registrations_controller.ts#
+// readNamedDocuments) — le second dépôt écraserait silencieusement le
+// premier sans qu'aucun signal ne prévienne l'agent.
+function findDuplicateKeys(requirements: DocumentRequirement[]): Set<string> {
+  const counts = new Map<string, number>()
+  for (const r of requirements) counts.set(r.key, (counts.get(r.key) ?? 0) + 1)
+  return new Set([...counts.entries()].filter(([, count]) => count > 1).map(([key]) => key))
+}
+
 // Composeur des pièces à demander au citoyen pour un évènement — chaque
 // exigence devient un slot de dépôt nommé et distinct (voir
 // registrations_controller.ts#readNamedDocuments), jamais un champ
@@ -47,6 +57,8 @@ export function DocumentRequirementsBuilder({
   requirements: DocumentRequirement[]
   onChange: (requirements: DocumentRequirement[]) => void
 }) {
+  const duplicateKeys = findDuplicateKeys(requirements)
+
   function updateRequirement(index: number, patch: Partial<DocumentRequirement>) {
     onChange(requirements.map((r, i) => (i === index ? { ...r, ...patch } : r)))
   }
@@ -94,6 +106,11 @@ export function DocumentRequirementsBuilder({
                 <Trash2 size={16} />
               </button>
             </div>
+            {duplicateKeys.has(requirement.key) && (
+              <p className="text-xs text-red-600">
+                Une autre pièce utilise déjà cette clé une fois convertie — modifiez l'un des deux libellés.
+              </p>
+            )}
             <TextInput
               type="text"
               placeholder="Instructions affichées au citoyen (facultatif)"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ApiResult } from './api'
 import { useDelayedLoading } from './useDelayedLoading'
 
@@ -25,10 +25,17 @@ export function usePaginatedResource<T, Meta = unknown>({
   const [meta, setMeta] = useState<Meta | null>(null)
   const [loadFailed, setLoadFailed] = useState(false)
   const showLoading = useDelayedLoading(data === null)
+  // Incrémenté à chaque `load()` — une réponse qui revient après qu'un
+  // load plus récent est parti (filtre changé, navigation rapide entre
+  // fiches...) est ignorée au lieu d'écraser l'état avec une donnée
+  // périmée.
+  const requestIdRef = useRef(0)
 
   async function load() {
+    const requestId = ++requestIdRef.current
     setLoadFailed(false)
     const result = await fetcher()
+    if (requestId !== requestIdRef.current) return
     if (result.ok) {
       setData(result.data.data)
       setMeta(result.data.meta)
