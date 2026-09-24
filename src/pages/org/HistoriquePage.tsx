@@ -407,33 +407,40 @@ export function HistoriquePage() {
           {!scansFailed && !showScansLoading && scans?.length === 0 && (
             <EmptyState icon={<History size={28} />} label="Aucun scan." />
           )}
-          {!showScansLoading && scans?.map((s) => (
-            <Card key={s.id} className="p-0 px-5 py-2.5">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <StatusBadge
-                      label={SCAN_RESULT_LABELS[s.result] ?? s.result}
-                      className={SCAN_RESULT_TINTS[s.result] ?? 'bg-red-100 text-red-600'}
-                    />
-                    {s.tariffType && <span className="truncate text-sm text-gray-700">{s.tariffType}</span>}
+          {!showScansLoading && scans?.map((s, i) => (
+            <motion.div
+              key={s.id}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut', delay: Math.min(i, 6) * 0.02 }}
+            >
+              <Card className="p-0 px-5 py-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <StatusBadge
+                        label={SCAN_RESULT_LABELS[s.result] ?? s.result}
+                        className={SCAN_RESULT_TINTS[s.result] ?? 'bg-red-100 text-red-600'}
+                      />
+                      {s.tariffType && <span className="truncate text-sm text-gray-700">{s.tariffType}</span>}
+                    </div>
+                    <p className="mt-0.5 truncate text-[13px] text-gray-400">
+                      {s.agentLabel ? `Par ${s.agentLabel}` : 'Agent inconnu'}
+                      {s.email && ` · ${s.email}`}
+                      {s.paymentReference && ` · ${s.paymentReference}`}
+                      {s.reason && ` · ${s.reason}`}
+                    </p>
                   </div>
-                  <p className="mt-0.5 truncate text-[13px] text-gray-400">
-                    {s.agentLabel ? `Par ${s.agentLabel}` : 'Agent inconnu'}
-                    {s.email && ` · ${s.email}`}
-                    {s.paymentReference && ` · ${s.paymentReference}`}
-                    {s.reason && ` · ${s.reason}`}
-                  </p>
+                  <span className="shrink-0 text-xs text-gray-400">
+                    {new Date(s.createdAt).toLocaleTimeString('fr-FR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                    })}
+                  </span>
                 </div>
-                <span className="shrink-0 text-xs text-gray-400">
-                  {new Date(s.createdAt).toLocaleTimeString('fr-FR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                  })}
-                </span>
-              </div>
-            </Card>
+              </Card>
+            </motion.div>
           ))}
         </div>
       ) : (
@@ -459,8 +466,14 @@ export function HistoriquePage() {
         {!loadFailed && !showOrdersLoading && orders?.length === 0 && (
           <EmptyState icon={<History size={28} />} label="Aucune commande." />
         )}
-        {!showOrdersLoading && orders?.map((order) => (
-          <Card key={order.id} className="p-0 px-5 py-2">
+        {!showOrdersLoading && orders?.map((order, i) => (
+          <motion.div
+            key={order.id}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut', delay: Math.min(i, 6) * 0.02 }}
+          >
+          <Card className="p-0 px-5 py-2">
             <div className="flex w-full items-center justify-between">
               <button
                 type="button"
@@ -595,6 +608,7 @@ export function HistoriquePage() {
               )}
             </AnimatePresence>
           </Card>
+          </motion.div>
         ))}
       </div>
       )}

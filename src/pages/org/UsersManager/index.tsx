@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { ChevronRight, KeyRound, Plus, Search, Users as UsersIcon } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import {
@@ -531,11 +532,14 @@ export function UsersManager() {
             label={tab === 'admins' ? 'Aucun administrateur pour l\'instant.' : 'Aucun agent pour l\'instant.'}
           />
         )}
-        {!showLoading && agents?.map((agent) => (
-          <button
+        {!showLoading && agents?.map((agent, i) => (
+          <motion.button
             key={agent.id}
             type="button"
             onClick={() => selectManageAgent(agent)}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut', delay: Math.min(i, 6) * 0.02 }}
             className="flex w-full items-center gap-3 squircle rounded-2xl bg-white p-4 text-left shadow-[0_1px_3px_rgba(20,25,60,0.06)] transition-shadow hover:shadow-md"
           >
             <div
@@ -565,7 +569,7 @@ export function UsersManager() {
               </p>
             </div>
             <ChevronRight size={18} className="shrink-0 text-gray-400" />
-          </button>
+          </motion.button>
         ))}
       </div>
 

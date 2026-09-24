@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { ScanLine } from 'lucide-react'
 import { BottomSheet } from './BottomSheet'
 import { LoadError } from '@/components/ui'
@@ -94,10 +95,16 @@ export function HistorySheet({
             </div>
           ))}
         {!failed && !loading && entries?.length === 0 && <p className="text-sm text-gray-400">Aucun scan pour l'instant.</p>}
-        {!loading && entries?.map((e) => {
+        {!loading && entries?.map((e, i) => {
           const { dot, bg, text } = dotAndTint(e.result)
           return (
-            <div key={e.id} className={`flex items-center gap-3 rounded-[16px] ${bg} px-3.5 py-3`}>
+            <motion.div
+              key={e.id}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut', delay: Math.min(i, 6) * 0.02 }}
+              className={`flex items-center gap-3 rounded-[16px] ${bg} px-3.5 py-3`}
+            >
               <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: dot }} />
               <div className="min-w-0 flex-1">
                 <p className={`truncate text-[14.5px] font-bold ${text}`}>
@@ -108,7 +115,7 @@ export function HistorySheet({
               <span className="shrink-0 text-[13px] font-semibold text-gray-400">
                 {new Date(e.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
               </span>
-            </div>
+            </motion.div>
           )
         })}
       </div>

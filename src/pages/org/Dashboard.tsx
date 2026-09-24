@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { ScanLine, Ticket, TrendingUp } from 'lucide-react'
 import { apiCall } from '@/lib/api'
 import { Card } from '@/components/ui'
@@ -142,12 +143,15 @@ export function Dashboard() {
                 <p className="text-sm">Chiffre d'affaires</p>
               </div>
               {monthStats ? (
-                <p
+                <motion.p
+                  initial={{ opacity: 0, y: 3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
                   className="mt-1 text-4xl font-bold tracking-tight text-gray-900"
                   style={{ fontFamily: 'var(--font-display)' }}
                 >
                   {euros(monthStats.monthRevenueCents)}
-                </p>
+                </motion.p>
               ) : (
                 <div className="mt-2 h-9 w-32 animate-pulse rounded bg-gray-100" />
               )}
@@ -172,12 +176,15 @@ export function Dashboard() {
               </div>
               <div>
                 {monthStats ? (
-                  <p
+                  <motion.p
+                    initial={{ opacity: 0, y: 3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
                     className="text-xl font-bold text-gray-900"
                     style={{ fontFamily: 'var(--font-display)' }}
                   >
                     {monthStats.monthTicketsSold}
-                  </p>
+                  </motion.p>
                 ) : (
                   <div className="h-6 w-10 animate-pulse rounded bg-gray-100" />
                 )}
@@ -190,12 +197,15 @@ export function Dashboard() {
               </div>
               <div>
                 {monthStats ? (
-                  <p
+                  <motion.p
+                    initial={{ opacity: 0, y: 3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
                     className="text-xl font-bold text-gray-900"
                     style={{ fontFamily: 'var(--font-display)' }}
                   >
                     {monthStats.monthTicketsScanned}
-                  </p>
+                  </motion.p>
                 ) : (
                   <div className="h-6 w-10 animate-pulse rounded bg-gray-100" />
                 )}
@@ -222,6 +232,7 @@ export function Dashboard() {
             </Card>
           )}
           {monthStats && monthStats.topServices.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: 'easeOut' }}>
             <Card>
               <p
                 className="mb-3 text-sm font-bold text-gray-900"
@@ -252,6 +263,7 @@ export function Dashboard() {
                 ))}
               </div>
             </Card>
+            </motion.div>
           )}
 
           {!monthStats && showLoading && (
@@ -269,6 +281,7 @@ export function Dashboard() {
             </Card>
           )}
           {monthStats && monthStats.recentActivity.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: 'easeOut' }}>
             <Card>
               <p
                 className="mb-3 text-sm font-bold text-gray-900"
@@ -295,6 +308,7 @@ export function Dashboard() {
                 ))}
               </div>
             </Card>
+            </motion.div>
           )}
           </div>
         </div>

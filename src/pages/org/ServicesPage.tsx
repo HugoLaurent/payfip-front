@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Search, Store } from 'lucide-react'
 import { apiCall, GATEWAY_URL } from '@/lib/api'
@@ -65,11 +66,14 @@ export function ServicesPage() {
         {!loadFailed && !showLoading && services?.length === 0 && (
           <EmptyState icon={<Store size={28} />} label="Aucun service." />
         )}
-        {!showLoading && services?.map((service) => (
-          <button
+        {!showLoading && services?.map((service, i) => (
+          <motion.button
             key={service.id}
             type="button"
             onClick={() => navigate(`/services/${service.id}`, { state: { service } })}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut', delay: Math.min(i, 6) * 0.02 }}
             className="flex w-full items-center gap-3.5 squircle rounded-2xl bg-white p-4 text-left shadow-[0_1px_3px_rgba(20,25,60,0.06)] transition-shadow hover:shadow-md"
           >
             <div
@@ -107,7 +111,7 @@ export function ServicesPage() {
               className={SERVICE_STATUS_TINTS[service.status] ?? 'bg-gray-100 text-gray-600'}
             />
             <ChevronRight size={18} className="shrink-0 text-gray-400" />
-          </button>
+          </motion.button>
         ))}
       </div>
 

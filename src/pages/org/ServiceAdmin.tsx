@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Image as ImageIcon } from 'lucide-react'
 import { apiCall, apiUpload, GATEWAY_URL } from '@/lib/api'
@@ -221,7 +222,11 @@ export function ServiceAdmin() {
   const showSettings = (!hasTariffsTab && !hasEventsTab) || effectiveTab === 'settings'
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: 'easeOut' }}
+    >
       <button
         type="button"
         onClick={() => navigate('/services')}
@@ -470,7 +475,7 @@ export function ServiceAdmin() {
           </div>
         </Modal>
       )}
-    </div>
+    </motion.div>
   )
 }
 

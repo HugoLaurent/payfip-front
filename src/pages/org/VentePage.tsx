@@ -394,10 +394,13 @@ export function VentePage() {
           )}
 
           <div className="space-y-2">
-            {!showTariffsLoading && tariffs?.map((t) => (
-              <div
+            {!showTariffsLoading && tariffs?.map((t, i) => (
+              <motion.div
                 key={t.id}
-                className={`flex items-center justify-between gap-2 squircle rounded-lg border px-3 py-3 transition ${
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, ease: 'easeOut', delay: Math.min(i, 6) * 0.02 }}
+                className={`flex items-center justify-between gap-2 squircle rounded-lg border px-3 py-3 transition-colors ${
                   (quantities[t.tariffType] ?? 0) > 0
                     ? 'border-aregie-deep bg-aregie-deep/[0.04]'
                     : 'border-gray-100'
@@ -411,7 +414,7 @@ export function VentePage() {
                   value={quantities[t.tariffType] ?? 0}
                   onChange={(v) => setQuantities((prev) => ({ ...prev, [t.tariffType]: v }))}
                 />
-              </div>
+              </motion.div>
             ))}
           </div>
         </Card>
