@@ -303,84 +303,87 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
               const full = isEventFull(event)
 
               return (
-                <Card key={event.id} className="relative flex flex-wrap items-center gap-3 p-0 px-4 py-3">
+                <Card key={event.id} className="relative flex flex-col gap-3 p-0 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center">
                   <div className="min-w-0 flex-1">
-                    <p className={`text-sm font-semibold ${dimmed ? 'text-gray-500' : 'text-gray-900'}`}>{event.title}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className={`text-sm font-semibold ${dimmed ? 'text-gray-500' : 'text-gray-900'}`}>{event.title}</p>
+                      <StatusBadge label={STATUS_LABELS[event.status]} className={STATUS_TINTS[event.status]} />
+                    </div>
                     <p className="truncate text-xs text-gray-400">{eventMetaLabel(event)}</p>
                   </div>
 
-                  <StatusBadge label={STATUS_LABELS[event.status]} className={STATUS_TINTS[event.status]} />
-
-                  <div className="w-32 shrink-0">
-                    {event.status === 'draft' ? (
-                      <p className="text-right text-xs font-medium text-gray-400">Non publié</p>
-                    ) : event.status === 'published' && !past ? (
-                      <div className="flex flex-col items-end gap-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-gray-700">
-                            {event.capacity === null ? `Illimité · ${event.registeredCount}` : `${event.registeredCount} / ${event.capacity}`}
-                          </span>
-                          {full && (
-                            <span className="squircle rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
-                              Complet
-                            </span>
-                          )}
-                        </div>
-                        <div className="h-[5px] w-full rounded-full bg-gray-100">
-                          <div
-                            className={`h-full rounded-full ${full ? 'bg-amber-500' : event.capacity === null ? 'bg-gray-300' : 'bg-aregie-deep'}`}
-                            style={{ width: `${fillRatio(event) * 100}%` }}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-right text-xs font-semibold text-gray-400">
-                        {event.capacity === null ? `${event.registeredCount} inscrits` : `${event.registeredCount} / ${event.capacity}`}
-                      </p>
-                    )}
-                  </div>
-
-                  <p className={`w-20 shrink-0 text-right text-sm font-bold ${
-                    !dimmed && event.priceCents === 0 ? 'text-emerald-600' : dimmed ? 'text-gray-400' : 'text-gray-900'
-                  }`}>
-                    {event.priceCents === 0 ? 'Gratuit' : euros(event.priceCents)}
-                  </p>
-
-                  {canManage && (
-                    <div className="flex shrink-0 items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-3 sm:shrink-0">
+                    <div className="w-32 shrink-0">
                       {event.status === 'draft' ? (
-                        <PrimaryButton type="button" onClick={() => handlePublish(event)} className="px-3 py-1.5 text-xs">
-                          Publier
-                        </PrimaryButton>
+                        <p className="text-right text-xs font-medium text-gray-400">Non publié</p>
+                      ) : event.status === 'published' && !past ? (
+                        <div className="flex flex-col items-end gap-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold text-gray-700">
+                              {event.capacity === null ? `Illimité · ${event.registeredCount}` : `${event.registeredCount} / ${event.capacity}`}
+                            </span>
+                            {full && (
+                              <span className="squircle rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                                Complet
+                              </span>
+                            )}
+                          </div>
+                          <div className="h-[5px] w-full rounded-full bg-gray-100">
+                            <div
+                              className={`h-full rounded-full ${full ? 'bg-amber-500' : event.capacity === null ? 'bg-gray-300' : 'bg-aregie-deep'}`}
+                              style={{ width: `${fillRatio(event) * 100}%` }}
+                            />
+                          </div>
+                        </div>
                       ) : (
+                        <p className="text-right text-xs font-semibold text-gray-400">
+                          {event.capacity === null ? `${event.registeredCount} inscrits` : `${event.registeredCount} / ${event.capacity}`}
+                        </p>
+                      )}
+                    </div>
+
+                    <p className={`w-20 shrink-0 text-right text-sm font-bold ${
+                      !dimmed && event.priceCents === 0 ? 'text-emerald-600' : dimmed ? 'text-gray-400' : 'text-gray-900'
+                    }`}>
+                      {event.priceCents === 0 ? 'Gratuit' : euros(event.priceCents)}
+                    </p>
+
+                    {canManage && (
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        {event.status === 'draft' ? (
+                          <PrimaryButton type="button" onClick={() => handlePublish(event)} className="px-3 py-1.5 text-xs">
+                            Publier
+                          </PrimaryButton>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setViewingRegistrationsFor(event)}
+                            className={`squircle inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                              event.pendingReviewCount > 0
+                                ? 'bg-aregie-coral/10 text-aregie-coral hover:bg-aregie-coral/15'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            Inscrits
+                            {event.pendingReviewCount > 0 && (
+                              <span className="squircle flex h-4 min-w-4 items-center justify-center rounded-full bg-aregie-coral px-1 text-[10px] font-bold text-white">
+                                {event.pendingReviewCount}
+                              </span>
+                            )}
+                          </button>
+                        )}
+
                         <button
                           type="button"
-                          onClick={() => setViewingRegistrationsFor(event)}
-                          className={`squircle inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                            event.pendingReviewCount > 0
-                              ? 'bg-aregie-coral/10 text-aregie-coral hover:bg-aregie-coral/15'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
+                          onClick={() => setOpenMenuId(openMenuId === event.id ? null : event.id)}
+                          className="squircle flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-50"
+                          aria-label={`Actions pour « ${event.title} »`}
                         >
-                          Inscrits
-                          {event.pendingReviewCount > 0 && (
-                            <span className="squircle flex h-4 min-w-4 items-center justify-center rounded-full bg-aregie-coral px-1 text-[10px] font-bold text-white">
-                              {event.pendingReviewCount}
-                            </span>
-                          )}
+                          <MoreHorizontal size={16} />
                         </button>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => setOpenMenuId(openMenuId === event.id ? null : event.id)}
-                        className="squircle flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-50"
-                        aria-label={`Actions pour « ${event.title} »`}
-                      >
-                        <MoreHorizontal size={16} />
-                      </button>
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
 
                   {openMenuId === event.id && (
                     <>
