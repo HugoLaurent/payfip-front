@@ -261,7 +261,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
         )}
       </div>
 
-      <div className={isDesktop ? 'grid grid-cols-[340px_minmax(0,1fr)] items-start gap-4' : undefined}>
+      <div className={isDesktop ? 'grid grid-cols-[340px_minmax(0,640px)] items-start gap-4' : undefined}>
         <Card className="p-0">
           <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 px-4 py-3">
             <div className="relative min-w-0 flex-1">
@@ -525,11 +525,11 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
         </Card>
 
         {isDesktop && (
-          <div className="squircle flex h-[calc(100vh-15rem)] min-h-[420px] flex-col overflow-hidden rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(20,25,60,0.06)]">
+          <div className="squircle flex min-h-[420px] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(20,25,60,0.06)]">
             {selectedEvent ? (
               <EventRegistrationsPanel auth={auth} event={selectedEvent} variant="panel" onClose={() => setSelectedEvent(null)} />
             ) : (
-              <div className="flex h-full items-center justify-center p-6">
+              <div className="flex h-full min-h-[420px] items-center justify-center p-6">
                 <EmptyState icon={<CalendarDays size={24} />} label="Sélectionnez un évènement pour voir ses inscrits." />
               </div>
             )}
