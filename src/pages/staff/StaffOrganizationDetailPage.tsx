@@ -5,11 +5,13 @@ import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { useToast } from '@/lib/useToast'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
+import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import {
   Card,
   DangerButton,
   LoadError,
   Modal,
+  Pagination,
   PrimaryButton,
   SecondaryButton,
   SelectInput,
@@ -17,14 +19,16 @@ import {
   Textarea,
   TextInput,
 } from '@/components/ui'
-import { SERVICE_STATUS_LABELS, SERVICE_STATUS_TINTS, SERVICE_TYPE_LABELS } from '@/lib/serviceLabels'
-import type { ServiceRow, StaffOrganization } from '@/lib/types'
+import {
+  ORG_STATUS_LABELS,
+  ORG_STATUS_TINTS,
+  SERVICE_STATUS_LABELS,
+  SERVICE_STATUS_TINTS,
+  SERVICE_TYPE_LABELS,
+} from '@/lib/serviceLabels'
+import type { PageMeta, ServiceRow, StaffOrganization } from '@/lib/types'
 
-const ORG_STATUS_LABELS: Record<string, string> = { active: 'Actif', suspended: 'Suspendu' }
-const ORG_STATUS_TINTS: Record<string, string> = {
-  active: 'bg-emerald-100 text-emerald-700',
-  suspended: 'bg-red-100 text-red-600',
-}
+const SERVICES_PER_PAGE = 25
 
 export function StaffOrganizationDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -37,35 +41,34 @@ export function StaffOrganizationDetailPage() {
   const [reloadKey, setReloadKey] = useState(0)
   const showLoading = useDelayedLoading(org === null && !loadFailed)
 
-  const [services, setServices] = useState<ServiceRow[] | null>(null)
-  const [servicesFailed, setServicesFailed] = useState(false)
+  const [servicesPage, setServicesPage] = useState(1)
+  const {
+    data: services,
+    meta: servicesMeta,
+    loadFailed: servicesFailed,
+    reload: reloadServices,
+  } = usePaginatedResource<ServiceRow, PageMeta>({
+    fetcher: () =>
+      apiCall(
+        'GET',
+        `/staff/services?orgId=${id}&page=${servicesPage}&perPage=${SERVICES_PER_PAGE}`,
+        { staffToken }
+      ),
+    deps: [staffToken, id, reloadKey, servicesPage],
+  })
 
   useEffect(() => {
+    let cancelled = false
     setOrg(null)
     setLoadFailed(false)
-    apiCall<{ data: StaffOrganization[] }>('GET', '/staff/organizations', { staffToken }).then((result) => {
-      if (!result.ok) {
-        setLoadFailed(true)
-        return
-      }
-      const found = result.data.data.find((o) => String(o.id) === id)
-      if (!found) {
-        setLoadFailed(true)
-        return
-      }
-      setOrg(found)
+    apiCall<{ data: StaffOrganization }>('GET', `/staff/organizations/${id}`, { staffToken }).then((result) => {
+      if (cancelled) return
+      if (result.ok) setOrg(result.data.data)
+      else setLoadFailed(true)
     })
-  }, [staffToken, id, reloadKey])
-
-  useEffect(() => {
-    setServices(null)
-    setServicesFailed(false)
-    apiCall<{ data: ServiceRow[] }>('GET', `/staff/services?orgId=${id}&perPage=100`, { staffToken }).then(
-      (result) => {
-        if (result.ok) setServices(result.data.data)
-        else setServicesFailed(true)
-      }
-    )
+    return () => {
+      cancelled = true
+    }
   }, [staffToken, id, reloadKey])
 
   const [editingName, setEditingName] = useState(false)
@@ -165,7 +168,7 @@ export function StaffOrganizationDetailPage() {
     })
     setTogglingServiceId(null)
     if (result.ok) {
-      setReloadKey((k) => k + 1)
+      await reloadServices()
       showToast(
         'success',
         nextStatus === 'archived' ? 'Service fermé' : 'Service réactivé',
@@ -206,7 +209,7 @@ export function StaffOrganizationDetailPage() {
       return
     }
     setEditingSlugId(null)
-    setReloadKey((k) => k + 1)
+    await reloadServices()
     showToast('success', 'Lien public mis à jour', service.name)
   }
 
@@ -244,7 +247,8 @@ export function StaffOrganizationDetailPage() {
     }
 
     setShowCreateService(false)
-    setReloadKey((k) => k + 1)
+    if (servicesPage === 1) await reloadServices()
+    else setServicesPage(1)
     const createdLinkCode = (result.data as { linkCode?: string } | undefined)?.linkCode
     showToast(
       'success',
@@ -293,6 +297,7 @@ export function StaffOrganizationDetailPage() {
                   onClick={handleSaveName}
                   disabled={savingName || !nameInput.trim()}
                   className="squircle flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 disabled:opacity-50"
+                  aria-label="Enregistrer le nom"
                 >
                   <Check size={14} />
                 </button>
@@ -300,6 +305,7 @@ export function StaffOrganizationDetailPage() {
                   type="button"
                   onClick={() => setEditingName(false)}
                   className="squircle flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 text-gray-500"
+                  aria-label="Annuler le renommage"
                 >
                   <X size={14} />
                 </button>
@@ -390,7 +396,7 @@ export function StaffOrganizationDetailPage() {
           </PrimaryButton>
         </div>
 
-        {servicesFailed && <LoadError onRetry={() => setReloadKey((k) => k + 1)} />}
+        {servicesFailed && <LoadError onRetry={reloadServices} />}
         {!servicesFailed && services === null && <p className="text-sm text-gray-500">Chargement…</p>}
         {!servicesFailed && services?.length === 0 && <p className="text-sm text-gray-400">Aucun service.</p>}
 
@@ -466,6 +472,7 @@ export function StaffOrganizationDetailPage() {
                       onClick={() => handleSaveSlug(s)}
                       disabled={savingSlug}
                       className="squircle flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 disabled:opacity-50"
+                      aria-label="Enregistrer le lien"
                     >
                       <Check size={13} />
                     </button>
@@ -473,6 +480,7 @@ export function StaffOrganizationDetailPage() {
                       type="button"
                       onClick={() => setEditingSlugId(null)}
                       className="squircle flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 text-gray-500"
+                      aria-label="Annuler la modification du lien"
                     >
                       <X size={13} />
                     </button>
@@ -495,6 +503,14 @@ export function StaffOrganizationDetailPage() {
               </div>
             ))}
           </div>
+        )}
+        {servicesMeta && (
+          <Pagination
+            currentPage={servicesMeta.currentPage}
+            lastPage={servicesMeta.lastPage}
+            total={servicesMeta.total}
+            onChange={setServicesPage}
+          />
         )}
       </Card>
 

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import type { Formation } from '@/lib/types'
 import { euros, formatDateLabel } from '@/lib/format'
-import { GATEWAY_URL, apiCall } from '@/lib/api'
+import { apiCall, openPdfInNewTab } from '@/lib/api'
 import { downloadEventIcs } from '@/lib/ics'
 import { PublicButton, PublicGhostButton } from './PublicButtons'
 
@@ -65,16 +65,11 @@ export function RegistrationConfirmation({
   async function handleDownloadAttestation() {
     setDownloadError(false)
     setDownloading(true)
-    const res = await fetch(
-      `${GATEWAY_URL}/inscription/registrations/by-token/${accessToken}/attestation?orgId=${orgId}`,
+    const ok = await openPdfInNewTab(
+      `/inscription/registrations/by-token/${accessToken}/attestation?orgId=${orgId}`,
     )
     setDownloading(false)
-    if (!res.ok) {
-      setDownloadError(true)
-      return
-    }
-    const blob = await res.blob()
-    window.open(URL.createObjectURL(blob), '_blank')
+    if (!ok) setDownloadError(true)
   }
 
   const dateLine = [

@@ -3,7 +3,10 @@
 // Délimiteur `;` + BOM UTF-8 pour un import direct correct dans Excel FR.
 export function downloadCsv(filename: string, headers: string[], rows: (string | number)[][]) {
   const escape = (v: string | number) => {
-    const s = String(v)
+    let s = String(v)
+    // Neutralise l'injection de formule (Excel/LibreOffice interprètent les
+    // cellules commençant par ces caractères comme des formules).
+    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`
     return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
   const lines = [headers, ...rows].map((r) => r.map(escape).join(';'))

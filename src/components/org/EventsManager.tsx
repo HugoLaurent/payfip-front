@@ -105,8 +105,17 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
       `/inscription/services/${service.id}/events`,
       { token: auth.token },
     )
-    if (result.ok) setEvents(result.data.data)
-    else setLoadFailed(true)
+    if (result.ok) {
+      setEvents(result.data.data)
+      // selectedEvent référence l'objet d'avant ce refetch — sans ce
+      // resync, le panneau de détail affiche un statut/compteurs périmés
+      // après publish/archive/révision de justificatif tant que l'agent
+      // ne resélectionne pas l'évènement. Repasse à null si l'évènement a
+      // disparu de la liste (ex. suppression).
+      setSelectedEvent((prev) => (prev ? (result.data.data.find((e) => e.id === prev.id) ?? null) : prev))
+    } else {
+      setLoadFailed(true)
+    }
   }
 
   useEffect(() => {
@@ -527,7 +536,13 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
         {isDesktop && (
           <div className="squircle flex min-h-[420px] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(20,25,60,0.06)]">
             {selectedEvent ? (
-              <EventRegistrationsPanel auth={auth} event={selectedEvent} variant="panel" onClose={() => setSelectedEvent(null)} />
+              <EventRegistrationsPanel
+                auth={auth}
+                event={selectedEvent}
+                variant="panel"
+                onClose={() => setSelectedEvent(null)}
+                onRegistrationsChanged={loadEvents}
+              />
             ) : (
               <div className="flex h-full min-h-[420px] items-center justify-center p-6">
                 <EmptyState icon={<CalendarDays size={24} />} label="Sélectionnez un évènement pour voir ses inscrits." />
@@ -613,6 +628,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
           event={selectedEvent}
           variant="sheet"
           onClose={() => setSelectedEvent(null)}
+          onRegistrationsChanged={loadEvents}
         />
       )}
     </div>

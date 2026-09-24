@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import QRCode from 'qrcode'
 import { CheckCircle2, Loader2, Printer } from 'lucide-react'
-import { apiCall, GATEWAY_URL } from '@/lib/api'
+import { apiCall, openPdfInNewTab } from '@/lib/api'
 import { LoadError } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { usePaymentStatusPolling, isPendingPaymentStatus } from '@/lib/usePaymentStatusPolling'
@@ -99,15 +99,10 @@ export function PurchaseReturnPage() {
 
   async function handleDownloadAll() {
     setPdfError(false)
-    const res = await fetch(
-      `${GATEWAY_URL}/billetterie/orders/by-reference/${sourceReference}/tickets/pdf?orgId=${orgId}&idop=${idop}`
+    const ok = await openPdfInNewTab(
+      `/billetterie/orders/by-reference/${sourceReference}/tickets/pdf?orgId=${orgId}&idop=${idop}`
     )
-    if (!res.ok) {
-      setPdfError(true)
-      return
-    }
-    const blob = await res.blob()
-    window.open(URL.createObjectURL(blob), '_blank')
+    if (!ok) setPdfError(true)
   }
 
   async function handleRetry() {

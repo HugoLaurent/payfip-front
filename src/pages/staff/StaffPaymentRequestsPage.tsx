@@ -4,16 +4,13 @@ import { apiCall } from '@/lib/api'
 import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { downloadCsv } from '@/lib/exportCsv'
+import { euros } from '@/lib/format'
 import { EmptyState, HeroGhostButton, LoadError, Pagination, StatusBadge, TextInput } from '@/components/ui'
 import { StaffHero } from '@/components/staff/StaffHero'
 import { genericStatusTint, StaffRow, StaffTable, StaffTableSkeleton, Td } from '@/components/staff/StaffTable'
 import type { PageMeta } from '@/lib/types'
 
 const PER_PAGE = 25
-
-function euros(cents: number): string {
-  return `${(cents / 100).toFixed(2)} €`
-}
 
 interface StaffPaymentRequest {
   id: number

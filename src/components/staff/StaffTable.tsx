@@ -119,7 +119,19 @@ export function StaffRow({
   return (
     <tr
       onClick={onClick}
-      className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/60 ${onClick ? 'cursor-pointer' : ''}`}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key !== 'Enter' && e.key !== ' ') return
+              e.preventDefault()
+              onClick()
+            }
+          : undefined
+      }
+      className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/60 ${
+        onClick ? 'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-aregie-blue' : ''
+      }`}
     >
       {children}
     </tr>

@@ -17,13 +17,8 @@ import {
 } from '@/components/ui'
 import { StaffHero } from '@/components/staff/StaffHero'
 import { StaffRow, StaffTable, StaffTableSkeleton, Td } from '@/components/staff/StaffTable'
+import { ORG_STATUS_LABELS, ORG_STATUS_TINTS } from '@/lib/serviceLabels'
 import type { StaffOrganization } from '@/lib/types'
-
-const ORG_STATUS_LABELS: Record<string, string> = { active: 'Actif', suspended: 'Suspendu' }
-const ORG_STATUS_TINTS: Record<string, string> = {
-  active: 'bg-emerald-100 text-emerald-700',
-  suspended: 'bg-red-100 text-red-600',
-}
 
 export function StaffOrganizationsPage() {
   const { staffToken } = useStaffAuth()

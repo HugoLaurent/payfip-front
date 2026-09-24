@@ -56,6 +56,9 @@ export function TariffsManager({ auth, service }: { auth: AuthState; service: Se
 
   const [loadFailed, setLoadFailed] = useState(false)
   const showLoading = useDelayedLoading(tariffs === null)
+  // Empêche un double-clic sur le Switch d'envoyer deux PATCH concurrents
+  // pour le même tarif pendant que le premier est encore en vol.
+  const [pendingArchiveIds, setPendingArchiveIds] = useState<Set<number>>(new Set())
 
   async function loadTariffs() {
     setLoadFailed(false)
@@ -120,10 +123,17 @@ export function TariffsManager({ auth, service }: { auth: AuthState; service: Se
   }
 
   async function handleArchive(tariffId: number) {
+    if (pendingArchiveIds.has(tariffId)) return
+    setPendingArchiveIds((prev) => new Set(prev).add(tariffId))
     const tariffType = tariffs?.find((t) => t.id === tariffId)?.tariffType ?? ''
     const result = await apiCall('PATCH', `/billetterie/tariffs/${tariffId}`, {
       token: auth.token,
       body: { status: 'archived' },
+    })
+    setPendingArchiveIds((prev) => {
+      const next = new Set(prev)
+      next.delete(tariffId)
+      return next
     })
     if (result.ok) showToast('success', 'Tarif désactivé', tariffType)
     else showToast('error', 'Échec', 'Impossible de désactiver le tarif.')
@@ -131,10 +141,17 @@ export function TariffsManager({ auth, service }: { auth: AuthState; service: Se
   }
 
   async function handleReactivate(tariffId: number) {
+    if (pendingArchiveIds.has(tariffId)) return
+    setPendingArchiveIds((prev) => new Set(prev).add(tariffId))
     const tariffType = tariffs?.find((t) => t.id === tariffId)?.tariffType ?? ''
     const result = await apiCall('PATCH', `/billetterie/tariffs/${tariffId}`, {
       token: auth.token,
       body: { status: 'active' },
+    })
+    setPendingArchiveIds((prev) => {
+      const next = new Set(prev)
+      next.delete(tariffId)
+      return next
     })
     if (result.ok) showToast('success', 'Tarif réactivé', tariffType)
     else showToast('error', 'Échec', 'Impossible de réactiver le tarif.')
@@ -252,7 +269,7 @@ export function TariffsManager({ auth, service }: { auth: AuthState; service: Se
               </p>
               {canManage ? (
                 <>
-                  <Switch checked onChange={() => handleArchive(t.id)} />
+                  <Switch checked onChange={() => handleArchive(t.id)} disabled={pendingArchiveIds.has(t.id)} />
                   <button
                     type="button"
                     onClick={() => openEdit(t)}
@@ -285,7 +302,7 @@ export function TariffsManager({ auth, service }: { auth: AuthState; service: Se
                   <p className="w-20 shrink-0 text-right text-sm font-bold text-gray-900">
                     {t.priceCents === 0 ? 'Gratuit' : euros(t.priceCents)}
                   </p>
-                  <Switch checked={false} onChange={() => handleReactivate(t.id)} />
+                  <Switch checked={false} onChange={() => handleReactivate(t.id)} disabled={pendingArchiveIds.has(t.id)} />
                   <button
                     type="button"
                     onClick={() => setDeletingTariff(t)}

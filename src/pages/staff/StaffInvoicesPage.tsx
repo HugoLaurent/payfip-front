@@ -5,6 +5,7 @@ import { useStaffAuth } from '@/lib/useStaffAuth'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
 import { downloadCsv } from '@/lib/exportCsv'
+import { euros } from '@/lib/format'
 import {
   EmptyState,
   HeroGhostButton,
@@ -17,7 +18,7 @@ import {
 } from '@/components/ui'
 import { StaffHero } from '@/components/staff/StaffHero'
 import { genericStatusTint, StaffRow, StaffTable, StaffTableSkeleton, Td } from '@/components/staff/StaffTable'
-import type { PageMeta } from '@/lib/types'
+import type { PageMeta, PaymentAttempt } from '@/lib/types'
 
 const PER_PAGE = 25
 
@@ -26,10 +27,6 @@ const INVOICE_STATUS_LABELS: Record<string, string> = {
   awaiting_payment: 'En attente',
   confirmed: 'Payée',
   cancelled: 'Annulée',
-}
-
-function euros(cents: number): string {
-  return `${(cents / 100).toFixed(2)} €`
 }
 
 interface StaffInvoice {
@@ -42,14 +39,6 @@ interface StaffInvoice {
   status: string
   amountCents: number
   objectLabel: string
-}
-
-interface PaymentAttempt {
-  id: number
-  status: string
-  createdAt: string
-  paidAt: string | null
-  isRetry: boolean
 }
 
 export function StaffInvoicesPage() {

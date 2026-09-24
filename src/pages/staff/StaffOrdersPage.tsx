@@ -6,6 +6,7 @@ import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useStaffOrgOptions } from '@/lib/useStaffOrgOptions'
 import { useToast } from '@/lib/useToast'
 import { downloadCsv } from '@/lib/exportCsv'
+import { euros } from '@/lib/format'
 import {
   EmptyState,
   HeroButton,
@@ -31,10 +32,6 @@ const ORDER_STATUS_LABELS: Record<string, string> = {
   awaiting_payment: 'En attente',
   confirmed: 'Payée',
   cancelled: 'Annulée',
-}
-
-function euros(cents: number): string {
-  return `${(cents / 100).toFixed(2)} €`
 }
 
 interface StaffOrder {

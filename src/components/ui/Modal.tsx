@@ -1,7 +1,10 @@
 import { X } from 'lucide-react'
 import { motion } from 'framer-motion'
-import type { ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 export function Modal({
   title,
@@ -12,6 +15,45 @@ export function Modal({
   onClose: () => void
   children: ReactNode
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const titleId = useId()
+
+  // Échap pour fermer, Tab/Shift+Tab piégés dans le modal (focus trap), et
+  // le focus revient à l'élément qui avait le focus avant l'ouverture —
+  // sans ça, un clavier ou lecteur d'écran perd le contexte dès qu'un
+  // Modal s'ouvre par-dessus la page.
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null
+    const firstFocusable = dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
+    ;(firstFocusable ?? dialogRef.current)?.focus()
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+      if (!focusables || focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      previouslyFocused?.focus()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Portail vers document.body : un Modal ouvert depuis un ancêtre animé
   // (Sidebar en tiroir mobile, Card en motion.div…) hérite sinon du
   // containing block que ce parent crée dès qu'il porte un `transform`
@@ -27,14 +69,19 @@ export function Modal({
       style={{ fontFamily: 'var(--font-public)' }}
     >
       <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         initial={{ opacity: 0, scale: 0.96, y: 8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.18, ease: 'easeOut' }}
-        className="squircle max-h-[85vh] w-full max-w-md overflow-y-auto rounded-[20px] bg-white p-6 shadow-[0_30px_60px_-20px_rgba(20,25,60,0.4)]"
+        className="squircle max-h-[85vh] w-full max-w-md overflow-y-auto rounded-[20px] bg-white p-6 shadow-[0_30px_60px_-20px_rgba(20,25,60,0.4)] outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-[17px] font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
+          <h3 id={titleId} className="text-[17px] font-bold text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
             {title}
           </h3>
           <button

@@ -100,6 +100,15 @@ export function eventFormToPayload(form: EventFormState) {
   }
 }
 
+function hasDuplicateKeys(items: { key: string }[]): boolean {
+  const seen = new Set<string>()
+  for (const item of items) {
+    if (seen.has(item.key)) return true
+    seen.add(item.key)
+  }
+  return false
+}
+
 function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
@@ -155,6 +164,9 @@ export function EventFormPanel({
   saving: boolean
   error: string | null
 }) {
+  const blockedByDuplicateKeys =
+    hasDuplicateKeys(form.documentRequirements) || hasDuplicateKeys(form.formSchema)
+
   return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
@@ -362,8 +374,20 @@ export function EventFormPanel({
         </form>
 
         <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-7 py-5">
-          {error ? <p className="text-sm text-red-600">{error}</p> : <span />}
-          <PrimaryButton type="submit" form="event-form" disabled={saving} className="px-6">
+          {error ? (
+            <p className="text-sm text-red-600">{error}</p>
+          ) : blockedByDuplicateKeys ? (
+            <p className="text-sm text-red-600">Corrigez les clés en doublon avant d'enregistrer.</p>
+          ) : (
+            <span />
+          )}
+          <PrimaryButton
+            type="submit"
+            form="event-form"
+            disabled={saving || blockedByDuplicateKeys}
+            title={blockedByDuplicateKeys ? 'Corrigez les clés en doublon avant d\'enregistrer.' : undefined}
+            className="px-6"
+          >
             {saving ? 'Enregistrement…' : editingEvent ? 'Enregistrer' : 'Créer'}
           </PrimaryButton>
         </div>
