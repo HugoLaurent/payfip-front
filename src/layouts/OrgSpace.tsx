@@ -13,16 +13,6 @@ export function OrgSpace() {
   const { auth } = useAuth()
   const location = useLocation()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  // Le Dashboard (cartes de stats côte à côte, "Top services" + "Activité
-  // récente" en deux colonnes) a besoin de plus de largeur que les autres
-  // pages, restées volontairement étroites (formulaires/listes verticales).
-  const isDashboard = location.pathname === '/dashboard' || location.pathname === '/'
-  // La fiche service (tarifs, évènements/inscriptions…) est une page de
-  // listes façon tableau — les mêmes lignes que sur le Dashboard ont besoin
-  // de la même largeur pour respirer, contrairement aux formulaires
-  // verticaux qui restent volontairement étroits.
-  const isServiceDetail = /^\/services\/[^/]+/.test(location.pathname)
-  const isWide = isDashboard || isServiceDetail
   // Le scanner est un outil de terrain, pas une page de formulaire : sur
   // téléphone (< 768px, seuil du tiroir mobile de la Sidebar), il devient
   // plein écran immersif — ScannerPage se positionne alors lui-même en
@@ -76,7 +66,13 @@ export function OrgSpace() {
               : 'flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:px-8 md:py-8'
           }
         >
-          <div className={isScanner ? 'h-full md:mx-auto md:h-auto md:max-w-5xl' : `mx-auto ${isWide ? 'max-w-5xl' : 'max-w-2xl'}`}>
+          {/* Pas de max-width partagée ici (même choix que StaffSpace) :
+              chaque page utilise toute la largeur dispo par défaut. Seule
+              VentePage (formulaire vertical façon caisse, carte d'action
+              collée en bas) porte son propre max-w-2xl, comme
+              StaffOrganizationDetailPage porte son propre max-w-5xl dans
+              StaffSpace. */}
+          <div className={isScanner ? 'h-full md:mx-auto md:h-auto md:max-w-5xl' : undefined}>
             {isScanner ? (
               <Outlet />
             ) : (
