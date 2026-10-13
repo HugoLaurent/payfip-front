@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import type { DocumentRequirement } from '@/lib/types'
 import { DocumentsByEmailCard } from './DocumentsByEmailCard'
+import { DocumentsSentCheckbox } from './DocumentsSentCheckbox'
 
 function formatSignatureDate(iso: string): string {
   return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) +
@@ -27,6 +28,11 @@ export function RegistrationRejected({
   documentRequirements,
   documentContactEmail,
   registrationReference,
+  accessToken,
+  orgId,
+  documentsSentAt,
+  canDeclareDocumentsSent,
+  onDeclared,
 }: {
   rejectionReason: string | null
   reviewedByLabel: string | null
@@ -36,6 +42,11 @@ export function RegistrationRejected({
   documentRequirements: DocumentRequirement[] | null
   documentContactEmail: string | null
   registrationReference: string
+  accessToken: string
+  orgId: number
+  documentsSentAt: string | null
+  canDeclareDocumentsSent: boolean
+  onDeclared: () => void
 }) {
   const requirements = documentRequirements ?? []
 
@@ -94,6 +105,17 @@ export function RegistrationRejected({
           />
         ) : null}
       </div>
+
+      {documentContactEmail && (
+        <DocumentsSentCheckbox
+          accessToken={accessToken}
+          orgId={orgId}
+          sentAt={documentsSentAt}
+          canDeclare={canDeclareDocumentsSent}
+          onDeclared={onDeclared}
+          plural={requirements.length !== 1 && !keepExistingDocuments}
+        />
+      )}
     </motion.div>
   )
 }

@@ -14,6 +14,7 @@ export * from './VisitDateCalendar'
 export * from './FormationCard'
 export * from './RegistrationFieldInput'
 export * from './DocumentsByEmailCard'
+export * from './DocumentsSentCheckbox'
 export * from './RegistrationConfirmation'
 export * from './RegistrationWaitlist'
 export * from './RegistrantIdentityFields' // also exports ServiceQuestionsDivider

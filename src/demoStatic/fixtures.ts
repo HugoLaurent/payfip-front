@@ -258,6 +258,8 @@ export function buildRegistrationCitizen(formation: Formation, firstName: string
     canConfirmWaitlistOffer: false,
     canRetryPayment: false,
     canSendDocuments: false,
+    documentsSentAt: null,
+    canDeclareDocumentsSent: false,
     canDownloadAttestation: false,
   }
 }

@@ -7,6 +7,7 @@ import type { RegistrationCitizen } from '@/lib/types'
 import { PublicShell } from '@/layouts/PublicShell'
 import {
   DocumentsByEmailCard,
+  DocumentsSentCheckbox,
   PaymentFailedState,
   PaymentPendingState,
   PublicButton,
@@ -246,10 +247,20 @@ export function InscriptionReturnPage() {
                 registrationReference={registration.registrationReference}
               />
             )}
+            {registration.documentContactEmail && accessToken && orgId && (
+              <DocumentsSentCheckbox
+                accessToken={accessToken}
+                orgId={Number(orgId)}
+                sentAt={registration.documentsSentAt}
+                canDeclare={registration.canDeclareDocumentsSent}
+                onDeclared={() => setRefreshKey((k) => k + 1)}
+                plural={(registration.documentRequirements?.length ?? 0) !== 1}
+              />
+            )}
           </div>
         )}
 
-        {registration.status === 'rejected' && (
+        {registration.status === 'rejected' && accessToken && orgId && (
           <RegistrationRejected
             rejectionReason={registration.rejectionReason}
             reviewedByLabel={registration.reviewedByLabel}
@@ -259,6 +270,11 @@ export function InscriptionReturnPage() {
             documentRequirements={registration.documentRequirements}
             documentContactEmail={registration.documentContactEmail}
             registrationReference={registration.registrationReference}
+            accessToken={accessToken}
+            orgId={Number(orgId)}
+            documentsSentAt={registration.documentsSentAt}
+            canDeclareDocumentsSent={registration.canDeclareDocumentsSent}
+            onDeclared={() => setRefreshKey((k) => k + 1)}
           />
         )}
 

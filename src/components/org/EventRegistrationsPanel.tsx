@@ -266,6 +266,14 @@ export function EventRegistrationsPanel({
         </p>
         <StatusBadge label={STATUS_LABELS[r.status]} className={`${STATUS_TINTS[r.status]} px-2.5 py-1 text-xs`} />
         <span className="text-sm font-bold text-gray-900">{r.amountCents === 0 ? 'Gratuit' : euros(r.amountCents)}</span>
+        {r.status === 'awaiting_review' && r.documentsSentAt && (
+          <span
+            className="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700"
+            title={`Déclaré le ${new Date(r.documentsSentAt).toLocaleString('fr-FR')}`}
+          >
+            ✉ Pièces envoyées
+          </span>
+        )}
         {r.status === 'awaiting_review' && (
           <PrimaryButton type="button" onClick={() => openReview(r)} className="shrink-0 px-3 py-1.5 text-xs">
             Vérifier
@@ -354,6 +362,11 @@ export function EventRegistrationsPanel({
           <p className="text-[11.5px] font-semibold text-gray-500">
             Pièces attendues par email
             {isPending && <span className="ml-1 font-normal text-gray-400">— cochez chaque pièce reçue et conforme</span>}
+          </p>
+          <p className={`text-xs font-medium ${reviewing.documentsSentAt ? 'text-emerald-700' : 'text-gray-400'}`}>
+            {reviewing.documentsSentAt
+              ? `✉ Le citoyen a déclaré avoir envoyé ses pièces le ${new Date(reviewing.documentsSentAt).toLocaleString('fr-FR')}.`
+              : "Le citoyen n'a pas encore déclaré avoir envoyé ses pièces."}
           </p>
           {event.documentContactEmail && (
             <p className="text-xs text-gray-400">

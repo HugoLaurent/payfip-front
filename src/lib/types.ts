@@ -181,6 +181,10 @@ export interface RegistrationCitizen {
   // Pièces refusées / complément demandé, avant la date limite : le citoyen peut
   // encore renvoyer un email à l'organisme.
   canSendDocuments: boolean
+  // Case "j'ai bien envoyé mon email" : date de la déclaration, et possibilité
+  // de la cocher (une seule fois, tant que les pièces sont attendues).
+  documentsSentAt: string | null
+  canDeclareDocumentsSent: boolean
   canDownloadAttestation: boolean
 }
 
@@ -235,6 +239,8 @@ export interface RegistrationAgent {
   rejectionReason: string | null
   documentDeadlineAt: string | null
   keepExistingDocuments: boolean
+  // Le citoyen a déclaré avoir envoyé ses pièces par email (non vérifié).
+  documentsSentAt: string | null
   waitlistPosition: number | null
   reviewedByLabel: string | null
   reviewedAt: string | null
