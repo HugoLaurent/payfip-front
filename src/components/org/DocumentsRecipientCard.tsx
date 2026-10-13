@@ -90,7 +90,8 @@ export function DocumentsRecipientCard({
       </p>
       <p className="mt-0.5 mb-3 text-xs text-gray-400">
         Quand un évènement demande des pièces, le citoyen les dépose dans le formulaire d'inscription : elles vous sont
-        transmises par email, en pièces jointes, depuis le domaine du service. PayFiP n'en conserve aucune.
+        transmises par email, en pièces jointes, depuis le domaine du service. PayFiP n'en conserve aucune : une fois reçues,
+        leur conservation dans votre messagerie relève de votre organisme (pensez à les supprimer après vérification).
       </p>
 
       {loadFailed && <p className="text-xs text-red-600">Impossible de charger ce réglage.</p>}

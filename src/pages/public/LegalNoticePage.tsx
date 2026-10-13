@@ -35,7 +35,7 @@ export function LegalNoticePage() {
           <p className="text-2xl leading-[1.25] font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
             Mentions légales
           </p>
-          <p className="mt-1 text-[13px] leading-[1.5] text-ink-soft">Dernière mise à jour : juin 2025</p>
+          <p className="mt-1 text-[13px] leading-[1.5] text-ink-soft">Dernière mise à jour : octobre 2026</p>
         </div>
       </div>
 
@@ -79,22 +79,25 @@ export function LegalNoticePage() {
         <div className="flex flex-col gap-2">
           <p className="text-[13.5px] leading-[1.7] text-ink-soft">
             Ce site, édité par AREGIE, permet la vérification d'adresse email, la réservation de billets ou
-            d'inscriptions, et l'envoi d'informations par email, notamment via le service de messagerie Microsoft
-            Outlook.
+            d'inscriptions, et l'envoi d'informations par email, via le service d'envoi d'AREGIE (AREGIE Mail).
           </p>
         </div>
 
         <div className="flex flex-col gap-2">
           <SectionLabel>1. Données personnelles collectées</SectionLabel>
           <p className="text-[13.5px] leading-[1.7] text-ink-soft">
-            Lors de l'utilisation du site, les données suivantes peuvent être collectées : adresse e-mail, code de
-            vérification à usage unique, données de réservation ou d'inscription (billets ou évènement, date,
-            montant), date et heure d'accès.
+            Lors de l'utilisation du site, les données suivantes peuvent être collectées : adresse e-mail, nom et
+            prénom, code de vérification à usage unique, données de réservation ou d'inscription (billets ou
+            évènement, date, montant, réponses au formulaire d'inscription), date et heure d'accès.
+          </p>
+          <p className="text-[13.5px] leading-[1.7] text-ink-soft">
+            Lorsque l'organisme organisateur l'exige, vous pouvez aussi être invité à déposer des pièces
+            justificatives (par exemple pièce d'identité, justificatif de domicile, permis de conduire).
           </p>
           <p className="text-[13.5px] leading-[1.7] text-ink-soft">
             Ces données sont utilisées exclusivement pour envoyer un code de vérification par email, transmettre les
-            billets ou confirmations d'inscription à l'utilisateur, assurer un suivi administratif et permettre la
-            réémission des réservations si nécessaire.
+            billets ou confirmations d'inscription à l'utilisateur, permettre à l'organisme de vérifier votre
+            inscription, assurer un suivi administratif et permettre la réémission des réservations si nécessaire.
           </p>
         </div>
 
@@ -109,9 +112,17 @@ export function LegalNoticePage() {
         <div className="flex flex-col gap-2">
           <SectionLabel>3. Durée de conservation</SectionLabel>
           <p className="text-[13.5px] leading-[1.7] text-ink-soft">
-            Les codes de vérification sont conservés quelques minutes puis supprimés automatiquement. Les données de
-            réservation ou d'inscription sont conservées pendant une durée limitée (maximum 12 mois) pour répondre
-            aux obligations légales et permettre la réémission des billets ou attestations.
+            Les codes de vérification ne sont valables que quelques minutes et sont supprimés automatiquement au plus
+            tard 24 heures après leur expiration. Les données de réservation ou d'inscription sont conservées pendant
+            une durée limitée (maximum 12 mois) pour répondre aux obligations légales et permettre la réémission des
+            billets ou attestations ; les données d'inscription à un évènement sont supprimées automatiquement 12
+            mois après la date de l'évènement. Le journal des emails envoyés est supprimé automatiquement après 30
+            jours.
+          </p>
+          <p className="text-[13.5px] leading-[1.7] text-ink-soft">
+            Les pièces justificatives ne sont pas conservées par ce site : elles sont transmises par email à
+            l'organisme au moment du dépôt et ne sont enregistrées sur aucun de nos serveurs. Leur conservation par
+            l'organisme, dans sa propre messagerie, relève de sa responsabilité.
           </p>
         </div>
 
@@ -126,8 +137,13 @@ export function LegalNoticePage() {
         <div className="flex flex-col gap-2">
           <SectionLabel>5. Partage de données</SectionLabel>
           <p className="text-[13.5px] leading-[1.7] text-ink-soft">
-            Les données ne sont jamais vendues à des tiers. Les emails sont envoyés via les serveurs sécurisés de
-            Microsoft Outlook. Les données sont hébergées en Europe chez IONOS.
+            Les données ne sont jamais vendues à des tiers. Les emails sont envoyés via AREGIE Mail, qui s'appuie sur le
+            prestataire d'envoi d'emails Mailjet. Les données sont hébergées en Europe chez IONOS.
+          </p>
+          <p className="text-[13.5px] leading-[1.7] text-ink-soft">
+            Les pièces justificatives que vous déposez sont transmises, en pièces jointes d'un email, à l'adresse de
+            l'organisme organisateur de l'évènement (et aux personnes qu'il a mises en copie). Elles transitent par
+            nos serveurs et par le prestataire d'envoi, sans y être conservées.
           </p>
           <p className="text-[13.5px] leading-[1.7] text-ink-soft">
             Lorsqu'un paiement est effectué, les informations nécessaires (adresse email, montant, référence) sont
