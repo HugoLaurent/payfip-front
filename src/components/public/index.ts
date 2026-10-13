@@ -13,7 +13,7 @@ export * from './ServiceClosedScreen'
 export * from './VisitDateCalendar'
 export * from './FormationCard'
 export * from './RegistrationFieldInput'
-export * from './FileUploadField'
+export * from './DocumentsByEmailCard'
 export * from './RegistrationConfirmation'
 export * from './RegistrationWaitlist'
 export * from './RegistrantIdentityFields' // also exports ServiceQuestionsDivider

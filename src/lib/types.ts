@@ -105,10 +105,10 @@ export interface RegistrationFormField {
   options?: string[]
 }
 
-// Une pièce nommée à déposer par le citoyen (ex. "Pièce d'identité",
-// "Certificat médical") — jamais un unique champ générique qui forcerait à
-// fusionner plusieurs documents en un seul fichier. `key` identifie aussi
-// le champ multipart envoyé au dépôt et registration_documents.documentKey.
+// Une pièce nommée que le citoyen envoie par email à l'organisme (ex.
+// "Pièce d'identité", "Certificat médical") — aucun fichier ne transite par
+// PayFiP, l'adresse est EventAgent.documentContactEmail. `key` identifie
+// l'exigence côté formulaire agent.
 export interface DocumentRequirement {
   key: string
   label: string
@@ -138,6 +138,9 @@ export interface Formation {
   registrationDeadline: string | null
   priceCents: number
   documentRequirements: DocumentRequirement[] | null
+  // Adresse d'envoi des pièces — renseignée dès que documentRequirements ne
+  // l'est pas (contrôlé côté svc-inscription).
+  documentContactEmail: string | null
   capacity: number | null
   maxParticipantsPerRegistration: number
   formSchema: RegistrationFormField[] | null
@@ -165,6 +168,7 @@ export interface RegistrationCitizen {
   documentDeadlineAt: string | null
   keepExistingDocuments: boolean
   documentRequirements: DocumentRequirement[] | null
+  documentContactEmail: string | null
   waitlistPosition: number | null
   waitlistNotifiedAt: string | null
   waitlistResponseDeadline: string | null
@@ -174,7 +178,9 @@ export interface RegistrationCitizen {
   canPay: boolean
   canConfirmWaitlistOffer: boolean
   canRetryPayment: boolean
-  canReplaceDocuments: boolean
+  // Pièces refusées / complément demandé, avant la date limite : le citoyen peut
+  // encore renvoyer un email à l'organisme.
+  canSendDocuments: boolean
   canDownloadAttestation: boolean
 }
 
@@ -198,6 +204,7 @@ export interface EventAgent {
   registrationDeadline: string | null
   priceCents: number
   documentRequirements: DocumentRequirement[] | null
+  documentContactEmail: string | null
   capacity: number | null
   maxParticipantsPerRegistration: number
   formSchema: RegistrationFormField[] | null
@@ -211,16 +218,6 @@ export interface EventAgent {
   // svc-inscription) — remplissage affiché à la place du seul nombre de
   // places, voir EventsManager.tsx.
   registeredCount: number
-}
-
-export interface RegistrationDocumentSummary {
-  id: number
-  documentKey: string
-  filename: string
-  mimeType: string
-  sizeBytes: number
-  isCurrent: boolean
-  createdAt: string
 }
 
 // Forme agent — GET /inscription/events/:id/registrations (gateway).
@@ -243,7 +240,6 @@ export interface RegistrationAgent {
   reviewedAt: string | null
   cancelledAt: string | null
   createdAt: string
-  documents?: RegistrationDocumentSummary[]
 }
 
 export interface ServiceLookup {

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Check, Download, Eye, Paperclip, Search, X } from 'lucide-react'
-import { apiCall, GATEWAY_URL } from '@/lib/api'
+import { ChevronLeft, Check, Search, X } from 'lucide-react'
+import { apiCall } from '@/lib/api'
 import { usePaginatedResource } from '@/lib/usePaginatedResource'
 import { useToast } from '@/lib/useToast'
 import { euros } from '@/lib/format'
@@ -18,7 +18,7 @@ import {
   TextInput,
   Textarea,
 } from '@/components/ui'
-import type { AuthState, EventAgent, PageMeta, RegistrationAgent, RegistrationDocumentSummary } from '@/lib/types'
+import type { AuthState, EventAgent, PageMeta, RegistrationAgent } from '@/lib/types'
 
 const STATUS_LABELS: Record<RegistrationAgent['status'], string> = {
   waitlisted: "Liste d'attente",
@@ -73,13 +73,12 @@ export function EventRegistrationsPanel({
   const [reviewing, setReviewing] = useState<RegistrationAgent | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
-  // Documents cochés "conforme" par l'agent pour l'inscription en cours de
-  // revue — état local uniquement, jamais envoyé au serveur : sert juste à
-  // empêcher un clic sur "Valider" avant d'avoir vraiment regardé chaque
-  // pièce (voir openReview, qui le réinitialise à chaque ouverture).
-  const [checkedDocIds, setCheckedDocIds] = useState<Set<number>>(new Set())
-  const [previewing, setPreviewing] = useState<{ url: string; mimeType: string; filename: string; label: string } | null>(null)
-  const [previewLoadingId, setPreviewLoadingId] = useState<number | null>(null)
+  // Pièces cochées "reçue et conforme" par l'agent pour l'inscription en
+  // cours de revue — état local uniquement, jamais envoyé au serveur : sert
+  // juste à empêcher un clic sur "Valider" avant d'avoir vraiment contrôlé
+  // chaque pièce reçue par email (voir openReview, qui le réinitialise à
+  // chaque ouverture). Les clés sont celles de event.documentRequirements.
+  const [checkedKeys, setCheckedKeys] = useState<Set<string>>(new Set())
   const [resendingId, setResendingId] = useState<number | null>(null)
   const [cancellingId, setCancellingId] = useState<number | null>(null)
 
@@ -96,14 +95,14 @@ export function EventRegistrationsPanel({
   function openReview(r: RegistrationAgent) {
     setReviewing(r)
     setRejectionReason('')
-    setCheckedDocIds(new Set())
+    setCheckedKeys(new Set())
   }
 
-  function toggleDocChecked(documentId: number) {
-    setCheckedDocIds((prev) => {
+  function toggleChecked(key: string) {
+    setCheckedKeys((prev) => {
       const next = new Set(prev)
-      if (next.has(documentId)) next.delete(documentId)
-      else next.add(documentId)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
       return next
     })
   }
@@ -122,7 +121,7 @@ export function EventRegistrationsPanel({
     if (result.ok) {
       const successLabel =
         decision === 'approve'
-          ? 'Justificatifs validés'
+          ? 'Pièces validées'
           : decision === 'reject'
             ? 'Inscription rejetée'
             : decision === 'revert'
@@ -131,7 +130,7 @@ export function EventRegistrationsPanel({
       showToast('success', successLabel, `${reviewing.firstName} ${reviewing.lastName}`)
       setReviewing(null)
       setRejectionReason('')
-      setCheckedDocIds(new Set())
+      setCheckedKeys(new Set())
       await reload()
       onRegistrationsChanged?.()
     } else {
@@ -139,7 +138,7 @@ export function EventRegistrationsPanel({
     }
   }
 
-  // Relance manuelle (le citoyen a le mail attendu — paiement ou redépôt —
+  // Relance manuelle (le citoyen a le mail attendu — paiement ou renvoi de pièces —
   // mais tarde à agir) : renvoie le même email, sans changer le statut. Le
   // serveur applique un délai anti-spam entre deux relances (429).
   async function handleResendReminder(r: RegistrationAgent) {
@@ -175,42 +174,6 @@ export function EventRegistrationsPanel({
       showToast('error', 'Échec', "Impossible d'annuler l'inscription.")
     }
   }
-
-  // Aperçu inline (image/PDF) au lieu de forcer un téléchargement pour
-  // consulter une pièce — le blob devient une URL d'objet affichée dans une
-  // lightbox, qui offre elle-même un vrai téléchargement si besoin.
-  async function openPreview(registrationId: number, doc: RegistrationDocumentSummary, label: string) {
-    setPreviewLoadingId(doc.id)
-    try {
-      const res = await fetch(`${GATEWAY_URL}/inscription/registrations/${registrationId}/documents/${doc.id}?serviceId=${event.serviceId}`, {
-        headers: { Authorization: `Bearer ${auth.token}` },
-      })
-      if (!res.ok) throw new Error('preview_failed')
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      setPreviewing({ url, mimeType: doc.mimeType, filename: doc.filename, label })
-    } catch {
-      showToast('error', 'Échec', "Impossible d'afficher le document.")
-    } finally {
-      setPreviewLoadingId(null)
-    }
-  }
-
-  function closePreview() {
-    if (previewing) URL.revokeObjectURL(previewing.url)
-    setPreviewing(null)
-  }
-
-  // Filet de sécurité si le panneau est démonté (EventsManager change de
-  // sélection, ferme le panneau...) pendant qu'un aperçu est ouvert —
-  // closePreview() seul ne suffit pas dans ce cas, la blob URL fuirait.
-  const previewingRef = useRef(previewing)
-  previewingRef.current = previewing
-  useEffect(() => {
-    return () => {
-      if (previewingRef.current) URL.revokeObjectURL(previewingRef.current.url)
-    }
-  }, [])
 
   const isSheet = variant === 'sheet'
 
@@ -293,7 +256,6 @@ export function EventRegistrationsPanel({
   // référence passent sur une seconde ligne (`w-full` force le retour dans
   // le flex-wrap) plutôt que de pousser le reste plus loin encore.
   function registrationRow(r: RegistrationAgent) {
-    const docs = r.documents?.filter((d) => d.isCurrent) ?? []
     return (
       <div
         key={r.id}
@@ -304,21 +266,15 @@ export function EventRegistrationsPanel({
         </p>
         <StatusBadge label={STATUS_LABELS[r.status]} className={`${STATUS_TINTS[r.status]} px-2.5 py-1 text-xs`} />
         <span className="text-sm font-bold text-gray-900">{r.amountCents === 0 ? 'Gratuit' : euros(r.amountCents)}</span>
-        {docs.length > 0 && (
-          <button
-            type="button"
-            onClick={() => openReview(r)}
-            className="squircle flex shrink-0 items-center gap-1 rounded-lg bg-gray-100 px-2 py-1.5 text-xs font-medium text-gray-500 transition hover:bg-gray-200 hover:text-aregie-deep"
-            aria-label={`Voir les ${docs.length} document(s) de ${r.firstName} ${r.lastName}`}
-          >
-            <Paperclip size={13} />
-            {docs.length}
-          </button>
-        )}
         {r.status === 'awaiting_review' && (
           <PrimaryButton type="button" onClick={() => openReview(r)} className="shrink-0 px-3 py-1.5 text-xs">
             Vérifier
           </PrimaryButton>
+        )}
+        {r.status === 'rejected' && (
+          <SecondaryButton type="button" onClick={() => openReview(r)} className="shrink-0 px-3 py-1.5 text-xs">
+            Re-vérifier
+          </SecondaryButton>
         )}
         {(r.status === 'awaiting_payment' || r.status === 'rejected') && (
           <SecondaryButton
@@ -368,9 +324,11 @@ export function EventRegistrationsPanel({
     </div>
   )
 
-  const currentDocs = reviewing?.documents?.filter((d) => d.isCurrent) ?? []
-  const isPending = reviewing?.status === 'awaiting_review'
-  const allDocsChecked = currentDocs.length === 0 || currentDocs.every((d) => checkedDocIds.has(d.id))
+  // Une inscription déjà refusée peut être re-décidée : le citoyen a renvoyé
+  // ses pièces par email, aucune action de sa part ne la repasse en revue.
+  const requirements = event.documentRequirements ?? []
+  const isPending = reviewing?.status === 'awaiting_review' || reviewing?.status === 'rejected'
+  const allPiecesChecked = requirements.every((req) => !req.required || checkedKeys.has(req.key))
   const canRevert =
     reviewing?.status === 'awaiting_payment' || (reviewing?.status === 'confirmed' && reviewing.paymentMethod === 'free')
 
@@ -391,24 +349,29 @@ export function EventRegistrationsPanel({
         </div>
       </div>
 
-      {currentDocs.length > 0 && (
+      {requirements.length > 0 && (
         <div className="mt-5 space-y-2">
           <p className="text-[11.5px] font-semibold text-gray-500">
-            Documents déposés
-            {isPending && <span className="ml-1 font-normal text-gray-400">— cochez chaque pièce conforme</span>}
+            Pièces attendues par email
+            {isPending && <span className="ml-1 font-normal text-gray-400">— cochez chaque pièce reçue et conforme</span>}
           </p>
+          {event.documentContactEmail && (
+            <p className="text-xs text-gray-400">
+              Boîte à consulter : <span className="font-medium text-gray-600">{event.documentContactEmail}</span> — objet
+              attendu : <span className="font-medium text-gray-600">Pièces {reviewing.registrationReference}</span>
+            </p>
+          )}
           <div className="space-y-1.5">
-            {currentDocs.map((d) => {
-              const label = event.documentRequirements?.find((req) => req.key === d.documentKey)?.label
-              const checked = checkedDocIds.has(d.id)
+            {requirements.map((req) => {
+              const checked = checkedKeys.has(req.key)
               return (
-                <div key={d.id} className="squircle flex w-full items-center gap-2.5 rounded-xl border border-gray-200 px-3.5 py-2.5">
+                <div key={req.key} className="squircle flex w-full items-center gap-2.5 rounded-xl border border-gray-200 px-3.5 py-2.5">
                   {isPending && (
                     <button
                       type="button"
-                      onClick={() => toggleDocChecked(d.id)}
+                      onClick={() => toggleChecked(req.key)}
                       aria-pressed={checked}
-                      aria-label={`Marquer ${label ?? d.filename} comme conforme`}
+                      aria-label={`Marquer ${req.label} comme reçue et conforme`}
                       className={`squircle flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 transition ${
                         checked ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 text-transparent hover:border-gray-400'
                       }`}
@@ -416,22 +379,13 @@ export function EventRegistrationsPanel({
                       <Check size={14} strokeWidth={3} />
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => openPreview(reviewing.id, d, label ?? d.filename)}
-                    disabled={previewLoadingId === d.id}
-                    className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left transition disabled:opacity-60"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-gray-800">{label ?? d.filename}</p>
-                      {label && <p className="truncate text-xs text-gray-400">{d.filename}</p>}
-                    </div>
-                    {previewLoadingId === d.id ? (
-                      <span className="shrink-0 text-xs text-gray-400">…</span>
-                    ) : (
-                      <Eye size={15} className="shrink-0 text-gray-400" />
-                    )}
-                  </button>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-gray-800">
+                      {req.label}
+                      {!req.required && <span className="ml-1 font-normal text-gray-400">(facultatif)</span>}
+                    </p>
+                    {req.instructions && <p className="truncate text-xs text-gray-400">{req.instructions}</p>}
+                  </div>
                 </div>
               )
             })}
@@ -442,7 +396,7 @@ export function EventRegistrationsPanel({
       {isPending ? (
         <>
           <p className="mt-5 mb-3 text-sm text-gray-500">
-            Valider les justificatifs déposés, demander un document en plus (les documents déjà envoyés restent
+            Valider les pièces reçues par email, demander une pièce en plus (les pièces déjà reçues restent
             valables), ou rejeter — le message est vu tel quel par le citoyen.
           </p>
           <label className="mb-1.5 block text-[11.5px] font-semibold text-gray-500">
@@ -452,7 +406,7 @@ export function EventRegistrationsPanel({
           <Textarea
             value={rejectionReason}
             onChange={(e) => setRejectionReason(e.target.value)}
-            placeholder="Ex. Le document fourni est illisible, merci d'en déposer un nouveau."
+            placeholder="Ex. Le justificatif de domicile date de plus de 3 mois, merci d'en renvoyer un récent par email."
             rows={3}
             className="mb-4"
           />
@@ -460,11 +414,11 @@ export function EventRegistrationsPanel({
             <PrimaryButton
               type="button"
               onClick={() => handleReview('approve')}
-              disabled={submittingReview || !allDocsChecked}
-              title={!allDocsChecked ? 'Cochez chaque document comme conforme avant de valider' : undefined}
+              disabled={submittingReview || !allPiecesChecked}
+              title={!allPiecesChecked ? 'Cochez chaque pièce requise comme conforme avant de valider' : undefined}
               className={isSheet ? 'col-span-2 justify-center' : 'flex-1 justify-center'}
             >
-              {submittingReview ? '…' : 'Valider les justificatifs'}
+              {submittingReview ? '…' : 'Valider les pièces'}
             </PrimaryButton>
             <SecondaryButton
               type="button"
@@ -472,7 +426,7 @@ export function EventRegistrationsPanel({
               disabled={submittingReview || !rejectionReason.trim()}
               className={isSheet ? 'justify-center py-2.5' : 'flex-1 justify-center py-2.5'}
             >
-              + de documents
+              + de pièces
             </SecondaryButton>
             <DangerButton
               type="button"
@@ -483,9 +437,9 @@ export function EventRegistrationsPanel({
               Rejeter
             </DangerButton>
           </div>
-          {currentDocs.length > 0 && !allDocsChecked && (
+          {!allPiecesChecked && (
             <p className="mt-2 text-center text-xs text-gray-400">
-              Cochez les {currentDocs.length} document(s) comme conformes pour activer la validation.
+              Cochez chaque pièce requise comme conforme pour activer la validation.
             </p>
           )}
         </>
@@ -564,53 +518,6 @@ export function EventRegistrationsPanel({
             document.body,
           )
         ))}
-
-      {previewing &&
-        createPortal(
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4"
-            onClick={closePreview}
-          >
-            <div
-              className="squircle flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_30px_60px_-20px_rgba(20,25,60,0.5)]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3.5">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-gray-900">{previewing.label}</p>
-                  <p className="truncate text-xs text-gray-400">{previewing.filename}</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <a
-                    href={previewing.url}
-                    download={previewing.filename}
-                    className="squircle flex items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-200"
-                  >
-                    <Download size={13} />
-                    Télécharger
-                  </a>
-                  <button
-                    type="button"
-                    onClick={closePreview}
-                    className="squircle rounded-lg bg-gray-100 p-1.5 text-gray-500 transition hover:bg-gray-200 hover:text-gray-700"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              </div>
-              <div className="flex-1 overflow-auto bg-gray-50 p-4">
-                {previewing.mimeType.startsWith('image/') ? (
-                  <img src={previewing.url} alt={previewing.filename} className="mx-auto max-h-full max-w-full rounded-lg" />
-                ) : (
-                  <iframe src={previewing.url} title={previewing.filename} className="h-[75vh] w-full rounded-lg border-0 bg-white" />
-                )}
-              </div>
-            </div>
-          </motion.div>,
-          document.body,
-        )}
     </>
   )
 }

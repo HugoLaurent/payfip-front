@@ -29,6 +29,7 @@ export interface EventFormState {
   registrationDeadline: string
   priceCents: string
   documentRequirements: DocumentRequirement[]
+  documentContactEmail: string
   capacity: string
   maxParticipantsPerRegistration: string
   formSchema: RegistrationFormField[]
@@ -48,6 +49,7 @@ export const EMPTY_EVENT_FORM: EventFormState = {
   registrationDeadline: '',
   priceCents: '0',
   documentRequirements: [],
+  documentContactEmail: '',
   capacity: '',
   maxParticipantsPerRegistration: '1',
   formSchema: [],
@@ -68,6 +70,7 @@ export function eventToForm(event: EventAgent): EventFormState {
     registrationDeadline: event.registrationDeadline ? event.registrationDeadline.slice(0, 16) : '',
     priceCents: (event.priceCents / 100).toString(),
     documentRequirements: event.documentRequirements ?? [],
+    documentContactEmail: event.documentContactEmail ?? '',
     capacity: event.capacity !== null ? String(event.capacity) : '',
     maxParticipantsPerRegistration: String(event.maxParticipantsPerRegistration),
     formSchema: event.formSchema ?? [],
@@ -93,6 +96,9 @@ export function eventFormToPayload(form: EventFormState) {
     // présente en base ne serait jamais effacée (voir updateEventValidator :
     // undefined = ne pas toucher, null = vider).
     documentRequirements: form.documentRequirements.length > 0 ? form.documentRequirements : null,
+    // Pas de pièces demandées = pas d'adresse d'envoi (null vide aussi une adresse
+    // déjà enregistrée, comme documentRequirements ci-dessus).
+    documentContactEmail: form.documentRequirements.length > 0 ? form.documentContactEmail.trim() : null,
     capacity: form.capacity ? Number(form.capacity) : undefined,
     maxParticipantsPerRegistration: Number(form.maxParticipantsPerRegistration || '1'),
     formSchema: form.formSchema.length > 0 ? form.formSchema : undefined,
@@ -166,6 +172,11 @@ export function EventFormPanel({
 }) {
   const blockedByDuplicateKeys =
     hasDuplicateKeys(form.documentRequirements) || hasDuplicateKeys(form.formSchema)
+  // Les pièces sont envoyées par email : sans adresse valide, le citoyen ne
+  // saurait pas où les adresser (le back refuse aussi, document_contact_email_required).
+  const blockedByMissingEmail =
+    form.documentRequirements.length > 0 && !/^\S+@\S+\.\S+$/.test(form.documentContactEmail.trim())
+  const blocked = blockedByDuplicateKeys || blockedByMissingEmail
 
   return createPortal(
     <motion.div
@@ -340,12 +351,23 @@ export function EventFormPanel({
 
             <Section
               title="Justificatifs"
-              description="Chaque pièce ajoutée devient un dépôt distinct côté citoyen — jamais un fichier unique à tout fusionner. L'agent devra les valider avant confirmation."
+              description="Le citoyen envoie ces pièces par email à l'adresse ci-dessous, en citant sa référence d'inscription — aucun fichier n'est stocké par PayFiP. Vous les contrôlez dans votre messagerie, puis validez l'inscription."
             >
               <DocumentRequirementsBuilder
                 requirements={form.documentRequirements}
                 onChange={(documentRequirements) => onChange({ documentRequirements })}
               />
+              {form.documentRequirements.length > 0 && (
+                <FieldGroup label="Adresse de réception des pièces">
+                  <TextInput
+                    type="email"
+                    value={form.documentContactEmail}
+                    onChange={(e) => onChange({ documentContactEmail: e.target.value })}
+                    placeholder="inscriptions@ma-commune.fr"
+                    className="w-full sm:w-[360px]"
+                  />
+                </FieldGroup>
+              )}
             </Section>
 
             <Section
@@ -378,14 +400,16 @@ export function EventFormPanel({
             <p className="text-sm text-red-600">{error}</p>
           ) : blockedByDuplicateKeys ? (
             <p className="text-sm text-red-600">Corrigez les clés en doublon avant d'enregistrer.</p>
+          ) : blockedByMissingEmail ? (
+            <p className="text-sm text-red-600">Renseignez l'adresse de réception des pièces avant d'enregistrer.</p>
           ) : (
             <span />
           )}
           <PrimaryButton
             type="submit"
             form="event-form"
-            disabled={saving || blockedByDuplicateKeys}
-            title={blockedByDuplicateKeys ? 'Corrigez les clés en doublon avant d\'enregistrer.' : undefined}
+            disabled={saving || blocked}
+            title={blocked ? 'Corrigez les erreurs du formulaire avant d\'enregistrer.' : undefined}
             className="px-6"
           >
             {saving ? 'Enregistrement…' : editingEvent ? 'Enregistrer' : 'Créer'}

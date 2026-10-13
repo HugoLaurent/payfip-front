@@ -3,11 +3,10 @@ import { TextInput } from '@/components/ui'
 import type { DocumentRequirement } from '@/lib/types'
 
 // Pièces qui reviennent souvent dans une démarche administrative — un clic
-// ajoute directement le slot de dépôt nommé, l'agent ajuste le libellé ou
-// les instructions ensuite plutôt que de repartir d'un champ vide à chaque
-// fois. Chaque exigence est un dépôt distinct côté citoyen (voir
-// FileUploadField dans le formulaire d'inscription) : jamais un unique
-// champ générique qui forcerait à fusionner plusieurs documents en un PDF.
+// ajoute directement la pièce nommée, l'agent ajuste le libellé ou les
+// instructions ensuite plutôt que de repartir d'un champ vide à chaque fois.
+// Chaque exigence est une pièce distincte que le citoyen envoie par email
+// (voir DocumentsByEmailCard côté citoyen).
 const DOCUMENT_PRESETS: { icon: typeof CreditCard; label: string; requirement: Omit<DocumentRequirement, 'key'> }[] = [
   { icon: CreditCard, label: "Carte d'identité", requirement: { label: "Carte d'identité", required: true } },
   { icon: Home, label: 'Justificatif de domicile', requirement: { label: 'Justificatif de domicile', required: true } },
@@ -37,9 +36,9 @@ function slugifyKeyForPreset(label: string): string {
 const PRESET_KEYS = new Set(DOCUMENT_PRESETS.map((p) => slugifyKeyForPreset(p.requirement.label)))
 
 // Deux pièces qui se slugifient sur la même clé partageraient sinon le
-// même slot de dépôt côté citoyen (voir registrations_controller.ts#
-// readNamedDocuments) — le second dépôt écraserait silencieusement le
-// premier sans qu'aucun signal ne prévienne l'agent.
+// même clé d'exigence — la case à cocher de la revue agent (voir
+// EventRegistrationsPanel) les confondrait sans qu'aucun signal ne prévienne
+// l'agent.
 function findDuplicateKeys(requirements: DocumentRequirement[]): Set<string> {
   const counts = new Map<string, number>()
   for (const r of requirements) counts.set(r.key, (counts.get(r.key) ?? 0) + 1)
@@ -47,9 +46,8 @@ function findDuplicateKeys(requirements: DocumentRequirement[]): Set<string> {
 }
 
 // Composeur des pièces à demander au citoyen pour un évènement — chaque
-// exigence devient un slot de dépôt nommé et distinct (voir
-// registrations_controller.ts#readNamedDocuments), jamais un champ
-// générique "justificatif" unique qui obligerait à tout fusionner.
+// exigence est une pièce nommée à envoyer par email, listée telle quelle côté
+// citoyen et cochée une à une par l'agent à la revue.
 export function DocumentRequirementsBuilder({
   requirements,
   onChange,
