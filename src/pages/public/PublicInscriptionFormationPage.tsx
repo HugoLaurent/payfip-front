@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { PublicShell } from '@/layouts/PublicShell'
 import { euros, formatDateLabel } from '@/lib/format'
 import { apiCall, apiUploadWithFields } from '@/lib/api'
+import { registrationErrorMessage } from '@/lib/registrationErrors'
 import { useEmailOtpVerification } from '@/lib/useEmailOtpVerification'
 import type { Formation, ServiceLookup } from '@/lib/types'
 import {
@@ -155,7 +156,7 @@ export function PublicInscriptionFormationPage() {
     }
 
     setSubmitting(false)
-    setSubmitError("Échec de l'envoi de l'inscription — réessayez.")
+    setSubmitError(registrationErrorMessage(result.data))
   }
 
   if (serviceError || eventError) {

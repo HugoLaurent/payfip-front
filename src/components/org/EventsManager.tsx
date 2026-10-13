@@ -9,7 +9,7 @@ import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { useIsDesktop } from '@/lib/useIsDesktop'
 import { useToast } from '@/lib/useToast'
 import { euros } from '@/lib/format'
-import type { AuthState, EventAgent, ServiceRow } from '@/lib/types'
+import type { AuthState, EventAgent, ServiceDocumentSettings, ServiceRow } from '@/lib/types'
 
 const STATUS_LABELS: Record<EventAgent['status'], string> = {
   draft: 'Brouillon',
@@ -95,6 +95,16 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
   // et d'écran "Inscrits" dédié (plein écran, mobile) — un seul état, deux
   // habillages (voir EventRegistrationsPanel, prop `variant`).
   const [selectedEvent, setSelectedEvent] = useState<EventAgent | null>(null)
+  // Boîte qui reçoit les pièces (réglage du service), rappelée dans la revue
+  // des inscrits — lecture seule ici, elle se modifie dans Paramètres.
+  const [documentRecipient, setDocumentRecipient] = useState<ServiceDocumentSettings | null>(null)
+  useEffect(() => {
+    apiCall<{ data: ServiceDocumentSettings }>('GET', `/inscription/services/${service.id}/settings`, {
+      token: auth.token,
+    }).then((result) => {
+      if (result.ok) setDocumentRecipient(result.data.data)
+    })
+  }, [service.id, auth.token])
   const [searchParams, setSearchParams] = useSearchParams()
   const isDesktop = useIsDesktop()
 
@@ -540,6 +550,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
                 auth={auth}
                 event={selectedEvent}
                 variant="panel"
+                documentRecipient={documentRecipient}
                 onClose={() => setSelectedEvent(null)}
                 onRegistrationsChanged={loadEvents}
               />
@@ -627,6 +638,7 @@ export function EventsManager({ auth, service }: { auth: AuthState; service: Ser
           auth={auth}
           event={selectedEvent}
           variant="sheet"
+          documentRecipient={documentRecipient}
           onClose={() => setSelectedEvent(null)}
           onRegistrationsChanged={loadEvents}
         />

@@ -45,6 +45,14 @@ export interface ServiceRow {
   closedReason?: string | null
 }
 
+// Réglage de service (Services > Paramètres) : la boîte de l'agent qui REÇOIT
+// les pièces justificatives par email, et ses copies. Valable pour tous les
+// évènements du service, jamais exposé côté citoyen.
+export interface ServiceDocumentSettings {
+  documentContactEmail: string | null
+  documentContactCc: string[]
+}
+
 export interface PageMeta {
   total: number
   perPage: number
@@ -200,10 +208,6 @@ export interface EventAgent {
   registrationDeadline: string | null
   priceCents: number
   documentRequirements: DocumentRequirement[] | null
-  // Boîte de l'agent qui REÇOIT les pièces par email (jamais exposée côté
-  // citoyen) et copies éventuelles — obligatoire dès qu'il y a des pièces.
-  documentContactEmail: string | null
-  documentContactCc: string[]
   capacity: number | null
   maxParticipantsPerRegistration: number
   formSchema: RegistrationFormField[] | null

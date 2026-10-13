@@ -6,6 +6,7 @@ import { PublicShell } from '@/layouts/PublicShell'
 import { TextInput } from '@/components/ui'
 import { euros } from '@/lib/format'
 import { apiCall, apiUploadWithFields } from '@/lib/api'
+import { registrationErrorMessage } from '@/lib/registrationErrors'
 import { useEmailOtpVerification } from '@/lib/useEmailOtpVerification'
 import type { Formation, ServiceLookup } from '@/lib/types'
 import {
@@ -145,7 +146,7 @@ export function PublicInscriptionDirectPage() {
     }
 
     setSubmitting(false)
-    setSubmitError("Échec de l'envoi de l'inscription — réessayez.")
+    setSubmitError(registrationErrorMessage(result.data))
   }
 
   if (loadError) {

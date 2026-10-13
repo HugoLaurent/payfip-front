@@ -18,7 +18,7 @@ import {
   TextInput,
   Textarea,
 } from '@/components/ui'
-import type { AuthState, EventAgent, PageMeta, RegistrationAgent } from '@/lib/types'
+import type { AuthState, EventAgent, PageMeta, RegistrationAgent, ServiceDocumentSettings } from '@/lib/types'
 
 const STATUS_LABELS: Record<RegistrationAgent['status'], string> = {
   waitlisted: "Liste d'attente",
@@ -53,12 +53,15 @@ export function EventRegistrationsPanel({
   auth,
   event,
   variant,
+  documentRecipient,
   onClose,
   onRegistrationsChanged,
 }: {
   auth: AuthState
   event: EventAgent
   variant: Variant
+  // Boîte qui reçoit les pièces (réglage du service, voir DocumentsRecipientCard).
+  documentRecipient?: ServiceDocumentSettings | null
   onClose: () => void
   // Prévient EventsManager qu'un compteur affiché sur la carte évènement
   // (pendingReviewCount, registeredCount) a pu changer, pour qu'il
@@ -368,10 +371,10 @@ export function EventRegistrationsPanel({
               ✉ Pièces transmises par email le {new Date(reviewing.documentsSentAt).toLocaleString('fr-FR')}.
             </p>
           )}
-          {event.documentContactEmail && (
+          {documentRecipient?.documentContactEmail && (
             <p className="text-xs text-gray-400">
-              Reçues dans la boîte <span className="font-medium text-gray-600">{event.documentContactEmail}</span>
-              {event.documentContactCc.length > 0 && ` (copie : ${event.documentContactCc.join(', ')})`} — cherchez la
+              Reçues dans la boîte <span className="font-medium text-gray-600">{documentRecipient.documentContactEmail}</span>
+              {documentRecipient.documentContactCc.length > 0 && ` (copie : ${documentRecipient.documentContactCc.join(', ')})`} — cherchez la
               référence <span className="font-medium text-gray-600">{reviewing.registrationReference}</span> dans l'objet.
             </p>
           )}

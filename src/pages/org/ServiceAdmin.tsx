@@ -6,6 +6,7 @@ import { apiCall, apiUpload, GATEWAY_URL } from '@/lib/api'
 import { TariffsManager } from '@/components/org/TariffsManager'
 import { EventsManager } from '@/components/org/EventsManager'
 import { OpeningScheduleManager } from '@/components/org/OpeningScheduleManager'
+import { DocumentsRecipientCard } from '@/components/org/DocumentsRecipientCard'
 import { Card, DangerButton, LoadError, Modal, SecondaryButton, StatusBadge, Textarea } from '@/components/ui'
 import { useDelayedLoading } from '@/lib/useDelayedLoading'
 import { useAuth } from '@/lib/useAuth'
@@ -342,6 +343,12 @@ export function ServiceAdmin() {
             canManage={canToggle}
             onServiceUpdate={(patch) => setService((prev) => (prev ? { ...prev, ...patch } : prev))}
           />
+        </div>
+      )}
+
+      {service.serviceType === 'inscription' && (
+        <div className="mb-6">
+          <DocumentsRecipientCard auth={auth} service={service} canManage={canToggle} />
         </div>
       )}
 
