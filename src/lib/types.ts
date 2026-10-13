@@ -105,10 +105,10 @@ export interface RegistrationFormField {
   options?: string[]
 }
 
-// Une pièce nommée que le citoyen envoie par email à l'organisme (ex.
-// "Pièce d'identité", "Certificat médical") — aucun fichier ne transite par
-// PayFiP, l'adresse est EventAgent.documentContactEmail. `key` identifie
-// l'exigence côté formulaire agent.
+// Une pièce nommée à déposer par le citoyen dans le formulaire (ex. "Pièce
+// d'identité", "Certificat médical") — un champ de dépôt par pièce. Aucun
+// fichier n'est stocké par PayFiP : elles sont relayées par email à l'agent
+// (EventAgent.documentContactEmail). `key` identifie le champ du formulaire.
 export interface DocumentRequirement {
   key: string
   label: string
@@ -138,9 +138,6 @@ export interface Formation {
   registrationDeadline: string | null
   priceCents: number
   documentRequirements: DocumentRequirement[] | null
-  // Adresse d'envoi des pièces — renseignée dès que documentRequirements ne
-  // l'est pas (contrôlé côté svc-inscription).
-  documentContactEmail: string | null
   capacity: number | null
   maxParticipantsPerRegistration: number
   formSchema: RegistrationFormField[] | null
@@ -168,7 +165,6 @@ export interface RegistrationCitizen {
   documentDeadlineAt: string | null
   keepExistingDocuments: boolean
   documentRequirements: DocumentRequirement[] | null
-  documentContactEmail: string | null
   waitlistPosition: number | null
   waitlistNotifiedAt: string | null
   waitlistResponseDeadline: string | null
@@ -179,12 +175,8 @@ export interface RegistrationCitizen {
   canConfirmWaitlistOffer: boolean
   canRetryPayment: boolean
   // Pièces refusées / complément demandé, avant la date limite : le citoyen peut
-  // encore renvoyer un email à l'organisme.
-  canSendDocuments: boolean
-  // Case "j'ai bien envoyé mon email" : date de la déclaration, et possibilité
-  // de la cocher (une seule fois, tant que les pièces sont attendues).
-  documentsSentAt: string | null
-  canDeclareDocumentsSent: boolean
+  // encore redéposer (elles repartent par email à l'agent).
+  canReplaceDocuments: boolean
   canDownloadAttestation: boolean
 }
 
@@ -208,7 +200,10 @@ export interface EventAgent {
   registrationDeadline: string | null
   priceCents: number
   documentRequirements: DocumentRequirement[] | null
+  // Boîte de l'agent qui REÇOIT les pièces par email (jamais exposée côté
+  // citoyen) et copies éventuelles — obligatoire dès qu'il y a des pièces.
   documentContactEmail: string | null
+  documentContactCc: string[]
   capacity: number | null
   maxParticipantsPerRegistration: number
   formSchema: RegistrationFormField[] | null
@@ -239,7 +234,8 @@ export interface RegistrationAgent {
   rejectionReason: string | null
   documentDeadlineAt: string | null
   keepExistingDocuments: boolean
-  // Le citoyen a déclaré avoir envoyé ses pièces par email (non vérifié).
+  // Date à laquelle les pièces ont été relayées par email à l'agent (aucune
+  // pièce n'est conservée par PayFiP).
   documentsSentAt: string | null
   waitlistPosition: number | null
   reviewedByLabel: string | null

@@ -3,12 +3,12 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { PublicShell } from '@/layouts/PublicShell'
 import { euros, formatDateLabel } from '@/lib/format'
-import { apiCall } from '@/lib/api'
+import { apiCall, apiUploadWithFields } from '@/lib/api'
 import { useEmailOtpVerification } from '@/lib/useEmailOtpVerification'
 import type { Formation, ServiceLookup } from '@/lib/types'
 import {
   EmailVerificationStep,
-  DocumentsByEmailCard,
+  FileUploadField,
   INSCRIPTION_STEPS,
   PublicButton,
   PublicServiceHeader,
@@ -57,6 +57,7 @@ export function PublicInscriptionFormationPage() {
   const [lastName, setLastName] = useState(demoLastName)
   const [quantity, setQuantity] = useState(1)
   const [values, setValues] = useState<Record<string, FieldValue>>({})
+  const [documentFiles, setDocumentFiles] = useState<Record<string, File | null>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -96,7 +97,8 @@ export function PublicInscriptionFormationPage() {
   const formValid =
     firstName.trim() !== '' &&
     lastName.trim() !== '' &&
-    allFields.every((f) => isFieldFilled(f, values[f.key]))
+    allFields.every((f) => isFieldFilled(f, values[f.key])) &&
+    documentRequirements.every((r) => !r.required || documentFiles[r.key])
 
   async function handleSubmit() {
     if (!formValid || !event || !service || !slug) return
@@ -106,19 +108,39 @@ export function PublicInscriptionFormationPage() {
     const formResponses = Object.fromEntries(Object.entries(values).filter(([k]) => k !== '__consent'))
     const frontRedirectUrl = `${window.location.origin}/inscription/${slug}/retour`
 
-    const result = await apiCall<CreateRegistrationResponse>('POST', '/inscription/registrations', {
-      body: {
-        orgId: service.orgId,
-        serviceId: service.serviceId,
-        eventId: event.id,
-        email: email.trim(),
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        quantity,
-        formResponses,
-        frontRedirectUrl,
-      },
-    })
+    const filesToSend = Object.fromEntries(
+      Object.entries(documentFiles).filter((entry): entry is [string, File] => entry[1] !== null),
+    )
+
+    const result = documentRequirements.length > 0
+      ? await apiUploadWithFields<CreateRegistrationResponse>(
+          `/inscription/registrations/with-documents`,
+          filesToSend,
+          {
+            orgId: String(service.orgId),
+            serviceId: String(service.serviceId),
+            eventId: String(event.id),
+            email: email.trim(),
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            quantity: String(quantity),
+            formResponses: JSON.stringify(formResponses),
+            frontRedirectUrl,
+          },
+        )
+      : await apiCall<CreateRegistrationResponse>('POST', '/inscription/registrations', {
+          body: {
+            orgId: service.orgId,
+            serviceId: service.serviceId,
+            eventId: event.id,
+            email: email.trim(),
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            quantity,
+            formResponses,
+            frontRedirectUrl,
+          },
+        })
 
     if (result.ok) {
       const d = result.data.data
@@ -226,8 +248,18 @@ export function PublicInscriptionFormationPage() {
                   onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
                 />
               ))}
-              {documentRequirements.length > 0 && event.documentContactEmail && (
-                <DocumentsByEmailCard requirements={documentRequirements} contactEmail={event.documentContactEmail} />
+              {documentRequirements.map((requirement) => (
+                <FileUploadField
+                  key={requirement.key}
+                  label={requirement.label}
+                  instructions={requirement.instructions}
+                  onFileChange={(file) => setDocumentFiles((prev) => ({ ...prev, [requirement.key]: file }))}
+                />
+              ))}
+              {documentRequirements.length > 0 && (
+                <p className="text-[11.5px] leading-[1.5] text-ink-faint">
+                  🔒 Vos pièces sont transmises par email à l'organisme et ne sont pas conservées sur PayFiP.
+                </p>
               )}
               <RegistrationFieldInput
                 field={consentField}
@@ -300,7 +332,7 @@ export function PublicInscriptionFormationPage() {
                   </PublicButton>
                   {documentRequirements.length > 0 && (
                     <p className="text-center text-[11.5px] leading-[1.5] font-medium text-ink-soft">
-                      Vous ne payez pas maintenant : le paiement vient après validation de vos pièces.
+                      Vous ne payez pas maintenant : le paiement vient après validation du justificatif.
                     </p>
                   )}
                   {submitError && <p className="text-center text-sm text-red-600">{submitError}</p>}
@@ -313,8 +345,7 @@ export function PublicInscriptionFormationPage() {
                     APRÈS L'ENVOI
                   </p>
                   <p className="pt-2 text-[12.5px] leading-[1.6] text-[oklch(0.42_0.05_265)]">
-                    Vous envoyez vos pièces par email à l'organisme (adresse et référence données après
-                    l'inscription). Un agent les vérifie sous 48 h ouvrées, puis vous recevez un email pour payer et
+                    Un agent vérifie votre justificatif sous 48 h ouvrées, puis vous recevez un email pour payer et
                     confirmer votre place.
                   </p>
                 </div>
@@ -430,8 +461,8 @@ export function PublicInscriptionFormationPage() {
                 ))}
               </ul>
               <p className="pt-[7px] text-[12.5px] leading-[1.6] text-[oklch(0.42_0.05_265)]">
-                Vous les enverrez par email à l'organisme après votre inscription ; un agent les vérifie sous 48 h,
-                puis vous recevrez un email pour payer.
+                Vous les déposerez à l'étape suivante ; un agent les vérifie sous 48 h, puis vous recevrez un email
+                pour payer.
               </p>
             </div>
           )}

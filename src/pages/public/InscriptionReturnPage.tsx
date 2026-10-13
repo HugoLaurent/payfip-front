@@ -6,8 +6,6 @@ import { euros, formatDateLabel } from '@/lib/format'
 import type { RegistrationCitizen } from '@/lib/types'
 import { PublicShell } from '@/layouts/PublicShell'
 import {
-  DocumentsByEmailCard,
-  DocumentsSentCheckbox,
   PaymentFailedState,
   PaymentPendingState,
   PublicButton,
@@ -222,41 +220,19 @@ export function InscriptionReturnPage() {
         )}
 
         {registration.status === 'awaiting_review' && (
-          <div className="flex flex-col gap-5 pt-10 md:mx-auto md:max-w-[540px]">
-            <div className="flex flex-col items-center gap-4 text-center md:flex-row md:items-start md:gap-5 md:text-left">
-              <div className="flex h-[78px] w-[78px] shrink-0 items-center justify-center rounded-full bg-[oklch(0.95_0.02_265)] text-[30px]">
-                📄
-              </div>
-              <div className="md:pt-1">
-                <p className="text-xl leading-[1.25] font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
-                  {registration.documentContactEmail
-                    ? 'Envoyez vos pièces par email'
-                    : 'Votre dossier est en cours de vérification'}
-                </p>
-                <p className="mt-2 max-w-sm text-sm leading-[1.6] text-ink-soft">
-                  {registration.documentContactEmail
-                    ? "Votre place est réservée. Dès réception de vos pièces, un agent les contrôle sous 48 h ouvrées — nous vous écrivons dès que c'est validé."
-                    : "Un agent contrôle votre dossier sous 48 h ouvrées. Vous n'avez rien à faire — nous vous écrivons dès que c'est validé."}
-                </p>
-              </div>
+          <div className="flex flex-col items-center gap-4 pt-10 text-center md:mx-auto md:max-w-[540px] md:flex-row md:items-start md:gap-5 md:text-left">
+            <div className="flex h-[78px] w-[78px] shrink-0 items-center justify-center rounded-full bg-[oklch(0.95_0.02_265)] text-[30px]">
+              📄
             </div>
-            {registration.documentContactEmail && (registration.documentRequirements?.length ?? 0) > 0 && (
-              <DocumentsByEmailCard
-                requirements={registration.documentRequirements ?? []}
-                contactEmail={registration.documentContactEmail}
-                registrationReference={registration.registrationReference}
-              />
-            )}
-            {registration.documentContactEmail && accessToken && orgId && (
-              <DocumentsSentCheckbox
-                accessToken={accessToken}
-                orgId={Number(orgId)}
-                sentAt={registration.documentsSentAt}
-                canDeclare={registration.canDeclareDocumentsSent}
-                onDeclared={() => setRefreshKey((k) => k + 1)}
-                plural={(registration.documentRequirements?.length ?? 0) !== 1}
-              />
-            )}
+            <div className="md:pt-1">
+              <p className="text-xl leading-[1.25] font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
+                Votre justificatif est en cours de vérification
+              </p>
+              <p className="mt-2 max-w-sm text-sm leading-[1.6] text-ink-soft">
+                Un agent le contrôle sous 48 h ouvrées. Vous n'avez rien à faire — nous vous écrivons dès que c'est
+                validé.
+              </p>
+            </div>
           </div>
         )}
 
@@ -268,13 +244,9 @@ export function InscriptionReturnPage() {
             documentDeadlineAt={registration.documentDeadlineAt}
             keepExistingDocuments={registration.keepExistingDocuments}
             documentRequirements={registration.documentRequirements}
-            documentContactEmail={registration.documentContactEmail}
-            registrationReference={registration.registrationReference}
             accessToken={accessToken}
             orgId={Number(orgId)}
-            documentsSentAt={registration.documentsSentAt}
-            canDeclareDocumentsSent={registration.canDeclareDocumentsSent}
-            onDeclared={() => setRefreshKey((k) => k + 1)}
+            onReplaced={() => setRefreshKey((k) => k + 1)}
           />
         )}
 
@@ -286,7 +258,7 @@ export function InscriptionReturnPage() {
               </div>
               <div className="md:pt-1">
                 <p className="text-[21px] leading-[1.25] font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
-                  Pièces validées — il reste à payer
+                  Justificatif validé — il reste à payer
                 </p>
                 <p className="mt-2 text-[13.5px] leading-[1.6] text-ink-soft">
                   Votre dossier est accepté. Réglez la formation pour que votre place soit définitive.
@@ -315,7 +287,7 @@ export function InscriptionReturnPage() {
                 </div>
                 <div className="h-px bg-hairline" />
                 <div className="flex items-center justify-between gap-3 px-[17px] py-[14px] md:px-[22px]">
-                  <span className="shrink-0 text-[12.5px] font-medium text-ink-soft md:text-[13px]">Pièces</span>
+                  <span className="shrink-0 text-[12.5px] font-medium text-ink-soft md:text-[13px]">Justificatif</span>
                   <span className="flex min-w-0 shrink-0 items-center gap-2 text-[13px] font-bold text-[oklch(0.42_0.09_150)]">
                     <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-success text-[10px] text-white">
                       ✓

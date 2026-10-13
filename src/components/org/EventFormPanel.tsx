@@ -30,6 +30,8 @@ export interface EventFormState {
   priceCents: string
   documentRequirements: DocumentRequirement[]
   documentContactEmail: string
+  // Saisie libre séparée par des virgules, convertie en liste à l'envoi.
+  documentContactCc: string
   capacity: string
   maxParticipantsPerRegistration: string
   formSchema: RegistrationFormField[]
@@ -50,6 +52,7 @@ export const EMPTY_EVENT_FORM: EventFormState = {
   priceCents: '0',
   documentRequirements: [],
   documentContactEmail: '',
+  documentContactCc: '',
   capacity: '',
   maxParticipantsPerRegistration: '1',
   formSchema: [],
@@ -71,6 +74,7 @@ export function eventToForm(event: EventAgent): EventFormState {
     priceCents: (event.priceCents / 100).toString(),
     documentRequirements: event.documentRequirements ?? [],
     documentContactEmail: event.documentContactEmail ?? '',
+    documentContactCc: (event.documentContactCc ?? []).join(', '),
     capacity: event.capacity !== null ? String(event.capacity) : '',
     maxParticipantsPerRegistration: String(event.maxParticipantsPerRegistration),
     formSchema: event.formSchema ?? [],
@@ -99,11 +103,21 @@ export function eventFormToPayload(form: EventFormState) {
     // Pas de pièces demandées = pas d'adresse d'envoi (null vide aussi une adresse
     // déjà enregistrée, comme documentRequirements ci-dessus).
     documentContactEmail: form.documentRequirements.length > 0 ? form.documentContactEmail.trim() : null,
+    documentContactCc: form.documentRequirements.length > 0 ? parseEmailList(form.documentContactCc) : null,
     capacity: form.capacity ? Number(form.capacity) : undefined,
     maxParticipantsPerRegistration: Number(form.maxParticipantsPerRegistration || '1'),
     formSchema: form.formSchema.length > 0 ? form.formSchema : undefined,
     status: form.status,
   }
+}
+
+const EMAIL_RE = /^\S+@\S+\.\S+$/
+
+function parseEmailList(value: string): string[] {
+  return value
+    .split(/[,;\s]+/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
 }
 
 function hasDuplicateKeys(items: { key: string }[]): boolean {
@@ -175,8 +189,11 @@ export function EventFormPanel({
   // Les pièces sont envoyées par email : sans adresse valide, le citoyen ne
   // saurait pas où les adresser (le back refuse aussi, document_contact_email_required).
   const blockedByMissingEmail =
-    form.documentRequirements.length > 0 && !/^\S+@\S+\.\S+$/.test(form.documentContactEmail.trim())
-  const blocked = blockedByDuplicateKeys || blockedByMissingEmail
+    form.documentRequirements.length > 0 && !EMAIL_RE.test(form.documentContactEmail.trim())
+  const ccList = parseEmailList(form.documentContactCc)
+  const blockedByInvalidCc =
+    form.documentRequirements.length > 0 && (ccList.length > 4 || ccList.some((entry) => !EMAIL_RE.test(entry)))
+  const blocked = blockedByDuplicateKeys || blockedByMissingEmail || blockedByInvalidCc
 
   return createPortal(
     <motion.div
@@ -351,7 +368,7 @@ export function EventFormPanel({
 
             <Section
               title="Justificatifs"
-              description="Le citoyen envoie ces pièces par email à l'adresse ci-dessous, en citant sa référence d'inscription — aucun fichier n'est stocké par PayFiP. Vous les contrôlez dans votre messagerie, puis validez l'inscription."
+              description="Le citoyen dépose ces pièces dans le formulaire d'inscription ; elles vous sont transmises par email, en pièces jointes, depuis le domaine du service — PayFiP n'en conserve aucune. Vous les contrôlez dans votre messagerie, puis validez l'inscription."
             >
               <DocumentRequirementsBuilder
                 requirements={form.documentRequirements}
@@ -365,6 +382,17 @@ export function EventFormPanel({
                     onChange={(e) => onChange({ documentContactEmail: e.target.value })}
                     placeholder="inscriptions@ma-commune.fr"
                     className="w-full sm:w-[360px]"
+                  />
+                </FieldGroup>
+              )}
+              {form.documentRequirements.length > 0 && (
+                <FieldGroup label="Copie (CC) — facultatif, 4 adresses maximum">
+                  <TextInput
+                    type="text"
+                    value={form.documentContactCc}
+                    onChange={(e) => onChange({ documentContactCc: e.target.value })}
+                    placeholder="second.agent@ma-commune.fr, direction@ma-commune.fr"
+                    className="w-full"
                   />
                 </FieldGroup>
               )}
@@ -402,6 +430,8 @@ export function EventFormPanel({
             <p className="text-sm text-red-600">Corrigez les clés en doublon avant d'enregistrer.</p>
           ) : blockedByMissingEmail ? (
             <p className="text-sm text-red-600">Renseignez l'adresse de réception des pièces avant d'enregistrer.</p>
+          ) : blockedByInvalidCc ? (
+            <p className="text-sm text-red-600">Une adresse en copie est invalide (4 maximum, séparées par des virgules).</p>
           ) : (
             <span />
           )}

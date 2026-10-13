@@ -5,8 +5,8 @@ import type { DocumentRequirement } from '@/lib/types'
 // Pièces qui reviennent souvent dans une démarche administrative — un clic
 // ajoute directement la pièce nommée, l'agent ajuste le libellé ou les
 // instructions ensuite plutôt que de repartir d'un champ vide à chaque fois.
-// Chaque exigence est une pièce distincte que le citoyen envoie par email
-// (voir DocumentsByEmailCard côté citoyen).
+// Chaque exigence est une pièce distincte, avec son propre champ de dépôt côté
+// citoyen (relayée par email à l'agent, jamais stockée).
 const DOCUMENT_PRESETS: { icon: typeof CreditCard; label: string; requirement: Omit<DocumentRequirement, 'key'> }[] = [
   { icon: CreditCard, label: "Carte d'identité", requirement: { label: "Carte d'identité", required: true } },
   { icon: Home, label: 'Justificatif de domicile', requirement: { label: 'Justificatif de domicile', required: true } },
@@ -46,8 +46,8 @@ function findDuplicateKeys(requirements: DocumentRequirement[]): Set<string> {
 }
 
 // Composeur des pièces à demander au citoyen pour un évènement — chaque
-// exigence est une pièce nommée à envoyer par email, listée telle quelle côté
-// citoyen et cochée une à une par l'agent à la revue.
+// exigence est une pièce nommée, déposée dans un champ distinct côté citoyen
+// et cochée une à une par l'agent à la revue.
 export function DocumentRequirementsBuilder({
   requirements,
   onChange,

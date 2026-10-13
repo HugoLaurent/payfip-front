@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { apiUploadWithFields } from '@/lib/api'
 import type { DocumentRequirement } from '@/lib/types'
-import { DocumentsByEmailCard } from './DocumentsByEmailCard'
-import { DocumentsSentCheckbox } from './DocumentsSentCheckbox'
+import { FileUploadField } from './FileUploadField'
+import { PublicButton } from './PublicButtons'
 
 function formatSignatureDate(iso: string): string {
   return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) +
@@ -13,12 +15,12 @@ function formatDeadline(iso: string): string {
   return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
 }
 
-// Écran E3 — pièces refusées ou complément demandé : le motif de l'agent est
-// cité mot pour mot, daté et signé du service (jamais reformulé), la place
-// reste réservée jusqu'à une échéance, et le citoyen renvoie ses pièces par
-// email à l'organisme (aucun dépôt de fichier sur PayFiP — voir
-// DocumentsByEmailCard). Desktop : même gabarit que les autres écrans d'état —
-// motif à gauche, consignes d'envoi à droite.
+// Écran E3 — justificatif refusé : le motif de l'agent est cité mot pour
+// mot, daté et signé du service (jamais reformulé), la place reste
+// réservée jusqu'à une échéance, et le citoyen peut redéposer un document
+// sans repasser par tout le formulaire (voir maquette "Parcours
+// Inscription"). Desktop : même gabarit que les autres écrans d'état —
+// motif à gauche, dépôt du nouveau document à droite.
 export function RegistrationRejected({
   rejectionReason,
   reviewedByLabel,
@@ -26,13 +28,9 @@ export function RegistrationRejected({
   documentDeadlineAt,
   keepExistingDocuments,
   documentRequirements,
-  documentContactEmail,
-  registrationReference,
   accessToken,
   orgId,
-  documentsSentAt,
-  canDeclareDocumentsSent,
-  onDeclared,
+  onReplaced,
 }: {
   rejectionReason: string | null
   reviewedByLabel: string | null
@@ -40,15 +38,33 @@ export function RegistrationRejected({
   documentDeadlineAt: string | null
   keepExistingDocuments: boolean
   documentRequirements: DocumentRequirement[] | null
-  documentContactEmail: string | null
-  registrationReference: string
   accessToken: string
   orgId: number
-  documentsSentAt: string | null
-  canDeclareDocumentsSent: boolean
-  onDeclared: () => void
+  onReplaced: () => void
 }) {
+  const [files, setFiles] = useState<Record<string, File | null>>({})
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   const requirements = documentRequirements ?? []
+  const filesToSend = Object.fromEntries(
+    Object.entries(files).filter((entry): entry is [string, File] => entry[1] !== null),
+  )
+  const hasFile = Object.keys(filesToSend).length > 0
+
+  async function handleSubmit() {
+    if (!hasFile) return
+    setSubmitting(true)
+    setError(null)
+    const result = await apiUploadWithFields(
+      `/inscription/registrations/by-token/${accessToken}/documents`,
+      filesToSend,
+      { orgId: String(orgId) },
+    )
+    setSubmitting(false)
+    if (result.ok) onReplaced()
+    else setError('Échec de l\'envoi — réessayez.')
+  }
 
   return (
     <motion.div
@@ -63,16 +79,16 @@ export function RegistrationRejected({
         </div>
         <div className="md:pt-1">
           <p className="text-[21px] leading-[1.25] font-extrabold text-ink" style={{ fontFamily: 'var(--font-display)' }}>
-            {keepExistingDocuments ? 'Une pièce supplémentaire est nécessaire' : "Vos pièces n'ont pas pu être acceptées"}
+            {keepExistingDocuments ? 'Un document supplémentaire est nécessaire' : "Votre justificatif n'a pas pu être accepté"}
           </p>
           <p className="mt-2 text-[13.5px] leading-[1.6] text-ink-soft">
             {keepExistingDocuments
               ? documentDeadlineAt
-                ? `Les pièces déjà envoyées restent valables. Votre place reste réservée jusqu'au ${formatDeadline(documentDeadlineAt)} — envoyez par email la pièce demandée et la vérification repart.`
-                : 'Les pièces déjà envoyées restent valables — envoyez par email la pièce demandée et la vérification repart.'
+                ? `Vos documents déjà envoyés restent valables. Votre place reste réservée jusqu'au ${formatDeadline(documentDeadlineAt)} — ajoutez le document demandé et la vérification repart.`
+                : 'Vos documents déjà envoyés restent valables — ajoutez le document demandé et la vérification repart.'
               : documentDeadlineAt
-                ? `Votre place reste réservée jusqu'au ${formatDeadline(documentDeadlineAt)}. Renvoyez vos pièces par email et la vérification repart.`
-                : 'Renvoyez vos pièces par email et la vérification repart.'}
+                ? `Votre place reste réservée jusqu'au ${formatDeadline(documentDeadlineAt)}. Déposez un nouveau document et la vérification repart.`
+                : 'Déposez un nouveau document et la vérification repart.'}
           </p>
         </div>
       </div>
@@ -96,26 +112,28 @@ export function RegistrationRejected({
           <div />
         )}
 
-        {documentContactEmail && requirements.length > 0 ? (
-          <DocumentsByEmailCard
-            requirements={requirements}
-            contactEmail={documentContactEmail}
-            registrationReference={registrationReference}
-            heading={keepExistingDocuments ? 'PIÈCE À ENVOYER PAR EMAIL' : 'PIÈCES À RENVOYER PAR EMAIL'}
-          />
-        ) : null}
+        <div className="squircle flex flex-col gap-[10px] rounded-[18px] border-[1.5px] border-hairline p-4 text-left md:rounded-[22px] md:p-5">
+          {requirements.length > 0 ? (
+            requirements.map((requirement) => (
+              <FileUploadField
+                key={requirement.key}
+                label={requirement.label}
+                instructions={requirement.instructions}
+                onFileChange={(file) => setFiles((prev) => ({ ...prev, [requirement.key]: file }))}
+              />
+            ))
+          ) : (
+            <FileUploadField
+              label={keepExistingDocuments ? 'Déposer le document demandé' : 'Déposer un nouveau justificatif'}
+              onFileChange={(file) => setFiles((prev) => ({ ...prev, justificatif: file }))}
+            />
+          )}
+          <PublicButton type="button" onClick={handleSubmit} disabled={!hasFile || submitting} className="w-full">
+            {submitting ? 'Envoi…' : keepExistingDocuments ? 'Envoyer le document' : 'Envoyer le nouveau document'}
+          </PublicButton>
+          {error && <p className="text-center text-sm text-red-600">{error}</p>}
+        </div>
       </div>
-
-      {documentContactEmail && (
-        <DocumentsSentCheckbox
-          accessToken={accessToken}
-          orgId={orgId}
-          sentAt={documentsSentAt}
-          canDeclare={canDeclareDocumentsSent}
-          onDeclared={onDeclared}
-          plural={requirements.length !== 1 && !keepExistingDocuments}
-        />
-      )}
     </motion.div>
   )
 }

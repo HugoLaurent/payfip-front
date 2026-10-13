@@ -269,9 +269,9 @@ export function EventRegistrationsPanel({
         {r.status === 'awaiting_review' && r.documentsSentAt && (
           <span
             className="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700"
-            title={`Déclaré le ${new Date(r.documentsSentAt).toLocaleString('fr-FR')}`}
+            title={`Pièces transmises par email le ${new Date(r.documentsSentAt).toLocaleString('fr-FR')}`}
           >
-            ✉ Pièces envoyées
+            ✉ Pièces transmises
           </span>
         )}
         {r.status === 'awaiting_review' && (
@@ -360,18 +360,19 @@ export function EventRegistrationsPanel({
       {requirements.length > 0 && (
         <div className="mt-5 space-y-2">
           <p className="text-[11.5px] font-semibold text-gray-500">
-            Pièces attendues par email
+            Pièces attendues
             {isPending && <span className="ml-1 font-normal text-gray-400">— cochez chaque pièce reçue et conforme</span>}
           </p>
-          <p className={`text-xs font-medium ${reviewing.documentsSentAt ? 'text-emerald-700' : 'text-gray-400'}`}>
-            {reviewing.documentsSentAt
-              ? `✉ Le citoyen a déclaré avoir envoyé ses pièces le ${new Date(reviewing.documentsSentAt).toLocaleString('fr-FR')}.`
-              : "Le citoyen n'a pas encore déclaré avoir envoyé ses pièces."}
-          </p>
+          {reviewing.documentsSentAt && (
+            <p className="text-xs font-medium text-emerald-700">
+              ✉ Pièces transmises par email le {new Date(reviewing.documentsSentAt).toLocaleString('fr-FR')}.
+            </p>
+          )}
           {event.documentContactEmail && (
             <p className="text-xs text-gray-400">
-              Boîte à consulter : <span className="font-medium text-gray-600">{event.documentContactEmail}</span> — objet
-              attendu : <span className="font-medium text-gray-600">Pièces {reviewing.registrationReference}</span>
+              Reçues dans la boîte <span className="font-medium text-gray-600">{event.documentContactEmail}</span>
+              {event.documentContactCc.length > 0 && ` (copie : ${event.documentContactCc.join(', ')})`} — cherchez la
+              référence <span className="font-medium text-gray-600">{reviewing.registrationReference}</span> dans l'objet.
             </p>
           )}
           <div className="space-y-1.5">
